@@ -4,7 +4,7 @@ using Transformalize.Libs.Cfg;
 namespace Cfg.Test.TestClasses {
 
     public class AttributeCfg : CfgNode {
-        [Cfg(required = true)]
+        [Cfg(required = true, sharedProperty = "common", sharedValue = "x")]
         public List<AttributeSite> Sites { get; set; }
     }
 

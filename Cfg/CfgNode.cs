@@ -11,13 +11,13 @@ namespace Transformalize.Libs.Cfg {
 
     public abstract class CfgNode {
 
-        private const char HIGH_SURROGATE_START = '\uD800';
-        private const char LOW_SURROGATE_START = '\uDC00';
-        private const int UNICODE_PLANE00_END = 0x00FFFF;
-        private const int UNICODE_PLANE01_START = 0x10000;
+        private const char HIGH_SURROGATE = '\uD800';
+        private const char LOW_SURROGATE = '\uDC00';
+        private const int UNICODE_00_END = 0x00FFFF;
+        private const int UNICODE_01_START = 0x10000;
 
         private static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertiesCache = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
-        private static Dictionary<string, char> _entities = null;
+        private static Dictionary<string, char> _entities;
 
         private readonly List<string> _propertyKeys = new List<string>();
         private readonly List<string> _classKeys = new List<string>();
@@ -31,6 +31,7 @@ namespace Transformalize.Libs.Cfg {
         private readonly Dictionary<string, Func<CfgNode>> _elementLoaders = new Dictionary<string, Func<CfgNode>>();
 
         protected List<string> Problems { get { return _problems; } }
+        protected static bool TurnOffProperties { get; set; }
 
         private static Dictionary<Type, Func<string, object>> Converter {
             get {
@@ -61,24 +62,39 @@ namespace Transformalize.Libs.Cfg {
             get { return _properties[name]; }
         }
 
-        protected void Class<T>(string name, bool required = false) {
+        public void Load(NanoXmlNode node) {
+            LoadProperties(node, null);
+            LoadCollections(node, null);
+            if (!TurnOffProperties) {
+                PopulateProperties();
+            }
+        }
+
+        protected void Collection<T>(string name, bool required = false) {
             _elementLoaders[name] = () => (CfgNode)Activator.CreateInstance(typeof(T));
             if (required) {
                 _requiredClasses.Add(name);
             }
         }
 
-        protected void Class(Type type, string name, bool required = false) {
+        protected void Collection<T>(Type type, string element, bool required = false, string sharedProperty = null, T sharedValue = default(T)) {
+            this.Collection(type, element, required);
+            if (!string.IsNullOrEmpty(sharedProperty)) {
+                SharedProperty(element, sharedProperty, sharedValue);
+            }
+        }
+
+        protected void Collection(Type type, string name, bool required = false) {
             _elementLoaders[name] = () => (CfgNode)Activator.CreateInstance(type);
             if (required) {
                 _requiredClasses.Add(name);
             }
         }
 
-        protected void Class<T1, T2>(string element, bool required = false, string classProperty = null, T2 value = default(T2)) {
-            this.Class<T1>(element, required);
-            if (!string.IsNullOrEmpty(classProperty)) {
-                ClassProperty(element, classProperty, value);
+        protected void Collection<T1, T2>(string element, bool required = false, string sharedProperty = null, T2 sharedValue = default(T2)) {
+            this.Collection<T1>(element, required);
+            if (!string.IsNullOrEmpty(sharedProperty)) {
+                SharedProperty(element, sharedProperty, sharedValue);
             }
         }
 
@@ -103,7 +119,7 @@ namespace Transformalize.Libs.Cfg {
             Property(property.Name, property.Value, property.Required, property.Unique, property.Decode);
         }
 
-        protected void ClassProperty<T>(string className, string propertyName, T value) {
+        protected void SharedProperty<T>(string className, string propertyName, T value) {
             if (_classProperties.ContainsKey(className)) {
                 _classProperties[className][propertyName] = new CfgProperty(propertyName, value);
             } else {
@@ -116,15 +132,15 @@ namespace Transformalize.Libs.Cfg {
             Property(name, string.Empty, true, unique);
         }
 
-        public CfgNode Load(NanoXmlNode node, string parentName = null) {
+        protected CfgNode Load(NanoXmlNode node, string parentName) {
             LoadProperties(node, parentName);
-            LoadClasses(node, parentName);
+            LoadCollections(node, parentName);
             return this;
         }
 
-        private void LoadClasses(NanoXmlNode node, string parentName) {
+        private void LoadCollections(NanoXmlNode node, string parentName) {
 
-            if (_elementLoaders.Count == 0) {
+            if (_elementLoaders.Count == 0 && !TurnOffProperties) {
                 var propertyInfos = GetProperties(GetType());
                 foreach (var pair in propertyInfos) {
                     if (pair.Value.MemberType != MemberTypes.Property)
@@ -135,7 +151,11 @@ namespace Transformalize.Libs.Cfg {
                     if (!pair.Value.PropertyType.IsGenericType)
                         continue;
                     var listType = pair.Value.PropertyType.GetGenericArguments()[0];
-                    Class(listType, ToXmlNameStyle(pair.Value.Name), attribute.required);
+                    if (attribute.sharedProperty == null) {
+                        Collection(listType, ToXmlNameStyle(pair.Value.Name), attribute.required);
+                    } else {
+                        Collection(listType, ToXmlNameStyle(pair.Value.Name), attribute.required, attribute.sharedProperty, attribute.sharedValue);
+                    }
                 }
             }
 
@@ -209,7 +229,7 @@ namespace Transformalize.Libs.Cfg {
 
         private void LoadProperties(NanoXmlNode node, string parentName) {
 
-            if (_properties.Count == 0) {
+            if (_properties.Count == 0 && !TurnOffProperties) {
                 var propertyInfos = GetProperties(this.GetType());
                 foreach (var pair in propertyInfos) {
                     if (pair.Value.MemberType != MemberTypes.Property)
@@ -217,10 +237,10 @@ namespace Transformalize.Libs.Cfg {
                     var attribute = (CfgAttribute)Attribute.GetCustomAttribute(pair.Value, typeof(CfgAttribute));
                     if (attribute == null)
                         continue;
+                    if (pair.Value.PropertyType.IsGenericType)
+                        continue;
 
-                    if (!pair.Value.PropertyType.IsGenericType) {
-                        Property(ToXmlNameStyle(pair.Value.Name), attribute.value, attribute.required, attribute.unique, attribute.decode);
-                    }
+                    Property(ToXmlNameStyle(pair.Value.Name), attribute.value, attribute.required, attribute.unique, attribute.decode);
                 }
             }
 
@@ -549,7 +569,7 @@ namespace Transformalize.Libs.Cfg {
             return allProblems;
         }
 
-        public void Populate() {
+        protected void PopulateProperties() {
 
             var properties = GetProperties(this.GetType());
 
@@ -570,7 +590,7 @@ namespace Transformalize.Libs.Cfg {
                     continue;
                 var list = (IList)Activator.CreateInstance(properties[key].PropertyType);
                 for (var j = 0; j < _classes[key].Count; j++) {
-                    _classes[key][j].Populate();
+                    _classes[key][j].PopulateProperties();
                     list.Add(_classes[key][j]);
                 }
                 properties[key].SetValue(this, list, null);
@@ -633,18 +653,18 @@ namespace Transformalize.Libs.Cfg {
                             }
 
                             if (parsedSuccessfully) {
-                                parsedSuccessfully = (0 < parsedValue && parsedValue <= UNICODE_PLANE00_END);
+                                parsedSuccessfully = (0 < parsedValue && parsedValue <= UNICODE_00_END);
                             }
 
                             if (parsedSuccessfully) {
-                                if (parsedValue <= UNICODE_PLANE00_END) {
+                                if (parsedValue <= UNICODE_00_END) {
                                     // single character
                                     output.Write((char)parsedValue);
                                 } else {
                                     // multi-character
-                                    var utf32 = (int)(parsedValue - UNICODE_PLANE01_START);
-                                    var leadingSurrogate = (char)((utf32 / 0x400) + HIGH_SURROGATE_START);
-                                    var trailingSurrogate = (char)((utf32 % 0x400) + LOW_SURROGATE_START);
+                                    var utf32 = (int)(parsedValue - UNICODE_01_START);
+                                    var leadingSurrogate = (char)((utf32 / 0x400) + HIGH_SURROGATE);
+                                    var trailingSurrogate = (char)((utf32 % 0x400) + LOW_SURROGATE);
 
                                     output.Write(leadingSurrogate);
                                     output.Write(trailingSurrogate);

@@ -15,5 +15,7 @@ namespace Cfg.Test.TestClasses {
         [Cfg(value = 0)]
         public int Numeric { get; set; }
 
+        public string Common { get; set; }
+
     }
 }

@@ -12,21 +12,25 @@ namespace Cfg.Test {
 
         [Test]
         public void TestEmptyCfg() {
-            var root = new AttributeCfg().Load(new NanoXmlDocument(@"<cfg></cfg>").RootNode);
-            Assert.AreEqual(1, root.AllProblems().Count);
-            Assert.AreEqual("The 'cfg' element is missing a 'sites' element.", root.AllProblems()[0]);
+            var cfg = new AttributeCfg();
+            cfg.Load(new NanoXmlDocument(@"<cfg></cfg>").RootNode);
+            Assert.AreEqual(1, cfg.AllProblems().Count);
+            Assert.AreEqual("The 'cfg' element is missing a 'sites' element.", cfg.AllProblems()[0]);
         }
 
         [Test]
         public void TestEmptySites() {
-            var node = new AttributeCfg().Load(new NanoXmlDocument(@"<cfg><sites/></cfg>").RootNode);
-            Assert.AreEqual(1, node.AllProblems().Count);
-            Assert.AreEqual("A 'sites' element is missing an 'add' element.", node.AllProblems()[0]);
+            var cfg = new AttributeCfg();
+            cfg.Load(new NanoXmlDocument(@"<cfg><sites/></cfg>").RootNode);
+            Assert.AreEqual(1, cfg.AllProblems().Count);
+            Assert.AreEqual("A 'sites' element is missing an 'add' element.", cfg.AllProblems()[0]);
         }
 
         [Test]
-        public void TestInvalidProcess() {
-            var node = new AttributeCfg().Load(new NanoXmlDocument(
+        public void TestInvalidProcess()
+        {
+            var cfg = new AttributeCfg();
+            cfg.Load(new NanoXmlDocument(
                 @"<cfg>
                     <sites>
                         <add/>
@@ -34,7 +38,7 @@ namespace Cfg.Test {
                 </cfg>"
                 ).RootNode);
 
-            var problems = node.AllProblems();
+            var problems = cfg.AllProblems();
 
             Assert.AreEqual(2, problems.Count);
 
@@ -46,26 +50,25 @@ namespace Cfg.Test {
         }
 
         [Test]
-        public void TestInvalidSiteAttribute() {
-            var cfg = new NanoXmlDocument(
+        public void TestInvalidSiteAttribute()
+        {
+            var cfg = new AttributeCfg();
+            cfg.Load(new NanoXmlDocument(
                 @"<cfg>
                     <sites>
                         <add name='dale' invalid='true' />
                     </sites>
                 </cfg>".Replace("'", "\"")
-                ).RootNode;
-            var node = new MethodCfg().Load(cfg);
+                ).RootNode);
 
-            var problems = node.AllProblems();
+            var problems = cfg.AllProblems();
 
             foreach (var problem in problems) {
                 Console.WriteLine(problem);
             }
 
             Assert.AreEqual(2, problems.Count);
-            Assert.AreEqual(
-                "A 'sites' 'add' element contains an invalid 'invalid' attribute.  Valid attributes are: name, url, something, numeric.",
-                problems[0]);
+            Assert.AreEqual("A 'sites' 'add' element contains an invalid 'invalid' attribute.  Valid attributes are: name, url, something, numeric.", problems[0]);
             Assert.AreEqual("A 'sites' 'add' element is missing a 'url' attribute.", problems[1]);
 
         }
@@ -82,7 +85,8 @@ namespace Cfg.Test {
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            var node = new MethodCfg().Load(new NanoXmlDocument(xml).RootNode);
+            var cfg = new AttributeCfg();
+            cfg.Load(new NanoXmlDocument(xml).RootNode);
             stopWatch.Stop();
 
             Console.WriteLine("cfg.net load ms:" + stopWatch.ElapsedMilliseconds);
@@ -95,23 +99,42 @@ namespace Cfg.Test {
 
             Assert.IsNotNull(doc);
 
-            var problems = node.AllProblems();
+            var problems = cfg.AllProblems();
             Assert.AreEqual(1, problems.Count);
             Assert.AreEqual("Could not set 'numeric' to 'x' inside 'sites' 'add'. Input string was not in a correct format.", problems[0]);
 
-            Assert.AreEqual(3, node.Count("sites"));
+            Assert.AreEqual(3, cfg.Sites.Count);
 
-            Assert.AreEqual("google", node["sites", 0]["name"].Value);
-            Assert.AreEqual("http://www.google.com", node["sites", 0]["url"].Value);
-            Assert.AreEqual("<", node["sites", 0]["something"].Value);
-            Assert.AreEqual(0, node["sites", 0]["numeric"].Value);
-            Assert.IsTrue(node["sites", 0]["numeric"].Value is int);
+            Assert.AreEqual("google", cfg.Sites[0].Name);
+            Assert.AreEqual("http://www.google.com", cfg.Sites[0].Url);
+            Assert.AreEqual("<", cfg.Sites[0].Something);
+            Assert.AreEqual(0, cfg.Sites[0].Numeric);
 
-            Assert.AreEqual("github", node["sites", 1]["name"].Value);
-            Assert.AreEqual("http://www.github.com", node["sites", 1]["url"].Value);
+            Assert.AreEqual("github", cfg.Sites[1].Name);
+            Assert.AreEqual("http://www.github.com", cfg.Sites[1].Url);
 
-            Assert.AreEqual(7, node["sites", 2]["numeric"].Value);
+            Assert.AreEqual(7, cfg.Sites[2].Numeric);
 
         }
+
+        [Test]
+        public void TestSharedProperty() {
+            var xml = @"<cfg>
+                    <sites common='colts'>
+                        <add name='google' url='http://www.google.com' something='&lt;'/>
+                        <add name='github' url='http://www.github.com' numeric='5'/>
+                        <add name='stackoverflow' url='http://www.stackoverflow.com' numeric='7' />
+                    </sites>
+                </cfg>".Replace("'", "\"");
+
+            var cfg = new AttributeCfg();
+            cfg.Load(new NanoXmlDocument(xml).RootNode);
+            Assert.AreEqual(0, cfg.AllProblems().Count);
+            Assert.AreEqual("colts", cfg.Sites[0].Common);
+            Assert.AreEqual("colts", cfg.Sites[1].Common);
+            Assert.AreEqual("colts", cfg.Sites[2].Common);
+
+        }
+
     }
 }

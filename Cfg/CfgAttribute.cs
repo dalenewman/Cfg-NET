@@ -7,5 +7,7 @@ namespace Transformalize.Libs.Cfg {
         public bool required { get; set; }
         public bool unique { get; set; }
         public bool decode { get; set; }
+        public string sharedProperty { get; set; }
+        public object sharedValue { get; set; }
     }
 }
