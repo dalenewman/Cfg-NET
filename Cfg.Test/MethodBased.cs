@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using Cfg.Test.TestClasses;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg;
+using Transformalize.Libs.Cfg.Net;
 
 namespace Cfg.Test {
 

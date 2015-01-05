@@ -1,6 +1,6 @@
 using System;
 
-namespace Transformalize.Libs.Cfg {
+namespace Transformalize.Libs.Cfg.Net {
     [AttributeUsage(AttributeTargets.Property)]
     public class CfgAttribute : Attribute {
         public object value { get; set; }

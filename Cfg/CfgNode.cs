@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Transformalize.Libs.Cfg {
+namespace Transformalize.Libs.Cfg.Net {
 
     public abstract class CfgNode {
 

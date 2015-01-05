@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Transformalize.Libs.Cfg {
+namespace Transformalize.Libs.Cfg.Net {
     /// <summary>
     ///     Base class containing useful features for all XML classes
     /// </summary>

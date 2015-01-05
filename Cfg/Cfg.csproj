@@ -7,7 +7,7 @@
     <ProjectGuid>{D146A874-CBF7-4EB3-972D-57201D62E8E3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Transformalize.Libs.Cfg</RootNamespace>
+    <RootNamespace>Transformalize.Libs.Cfg.Net</RootNamespace>
     <AssemblyName>Cfg</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -49,6 +49,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>IF EXIST C:\Code\Transformalize\Transformalize\Libs\Cfg.Net XCOPY /y $(ProjectDir)*.cs C:\Code\Transformalize\Transformalize\Libs\Cfg.Net</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
