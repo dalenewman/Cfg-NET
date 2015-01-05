@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Xml.Linq;
 using Cfg.Test.TestClasses;
 using NUnit.Framework;
-using Transformalize.Libs.Cfg;
 using Transformalize.Libs.Cfg.Net;
 
 namespace Cfg.Test {
@@ -14,32 +15,31 @@ namespace Cfg.Test {
         [Test]
         public void TestEmptyCfg() {
             var cfg = new AttributeCfg();
-            cfg.Load(new NanoXmlDocument(@"<cfg></cfg>").RootNode);
-            Assert.AreEqual(1, cfg.AllProblems().Count);
-            Assert.AreEqual("The 'cfg' element is missing a 'sites' element.", cfg.AllProblems()[0]);
+            cfg.Load(@"<cfg></cfg>");
+            Assert.AreEqual(1, cfg.Problems().Count);
+            Assert.AreEqual("The 'cfg' element is missing a 'sites' element.", cfg.Problems()[0]);
         }
 
         [Test]
         public void TestEmptySites() {
             var cfg = new AttributeCfg();
-            cfg.Load(new NanoXmlDocument(@"<cfg><sites/></cfg>").RootNode);
-            Assert.AreEqual(1, cfg.AllProblems().Count);
-            Assert.AreEqual("A 'sites' element is missing an 'add' element.", cfg.AllProblems()[0]);
+            cfg.Load(@"<cfg><sites/></cfg>");
+            Assert.AreEqual(1, cfg.Problems().Count);
+            Assert.AreEqual("A 'sites' element is missing an 'add' element.", cfg.Problems()[0]);
         }
 
         [Test]
-        public void TestInvalidProcess()
-        {
+        public void TestInvalidProcess() {
             var cfg = new AttributeCfg();
-            cfg.Load(new NanoXmlDocument(
+            cfg.Load(
                 @"<cfg>
                     <sites>
                         <add/>
                     </sites>
                 </cfg>"
-                ).RootNode);
+            );
 
-            var problems = cfg.AllProblems();
+            var problems = cfg.Problems();
 
             Assert.AreEqual(2, problems.Count);
 
@@ -51,18 +51,17 @@ namespace Cfg.Test {
         }
 
         [Test]
-        public void TestInvalidSiteAttribute()
-        {
+        public void TestInvalidSiteAttribute() {
             var cfg = new AttributeCfg();
-            cfg.Load(new NanoXmlDocument(
+            cfg.Load(
                 @"<cfg>
                     <sites>
                         <add name='dale' invalid='true' />
                     </sites>
                 </cfg>".Replace("'", "\"")
-                ).RootNode);
+            );
 
-            var problems = cfg.AllProblems();
+            var problems = cfg.Problems();
 
             foreach (var problem in problems) {
                 Console.WriteLine(problem);
@@ -87,7 +86,7 @@ namespace Cfg.Test {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var cfg = new AttributeCfg();
-            cfg.Load(new NanoXmlDocument(xml).RootNode);
+            cfg.Load(xml);
             stopWatch.Stop();
 
             Console.WriteLine("cfg.net load ms:" + stopWatch.ElapsedMilliseconds);
@@ -100,7 +99,7 @@ namespace Cfg.Test {
 
             Assert.IsNotNull(doc);
 
-            var problems = cfg.AllProblems();
+            var problems = cfg.Problems();
             Assert.AreEqual(1, problems.Count);
             Assert.AreEqual("Could not set 'numeric' to 'x' inside 'sites' 'add'. Input string was not in a correct format.", problems[0]);
 
@@ -129,13 +128,17 @@ namespace Cfg.Test {
                 </cfg>".Replace("'", "\"");
 
             var cfg = new AttributeCfg();
-            cfg.Load(new NanoXmlDocument(xml).RootNode);
-            Assert.AreEqual(0, cfg.AllProblems().Count);
+            cfg.Load(xml);
+            Assert.AreEqual(0, cfg.Problems().Count);
             Assert.AreEqual("colts", cfg.Sites[0].Common);
             Assert.AreEqual("colts", cfg.Sites[1].Common);
             Assert.AreEqual("colts", cfg.Sites[2].Common);
 
         }
 
+        [Test]
+        public void TestReadMe()
+        {
+        }
     }
 }

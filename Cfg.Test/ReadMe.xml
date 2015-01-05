@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<cfg>
+  <servers>
+    <add name="Gandalf">
+      <databases>
+        <add name="master" backups-to-keep="6"/>
+      </databases>
+    </add>
+    <add name="Saruman">
+      <databases>
+        <add name="master" backup-folder="\\san\sql-backups\saruman\master" backups-to-keep="8" />
+        <add name="model" backup-folder="\\san\sql-backups\saruman\model" />
+      </databases>
+    </add>
+  </servers>
+</cfg>
