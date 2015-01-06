@@ -53,6 +53,7 @@
     <Compile Include="MethodBased.cs" />
     <Compile Include="TestClasses\AttributeSite.cs" />
     <Compile Include="TestClasses\MethodSite.cs" />
+    <Compile Include="XmlParameters.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -65,7 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ReadMe.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

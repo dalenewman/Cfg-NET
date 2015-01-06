@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -7,8 +8,12 @@ namespace Cfg.Test {
 
         [Test]
         public void TestReadMe() {
-            var xml = File.ReadAllText("ReadMe.xml");
+            var xml = File.ReadAllText(@"ReadMe.xml");
             var cfg = new Cfg(xml);
+
+            foreach (var problem in cfg.Problems()) {
+                Console.WriteLine(problem);
+            }
 
             //TEST FOR PROBLEMS
             Assert.AreEqual(0, cfg.Problems().Count);

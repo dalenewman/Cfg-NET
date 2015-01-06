@@ -19,6 +19,7 @@ namespace Transformalize.Libs.Cfg.Net {
         private static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertiesCache = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
         private static Dictionary<string, char> _entities;
 
+        private bool _configuredWithProperties = false;
         private readonly List<string> _propertyKeys = new List<string>();
         private readonly List<string> _classKeys = new List<string>();
         private readonly Dictionary<string, CfgProperty> _properties = new Dictionary<string, CfgProperty>(StringComparer.Ordinal);
@@ -29,8 +30,6 @@ namespace Transformalize.Libs.Cfg.Net {
         private readonly List<string> _requiredClasses = new List<string>();
         private readonly List<string> _problems = new List<string>();
         private readonly Dictionary<string, Func<CfgNode>> _elementLoaders = new Dictionary<string, Func<CfgNode>>();
-
-        protected static bool TurnOffProperties { get; set; }
 
         private static Dictionary<Type, Func<string, object>> Converter {
             get {
@@ -73,9 +72,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
             LoadProperties(node, null);
             LoadCollections(node, null);
-            if (!TurnOffProperties) {
-                PopulateProperties();
-            }
+            PopulateProperties();
         }
 
         /// <summary>
@@ -146,11 +143,6 @@ namespace Transformalize.Libs.Cfg.Net {
             }
         }
 
-        // Convenience method for keys
-        protected void Key(string name, bool unique = true) {
-            Property(name, string.Empty, true, unique);
-        }
-
         protected CfgNode Load(NanoXmlNode node, string parentName) {
             LoadProperties(node, parentName);
             LoadCollections(node, parentName);
@@ -217,7 +209,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
         private void ConfigureCollectionsWithPropertyAttributes() {
 
-            if (_elementLoaders.Count != 0 || TurnOffProperties)
+            if (_elementLoaders.Count != 0)
                 return;
 
             var propertyInfos = GetProperties(GetType());
@@ -229,14 +221,15 @@ namespace Transformalize.Libs.Cfg.Net {
                     continue;
                 if (!pair.Value.PropertyType.IsGenericType)
                     continue;
+                _configuredWithProperties = true;
                 var listType = pair.Value.PropertyType.GetGenericArguments()[0];
                 if (attribute.sharedProperty == null) {
                     Collection(listType, ToXmlNameStyle(pair.Value.Name), attribute.required);
                 } else {
-                    Collection(listType, ToXmlNameStyle(pair.Value.Name), attribute.required, attribute.sharedProperty,
-                        attribute.sharedValue);
+                    Collection(listType, ToXmlNameStyle(pair.Value.Name), attribute.required, attribute.sharedProperty, attribute.sharedValue);
                 }
             }
+
         }
 
         private void CheckRequiredClasses(NanoXmlNode node, string parentName) {
@@ -263,15 +256,17 @@ namespace Transformalize.Libs.Cfg.Net {
                     if (attribute.Value == null)
                         continue;
 
+                    var value = Modifier(attribute.Value);
+
                     if (_properties[attribute.Name].Type == typeof(string)) {
-                        _properties[attribute.Name].Value = _properties[attribute.Name].Decode && attribute.Value.IndexOf('&') >= 0 ? Decode(attribute.Value) : attribute.Value;
+                        _properties[attribute.Name].Value = _properties[attribute.Name].Decode && value.IndexOf('&') >= 0 ? Decode(value) : value;
                         _properties[attribute.Name].Set = true;
                     } else {
                         try {
-                            _properties[attribute.Name].Value = Converter[_properties[attribute.Name].Type](_properties[attribute.Name].Decode && attribute.Value.IndexOf('&') >= 0 ? Decode(attribute.Value) : attribute.Value);
+                            _properties[attribute.Name].Value = Converter[_properties[attribute.Name].Type](_properties[attribute.Name].Decode && value.IndexOf('&') >= 0 ? Decode(value) : value);
                             _properties[attribute.Name].Set = true;
                         } catch (Exception ex) {
-                            _problems.Add(string.Format("Could not set '{0}' to '{1}' inside '{2}' '{3}'. {4}", _properties[attribute.Name].Name, attribute.Value, parentName, node.Name, ex.Message));
+                            _problems.Add(string.Format("Could not set '{0}' to '{1}' inside '{2}' '{3}'. {4}", _properties[attribute.Name].Name, value, parentName, node.Name, ex.Message));
                         }
                     }
                 } else {
@@ -290,8 +285,12 @@ namespace Transformalize.Libs.Cfg.Net {
             CheckRequiredProperties(node, parentName);
         }
 
+        public virtual string Modifier(string value) {
+            return value;
+        }
+
         private void ConfigurePropertiesWithPropertyAttributes() {
-            if (_properties.Count != 0 || TurnOffProperties)
+            if (_properties.Count != 0)
                 return;
 
             var propertyInfos = GetProperties(this.GetType());
@@ -304,6 +303,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 if (pair.Value.PropertyType.IsGenericType)
                     continue;
 
+                _configuredWithProperties = true;
                 Property(ToXmlNameStyle(pair.Value.Name), attribute.value, pair.Value.PropertyType, attribute.required, attribute.unique, attribute.decode);
             }
         }
@@ -601,6 +601,9 @@ namespace Transformalize.Libs.Cfg.Net {
 
         protected void PopulateProperties() {
 
+            if (!_configuredWithProperties)
+                return;
+
             var properties = GetProperties(this.GetType());
 
             for (var i = 0; i < _propertyKeys.Count; i++) {
@@ -658,19 +661,19 @@ namespace Transformalize.Libs.Cfg.Net {
             return properties;
         }
 
-        public static string Decode(string value) {
+        public static string Decode(string input) {
 
             var output = new StringWriter();
             var htmlEntityEndingChars = new[] { ';', '&' };
-            var l = value.Length;
-            for (var i = 0; i < l; i++) {
-                var ch = value[i];
 
-                if (ch == '&') {
+            for (var i = 0; i < input.Length; i++) {
+                var c = input[i];
+
+                if (c == '&') {
                     // Found &. Look for the next ; or &. If & occurs before ;, then this is not entity, and next & may start another entity
-                    var index = value.IndexOfAny(htmlEntityEndingChars, i + 1);
-                    if (index > 0 && value[index] == ';') {
-                        var entity = value.Substring(i + 1, index - i - 1);
+                    var index = input.IndexOfAny(htmlEntityEndingChars, i + 1);
+                    if (index > 0 && input[index] == ';') {
+                        var entity = input.Substring(i + 1, index - i - 1);
 
                         if (entity.Length > 1 && entity[0] == '#') {
 
@@ -700,17 +703,16 @@ namespace Transformalize.Libs.Cfg.Net {
                                     output.Write(trailingSurrogate);
                                 }
 
-                                i = index; // already looked at everything until semicolon
+                                i = index;
                                 continue;
                             }
                         } else {
-                            i = index; // already looked at everything until semicolon
-
+                            i = index;
                             char entityChar;
                             Entities.TryGetValue(entity, out entityChar);
 
                             if (entityChar != (char)0) {
-                                ch = entityChar;
+                                c = entityChar;
                             } else {
                                 output.Write('&');
                                 output.Write(entity);
@@ -720,7 +722,7 @@ namespace Transformalize.Libs.Cfg.Net {
                         }
                     }
                 }
-                output.Write(ch);
+                output.Write(c);
             }
             return output.ToString();
         }
