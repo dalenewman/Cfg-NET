@@ -53,7 +53,7 @@
     <Compile Include="MethodBased.cs" />
     <Compile Include="TestClasses\AttributeSite.cs" />
     <Compile Include="TestClasses\MethodSite.cs" />
-    <Compile Include="XmlParameters.cs" />
+    <Compile Include="Parameters.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -4,8 +4,9 @@ using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
 
 namespace Cfg.Test {
+
     [TestFixture]
-    public class XmlParameters {
+    public class Parameters {
 
         [Test]
         public void Test() {
@@ -32,7 +33,11 @@ namespace Cfg.Test {
     </cfg>
 ".Replace("'", "\"");
 
-            var cfg = new MyCfg(xml);
+            var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+                {"p1", "i am the new p1"}
+            };
+
+            var cfg = new MyCfg(xml, parameters);
 
             foreach (var problem in cfg.Problems()) {
                 Console.WriteLine(problem);
@@ -44,8 +49,8 @@ namespace Cfg.Test {
             Assert.AreEqual(false, cfg.Environments[0].Default == cfg.Environments[0].Name);
             Assert.AreEqual(true, cfg.Environments[1].Default == cfg.Environments[1].Name);
 
-            Assert.AreEqual("@(p1)", cfg.Things[0].Value);
-            Assert.AreEqual("@(p2)", cfg.Things[1].Value);
+            Assert.AreEqual("i am the new p1", cfg.Things[0].Value, "I should be passed in for p1.");
+            Assert.AreEqual("two-2", cfg.Things[1].Value, "I am the default value for p2 in the default environment two.");
 
             //TODO:Make it use the default parameters (unless parameters passed in via Dictionary<string,string>)
         }
@@ -53,8 +58,8 @@ namespace Cfg.Test {
     }
 
     public class MyCfg : CfgNode {
-        public MyCfg(string xml) {
-            this.Load(xml);
+        public MyCfg(string xml, Dictionary<string, string> parameters = null) {
+            this.Load(xml, parameters);
         }
 
         [Cfg(required = false, sharedProperty = "default")]

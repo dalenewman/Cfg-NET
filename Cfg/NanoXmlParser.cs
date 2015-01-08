@@ -320,6 +320,9 @@ namespace Transformalize.Libs.Cfg.Net {
             return builder.ToString();
         }
 
+        public bool HasSubNode() {
+            return SubNodes != null && SubNodes.Any();
+        }
     }
 
     /// <summary>

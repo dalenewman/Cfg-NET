@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -15,6 +14,9 @@ namespace Transformalize.Libs.Cfg.Net {
         private const char LOW_SURROGATE = '\uDC00';
         private const int UNICODE_00_END = 0x00FFFF;
         private const int UNICODE_01_START = 0x10000;
+        private const char FIRST_CHAR = '@';
+        private const char SECOND_CHAR = '(';
+        private const char LAST_CHAR = ')';
 
         private static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertiesCache = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
         private static Dictionary<string, char> _entities;
@@ -30,6 +32,7 @@ namespace Transformalize.Libs.Cfg.Net {
         private readonly List<string> _requiredClasses = new List<string>();
         private readonly List<string> _problems = new List<string>();
         private readonly Dictionary<string, Func<CfgNode>> _elementLoaders = new Dictionary<string, Func<CfgNode>>();
+        private readonly StringBuilder _builder = new StringBuilder();
 
         private static Dictionary<Type, Func<string, object>> Converter {
             get {
@@ -60,19 +63,102 @@ namespace Transformalize.Libs.Cfg.Net {
             get { return _properties[name]; }
         }
 
-        public void Load(string xml) {
+        public void Load(string xml, Dictionary<string, string> parameters = null) {
 
-            NanoXmlNode node;
+            NanoXmlNode node = null;
             try {
                 node = new NanoXmlDocument(xml).RootNode;
+                var environmentDefaults = LoadEnvironment(node).ToArray();
+                if (environmentDefaults.Length > 0) {
+                    for (var i = 0; i < environmentDefaults.Length; i++) {
+                        if (i == 0 && parameters == null) {
+                            parameters = new Dictionary<string, string>(StringComparer.Ordinal);
+                        }
+                        if (!parameters.ContainsKey(environmentDefaults[i][0])) {
+                            parameters[environmentDefaults[i][0]] = environmentDefaults[i][1];
+                        }
+                    }
+                }
             } catch (Exception ex) {
                 _problems.Add(string.Format("Could not parse the configuration. {0}", ex.Message));
                 return;
             }
 
-            LoadProperties(node, null);
-            LoadCollections(node, null);
+            LoadProperties(node, null, parameters);
+            LoadCollections(node, null, parameters);
             PopulateProperties();
+        }
+
+        protected IEnumerable<string[]> LoadEnvironment(NanoXmlNode node) {
+
+            for (var i = 0; i < node.SubNodes.Count; i++) {
+                var environmentsNode = node.SubNodes[i];
+                if (environmentsNode.Name != "environments")
+                    continue;
+
+                if (!environmentsNode.HasSubNode())
+                    break;
+
+                NanoXmlNode environmentNode;
+
+                if (environmentsNode.SubNodes.Count > 1) {
+                    NanoXmlAttribute defaultEnvironment;
+                    if (!environmentsNode.TryAttribute("default", out defaultEnvironment))
+                        continue;
+
+                    for (var j = 0; j < environmentsNode.SubNodes.Count; j++) {
+                        environmentNode = environmentsNode.SubNodes[j];
+
+                        NanoXmlAttribute environmentName;
+                        if (!environmentNode.TryAttribute("name", out environmentName))
+                            continue;
+
+                        if (defaultEnvironment.Value != environmentName.Value || !environmentNode.HasSubNode())
+                            continue;
+
+                        return GetParameters(environmentNode.SubNodes[0]);
+                    }
+                }
+
+                environmentNode = environmentsNode.SubNodes[0];
+                if (!environmentNode.HasSubNode())
+                    break;
+
+                var parametersNode = environmentNode.SubNodes[0];
+
+                if (parametersNode.Name != "parameters" || !parametersNode.HasSubNode())
+                    break;
+
+                return GetParameters(parametersNode);
+
+            }
+
+            return Enumerable.Empty<string[]>();
+        }
+
+        private static IEnumerable<string[]> GetParameters(NanoXmlNode parametersNode) {
+            var parameters = new List<string[]>();
+
+            for (var j = 0; j < parametersNode.SubNodes.Count; j++) {
+                var parameter = parametersNode.SubNodes[j];
+                string name = null;
+                string value = null;
+                for (var k = 0; k < parameter.Attributes.Count; k++) {
+                    var attribute = parameter.Attributes[k];
+                    switch (attribute.Name) {
+                        case "name":
+                            name = attribute.Value;
+                            break;
+                        case "value":
+                            value = attribute.Value;
+                            break;
+                    }
+                }
+                if (name != null && value != null) {
+                    parameters.Add(new[] { name, value });
+                }
+            }
+            return parameters;
         }
 
         /// <summary>
@@ -143,13 +229,13 @@ namespace Transformalize.Libs.Cfg.Net {
             }
         }
 
-        protected CfgNode Load(NanoXmlNode node, string parentName) {
-            LoadProperties(node, parentName);
-            LoadCollections(node, parentName);
+        protected CfgNode Load(NanoXmlNode node, string parentName, Dictionary<string, string> parameters) {
+            LoadProperties(node, parentName, parameters);
+            LoadCollections(node, parentName, parameters);
             return this;
         }
 
-        private void LoadCollections(NanoXmlNode node, string parentName) {
+        private void LoadCollections(NanoXmlNode node, string parentName, Dictionary<string, string> parameters = null) {
 
             ConfigureCollectionsWithPropertyAttributes();
 
@@ -165,7 +251,7 @@ namespace Transformalize.Libs.Cfg.Net {
                     for (var j = 0; j < subNode.SubNodes.Count; j++) {
                         var add = subNode.SubNodes[j];
                         if (add.Name.Equals("add")) {
-                            var tflNode = _elementLoaders[subNode.Name]().Load(add, subNode.Name);
+                            var tflNode = _elementLoaders[subNode.Name]().Load(add, subNode.Name, parameters);
                             // check for duplicates of unique attributes
                             for (var k = 0; k < _collections[subNode.Name].Count; k++) {
                                 foreach (var pair in _collections[subNode.Name][k].Properties) {
@@ -200,7 +286,11 @@ namespace Transformalize.Libs.Cfg.Net {
                         }
                     }
                 } else {
-                    _problems.Add(string.Format("Invalid element {0} in {1}.", subNode.Name, node.Name));
+                    if (parentName == null) {
+                        _problems.Add(string.Format("A{2} '{0}' element has an invalid '{1}' element.", node.Name, subNode.Name, node.Name[0].IsVowel() ? "n" : string.Empty));
+                    } else {
+                        _problems.Add(string.Format("A{3} '{0}' '{1}' element has an invalid '{2}' element.", parentName, node.Name, subNode.Name, parentName[0].IsVowel() ? "n" : string.Empty));
+                    }
                 }
             }
 
@@ -246,7 +336,7 @@ namespace Transformalize.Libs.Cfg.Net {
             }
         }
 
-        private void LoadProperties(NanoXmlNode node, string parentName) {
+        private void LoadProperties(NanoXmlNode node, string parentName, Dictionary<string, string> parameters = null) {
 
             ConfigurePropertiesWithPropertyAttributes();
 
@@ -256,14 +346,42 @@ namespace Transformalize.Libs.Cfg.Net {
                     if (attribute.Value == null)
                         continue;
 
-                    var value = Modifier(attribute.Value);
+                    string value;
+
+                    if (attribute.Value.IndexOf('@') >= 0 && parameters != null) {
+                        _builder.Clear();
+                        for (var j = 0; j < attribute.Value.Length; j++) {
+                            if (attribute.Value[j] == FIRST_CHAR &&
+                                attribute.Value.Length > j + 1 &&
+                                attribute.Value[j + 1] == SECOND_CHAR) {
+                                var length = 2;
+                                while (attribute.Value.Length > j + length && attribute.Value[j + length] != LAST_CHAR) {
+                                    length++;
+                                }
+                                if (length > 2) {
+                                    var key = attribute.Value.Substring(j + 2, length - 2);
+                                    if (parameters.ContainsKey(key)) {
+                                        _builder.Append(parameters[key]);
+                                    } else {
+                                        _problems.Add(string.Format("You're missing a value for @({0})", key));
+                                    }
+                                }
+                                j = j + length;
+                            } else {
+                                _builder.Append(attribute.Value[j]);
+                            }
+                        }
+                        value = _builder.ToString();
+                    } else {
+                        value = attribute.Value;
+                    }
 
                     if (_properties[attribute.Name].Type == typeof(string)) {
-                        _properties[attribute.Name].Value = _properties[attribute.Name].Decode && value.IndexOf('&') >= 0 ? Decode(value) : value;
+                        _properties[attribute.Name].Value = _properties[attribute.Name].Decode && value.IndexOf('&') >= 0 ? Decode(value, _builder) : value;
                         _properties[attribute.Name].Set = true;
                     } else {
                         try {
-                            _properties[attribute.Name].Value = Converter[_properties[attribute.Name].Type](_properties[attribute.Name].Decode && value.IndexOf('&') >= 0 ? Decode(value) : value);
+                            _properties[attribute.Name].Value = Converter[_properties[attribute.Name].Type](_properties[attribute.Name].Decode && value.IndexOf('&') >= 0 ? Decode(value, _builder) : value);
                             _properties[attribute.Name].Set = true;
                         } catch (Exception ex) {
                             _problems.Add(string.Format("Could not set '{0}' to '{1}' inside '{2}' '{3}'. {4}", _properties[attribute.Name].Name, value, parentName, node.Name, ex.Message));
@@ -283,10 +401,6 @@ namespace Transformalize.Libs.Cfg.Net {
             }
 
             CheckRequiredProperties(node, parentName);
-        }
-
-        public virtual string Modifier(string value) {
-            return value;
         }
 
         private void ConfigurePropertiesWithPropertyAttributes() {
@@ -661,9 +775,9 @@ namespace Transformalize.Libs.Cfg.Net {
             return properties;
         }
 
-        public static string Decode(string input) {
+        public static string Decode(string input, StringBuilder builder) {
 
-            var output = new StringWriter();
+            builder.Clear();
             var htmlEntityEndingChars = new[] { ';', '&' };
 
             for (var i = 0; i < input.Length; i++) {
@@ -692,15 +806,15 @@ namespace Transformalize.Libs.Cfg.Net {
                             if (parsedSuccessfully) {
                                 if (parsedValue <= UNICODE_00_END) {
                                     // single character
-                                    output.Write((char)parsedValue);
+                                    builder.Append((char)parsedValue);
                                 } else {
                                     // multi-character
                                     var utf32 = (int)(parsedValue - UNICODE_01_START);
                                     var leadingSurrogate = (char)((utf32 / 0x400) + HIGH_SURROGATE);
                                     var trailingSurrogate = (char)((utf32 % 0x400) + LOW_SURROGATE);
 
-                                    output.Write(leadingSurrogate);
-                                    output.Write(trailingSurrogate);
+                                    builder.Append(leadingSurrogate);
+                                    builder.Append(trailingSurrogate);
                                 }
 
                                 i = index;
@@ -714,17 +828,17 @@ namespace Transformalize.Libs.Cfg.Net {
                             if (entityChar != (char)0) {
                                 c = entityChar;
                             } else {
-                                output.Write('&');
-                                output.Write(entity);
-                                output.Write(';');
+                                builder.Append('&');
+                                builder.Append(entity);
+                                builder.Append(';');
                                 continue;
                             }
                         }
                     }
                 }
-                output.Write(c);
+                builder.Append(c);
             }
-            return output.ToString();
+            return builder.ToString();
         }
 
         public int Count(string n) {
