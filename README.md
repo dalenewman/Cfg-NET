@@ -23,46 +23,38 @@ This is an alternative .NET configuration handler.  It is released under the [Ap
     &lt;/cfg&gt;
 </pre>
 
-Above, is a configuration that holds a collection of `servers`. 
+Above, is a configuration that holds a collection of `servers`.
 
-Each server has a unique `name`, and a required collection of `databases`. 
+Each server has a unique `name`, and a required collection of `databases`.
 
-Each database has a required name, and optional `backup-folder` and `backups-to-keep` attributes.
+Each database has a required name, and optional `backup-folder` and `backups-to-keep` attribute.
+
+__Note__: Element and attribute names must be lower-case "slugs."  A slug separates words with hyphens (e.g. `backups-to-keep`)
 
 ###C# Configuration Classes:
 
 <pre class="prettyprint">
     using System.Collections.Generic;
     using Transformalize.Libs.Cfg.Net;
-
     namespace Cfg.Test {
-
         public class Cfg : CfgNode {
             [Cfg(required = true)]
             public List&lt;CfgServer&gt; Servers { get; set; }
-
             public Cfg(string xml) {
                 this.Load(xml);
             }
         }
-
         public class CfgServer : CfgNode {
-
             [Cfg(required = true, unique = true)]
             public string Name { get; set; }
-
             [Cfg(required = true)]
             public List&lt;CfgDatabase&gt; Databases { get; set; }
         }
-
         public class CfgDatabase : CfgNode {
-
             [Cfg(required = true, unique = true)]
             public string Name { get; set; }
-
             [Cfg(value = @&quot;\\san\sql-backups&quot;)]
             public string BackupFolder { get; set; }
-
             [Cfg(value = 4)]
             public int BackupsToKeep { get; set; }
         }
@@ -70,7 +62,7 @@ Each database has a required name, and optional `backup-folder` and `backups-to-
 </pre>
 
 The classes above inherit from `CfgNode` and have `Cfg` attributes to add metadata to their properties.
-The configuration metadata is: 
+The configuration metadata is:
 
 * required
 * unique
@@ -79,32 +71,28 @@ The configuration metadata is:
 
 The root class `Cfg` defines a constructor that automatically calls the `CfgNode.Load` method.  This loads the XML.
 
+__Note__: Property names must be title (or proper) case. (e.g. `BackupsToKeep`)
+
 ### Test:
 
 <pre class="prettyprint">
 using System.IO;
 using NUnit.Framework;
-
 namespace Cfg.Test {
-
     [TestFixture]
     public class ReadMe {
-
         [Test]
         public void TestReadMe() {
-            var xml = File.ReadAllText(&quot;ReadMe.xml&quot;);
+            var xml = File.ReadAllText(&quot;ReadMe.xml&quot;); //note: ReadMe.xml is the XML defined above.
             var cfg = new Cfg(xml);
-
             //TEST FOR PROBLEMS
             Assert.AreEqual(0, cfg.Problems().Count);
-
             //TEST GANDALF
             Assert.AreEqual(&quot;Gandalf&quot;, cfg.Servers[0].Name);
             Assert.AreEqual(1, cfg.Servers[0].Databases.Count);
             Assert.AreEqual(&quot;master&quot;, cfg.Servers[0].Databases[0].Name);
             Assert.AreEqual(@&quot;\\san\sql-backups&quot;, cfg.Servers[0].Databases[0].BackupFolder);
             Assert.AreEqual(6, cfg.Servers[0].Databases[0].BackupsToKeep);
-
             //TEST SARUMAN
             Assert.AreEqual(&quot;Saruman&quot;, cfg.Servers[1].Name);
             Assert.AreEqual(2, cfg.Servers[1].Databases.Count);
@@ -114,18 +102,98 @@ namespace Cfg.Test {
             Assert.AreEqual(&quot;model&quot;, cfg.Servers[1].Databases[1].Name);
             Assert.AreEqual(@&quot;\\san\sql-backups\saruman\model&quot;, cfg.Servers[1].Databases[1].BackupFolder);
             Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
-
         }
     }
 }
 </pre>
 
+### Support for Environments, Parameters, and Place-Holders
+
+I find it necessary for key values in my configuration to change depending on the environment (i.e. `production`, or `test`).
+In addition, I find it helpful to pass parameters into the configuration in order to dynamically change the configuration.
+
+####Environments
+If you include an `environments` element (aka collection) just inside the XML's root element, you can take advantage of these features.
+Your configuration must be setup like this:
+
+<pre class="prettyprint">
+    &lt;cfg&gt;
+        &lt;environments default=&quot;test&quot;&gt;
+            &lt;add name=&quot;prod&quot;&gt;
+                &lt;parameters&gt;
+                    &lt;add name=&quot;Server&quot; value=&quot;ProductionServer&quot; /&gt;
+                    &lt;add name=&quot;Database&quot; value=&quot;ProductionDatabase&quot; /&gt;
+                    &lt;!-- more parameters, if you want --&gt;
+                &lt;/parameters&gt;
+            &lt;/add&gt;
+            &lt;add name=&quot;test&quot;&gt;
+                &lt;parameters&gt;
+                    &lt;add name=&quot;Server&quot; value=&quot;TestServer&quot; /&gt;
+                    &lt;add name=&quot;Database&quot; value=&quot;TestDatabase&quot; /&gt;
+                    &lt;!-- more parameters, if you want --&gt;
+                &lt;/parameters&gt;
+            &lt;/add&gt;
+            &lt;!-- more environments, if you want --&gt;
+        &lt;/environments&gt;
+        &lt;!-- the rest of your configuration --&gt;
+    &lt;/cfg&gt;
+</pre>
+
+If you include a `default` attribute in the `environments` element, and it matches an environment's `name` attribute, it is used (by default).
+Otherwise, the first environment is used.
+
+####Place-Holders
+In order to actually have any affect on the configuration, you have to insert "place-holders" into the XML's attribute values.
+Use the explicit c# razor style place holders like this: __@(Server)__, and __@(Database)__.
+
+The place-holders will be replaced with the environment defaults.
+
+####Parameters
+To affect the configuration from outside of it, 
+pass a `Dictionary<string,string>` of parameters into the `CfgNode.Load` method.
+Passing in parameters overrides any environment defaults.
+
+If you have a place-holder in the configuration, and you don't setup a default or pass in a parameter, 
+Cfg.Net will report it as a problem, so always check `Problems` 
+after loading the configuration.
+
 ###Feature Summary:
 
-* returns a complete list of configuration problems
+* returns a complete list of configuration problems (if valid XML)
 * allows for default values of attributes
 * enforces attribute types
 * enforces required attributes (properties)
 * enforces required elements (collections)
 * enforces unique attributes (within collections)
+* supports environments, parameters, and place-holders.
 
+###A Note about the Code:
+
+Cfg.Net is "over-engineered" in an attempt to keep it fast.
+
+#### Go Property-less?
+
+Cfg.Net may also used without properties to avoid the cost of reflection. 
+Instead of defining your configuration with properties and attributes, 
+you may use the `Property` and `Collection` methods like this:
+
+<pre class="prettyprint">
+    public class Site : CfgNode {
+        public Site() {
+            Property(name: &quot;name&quot;, value: &quot;&quot;, required: true, unique: true);
+            Property(name: &quot;url&quot;, value: &quot;&quot;, required: true);
+            Property(name: &quot;something&quot;, value: &quot;&quot;, decode: true);
+            Property(name: &quot;numeric&quot;, value: 0);
+            //note: you must pass in value, so that it knows the `Type` you want.
+
+            Collection&lt;SomethingElse&gt;(&quot;something-else&quot;);
+        }
+    }
+</pre> 
+
+Once loaded, you may use CfgNode's indexers to access collections and properties (e.g. `yourCfg["sites", 0]["url"].Value`).
+
+####Credits
+*  a modified version of a `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
+*  .NET Source of WebUtility.HtmlDecode found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
+  *  __Note__: Cfg.Net will not decode XML entities unless you ask it to (e.g. `[Cfg(decode:true)]`).
