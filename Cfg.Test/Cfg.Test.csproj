@@ -36,19 +36,16 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cfg.cs" />
-    <Compile Include="CfgDatabase.cs" />
-    <Compile Include="CfgServer.cs" />
     <Compile Include="ReadMe.cs" />
     <Compile Include="AttributeBased.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestClasses\AttributeCfg.cs" />
+    <Compile Include="TestClasses\Cfg.cs" />
+    <Compile Include="TestClasses\CfgDatabase.cs" />
+    <Compile Include="TestClasses\CfgServer.cs" />
     <Compile Include="TestClasses\MethodCfg.cs" />
     <Compile Include="MethodBased.cs" />
     <Compile Include="TestClasses\AttributeSite.cs" />

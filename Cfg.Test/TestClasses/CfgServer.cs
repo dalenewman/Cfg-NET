@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
 
-namespace Cfg.Test {
+namespace Cfg.Test.TestClasses {
     public class CfgServer : CfgNode {
 
         [Cfg(required = true, unique = true)]

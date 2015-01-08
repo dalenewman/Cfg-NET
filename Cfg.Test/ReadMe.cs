@@ -9,7 +9,7 @@ namespace Cfg.Test {
         [Test]
         public void TestReadMe() {
             var xml = File.ReadAllText(@"ReadMe.xml");
-            var cfg = new Cfg(xml);
+            var cfg = new TestClasses.Cfg(xml);
 
             foreach (var problem in cfg.Problems()) {
                 Console.WriteLine(problem);

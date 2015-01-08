@@ -37,6 +37,7 @@ __Note__: Element and attribute names must be lower-case "slugs."  A slug separa
     using System.Collections.Generic;
     using Transformalize.Libs.Cfg.Net;
     namespace Cfg.Test {
+
         public class Cfg : CfgNode {
             [Cfg(required = true)]
             public List&lt;CfgServer&gt; Servers { get; set; }
@@ -44,12 +45,14 @@ __Note__: Element and attribute names must be lower-case "slugs."  A slug separa
                 this.Load(xml);
             }
         }
+
         public class CfgServer : CfgNode {
             [Cfg(required = true, unique = true)]
             public string Name { get; set; }
             [Cfg(required = true)]
             public List&lt;CfgDatabase&gt; Databases { get; set; }
         }
+
         public class CfgDatabase : CfgNode {
             [Cfg(required = true, unique = true)]
             public string Name { get; set; }
@@ -83,16 +86,20 @@ namespace Cfg.Test {
     public class ReadMe {
         [Test]
         public void TestReadMe() {
+
             var xml = File.ReadAllText(&quot;ReadMe.xml&quot;); //note: ReadMe.xml is the XML defined above.
             var cfg = new Cfg(xml);
+
             //TEST FOR PROBLEMS
             Assert.AreEqual(0, cfg.Problems().Count);
+
             //TEST GANDALF
             Assert.AreEqual(&quot;Gandalf&quot;, cfg.Servers[0].Name);
             Assert.AreEqual(1, cfg.Servers[0].Databases.Count);
             Assert.AreEqual(&quot;master&quot;, cfg.Servers[0].Databases[0].Name);
             Assert.AreEqual(@&quot;\\san\sql-backups&quot;, cfg.Servers[0].Databases[0].BackupFolder);
             Assert.AreEqual(6, cfg.Servers[0].Databases[0].BackupsToKeep);
+
             //TEST SARUMAN
             Assert.AreEqual(&quot;Saruman&quot;, cfg.Servers[1].Name);
             Assert.AreEqual(2, cfg.Servers[1].Databases.Count);
