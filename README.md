@@ -110,7 +110,7 @@ namespace Cfg.Test {
 ### Support for Environments, Parameters, and Place-Holders
 
 I find it necessary for key values in my configuration to change depending on the environment (i.e. `production`, or `test`).
-In addition, I find it helpful to pass parameters into the configuration in order to dynamically change the configuration.
+In addition, I find it helpful to pass parameters into the configuration in order to change it on the fly.
 
 ####Environments
 If you include an `environments` element (aka collection) just inside the XML's root element, you can take advantage of these features.
