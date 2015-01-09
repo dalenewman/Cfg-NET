@@ -1,7 +1,9 @@
 Cfg.Net
 =======
 
-This is an alternative .NET configuration handler.  It is released under the [Apache 2 License](http://www.apache.org/licenses/LICENSE-2.0).
+This is an alternative .NET configuration handler. 
+It is released under the [Apache 2 License](http://www.apache.org/licenses/LICENSE-2.0). 
+The source code is hosted on [GitHub](https://github.com/dalenewman/Cfg.Net).
 
 ### An XML Configuration
 
@@ -27,7 +29,7 @@ Above, is a configuration that holds a collection of `servers`.
 
 Each server has a unique `name`, and a required collection of `databases`.
 
-Each database has a required name, and optional `backup-folder` and `backups-to-keep` attribute.
+Each database has a required name, and optional `backup-folder` and `backups-to-keep` attributes.
 
 __Note__: Element and attribute names must be lower-case "slugs."  A slug separates words with hyphens (e.g. `backups-to-keep`)
 
@@ -36,6 +38,7 @@ __Note__: Element and attribute names must be lower-case "slugs."  A slug separa
 <pre class="prettyprint">
     using System.Collections.Generic;
     using Transformalize.Libs.Cfg.Net;
+
     namespace Cfg.Test {
 
         public class Cfg : CfgNode {
@@ -64,7 +67,10 @@ __Note__: Element and attribute names must be lower-case "slugs."  A slug separa
     }
 </pre>
 
-The classes above inherit from `CfgNode` and have `Cfg` attributes to add metadata to their properties.
+The classes above inherit from `CfgNode` and 
+have `Cfg` attributes to add metadata 
+to their properties.
+
 The configuration metadata is:
 
 * required
@@ -72,23 +78,29 @@ The configuration metadata is:
 * value (as in the default value)
 * decode (as in decode XML entities, if necessary)
 
-The root class `Cfg` defines a constructor that automatically calls the `CfgNode.Load` method.  This loads the XML.
+The root class `Cfg` defines a constructor 
+that automatically calls the `CfgNode.Load` method. 
+This loads the XML.
 
-__Note__: Property names must be title (or proper) case. (e.g. `BackupsToKeep`)
+__Note__: Property names must be title (or proper) case. 
+(e.g. `BackupsToKeep`)
 
 ### Test:
 
 <pre class="prettyprint">
 using System.IO;
 using NUnit.Framework;
+
 namespace Cfg.Test {
+
     [TestFixture]
     public class ReadMe {
+
         [Test]
         public void TestReadMe() {
 
-            var xml = File.ReadAllText(&quot;ReadMe.xml&quot;); //note: ReadMe.xml is the XML defined above.
-            var cfg = new Cfg(xml);
+            //LOAD CONFIGURATION, note: ReadMe.xml is the XML defined above.
+            var cfg = new Cfg(File.ReadAllText(&quot;ReadMe.xml&quot;));
 
             //TEST FOR PROBLEMS
             Assert.AreEqual(0, cfg.Problems().Count);
@@ -116,11 +128,14 @@ namespace Cfg.Test {
 
 ### Support for Environments, Parameters, and Place-Holders
 
-I find it necessary for key values in my configuration to change depending on the environment (i.e. `production`, or `test`).
-In addition, I find it helpful to pass parameters into the configuration in order to change it on the fly.
+I find it necessary for key values in my configuration to 
+change depending on the environment (i.e. `production`, or `test`).
+In addition, I find it helpful to use parameters to alter the 
+configuration at run-time.
 
 ####Environments
-If you include an `environments` element (aka collection) just inside the XML's root element, you can take advantage of these features.
+If you include an `environments` element (aka collection) just inside 
+the XML's root, you can take advantage of these features.
 Your configuration must be setup like this:
 
 <pre class="prettyprint">
@@ -146,23 +161,32 @@ Your configuration must be setup like this:
     &lt;/cfg&gt;
 </pre>
 
-If you include a `default` attribute in the `environments` element, and it matches an environment's `name` attribute, it is used (by default).
-Otherwise, the first environment is used.
+A `default` attribute in the `environments` element will tell Cfg.Net which environment to use.
+Without a default set, the first environment is used.
 
 ####Place-Holders
-In order to actually have any affect on the configuration, you have to insert "place-holders" into the XML's attribute values.
-Use the explicit c# razor style place holders like this: __@(Server)__, and __@(Database)__.
+To affect the configuration at run-time, insert "place-holders" into 
+the XML's attribute values. Use explicit c# razor style place holders 
+like: __@(Server)__, and __@(Database)__.
 
-The place-holders will be replaced with the environment defaults.
+The place-holders will be replaced with the environment default values.
 
 ####Parameters
-To affect the configuration from outside of it, 
-pass a `Dictionary<string,string>` of parameters into the `CfgNode.Load` method.
-Passing in parameters overrides any environment defaults.
+When environment defaults are not applicable, you may pass a `Dictionary<string,string>` 
+of parameters into the `CfgNode.Load` method. Passing in parameters 
+overrides any environment defaults.
 
-If you have a place-holder in the configuration, and you don't setup a default or pass in a parameter, 
-Cfg.Net will report it as a problem, so always check `Problems` 
+__Note__: If you have a place-holder in the configuration, and you 
+don't setup a default or pass in a parameter, Cfg.Net will 
+report it as a problem. So, always check for `Problems` 
 after loading the configuration.
+
+####Together
+
+Environments, parameters, and place-holders work together in order
+to provide configuration flexibility at run-time.  You wouldn't want to 
+copy-paste a configuration 10 times when you can just pass in 10 
+different parameter values.
 
 ###Feature Summary:
 
@@ -176,11 +200,13 @@ after loading the configuration.
 
 ###A Note about the Code:
 
-Cfg.Net is "over-engineered" in an attempt to keep it fast.
+Cfg.Net is "over-engineered" in an attempt to keep it fast and independent. 
+It only references `System` and `System.Core`.  It targets the .NET 4 
+Client Profile framework.
 
 #### Go Property-less?
 
-Cfg.Net may also used without properties to avoid the cost of reflection. 
+Cfg.Net may also be used without properties to avoid the cost of reflection. 
 Instead of defining your configuration with properties and attributes, 
 you may use the `Property` and `Collection` methods like this:
 
@@ -198,7 +224,8 @@ you may use the `Property` and `Collection` methods like this:
     }
 </pre> 
 
-Once loaded, you may use CfgNode's indexers to access collections and properties (e.g. `yourCfg["sites", 0]["url"].Value`).
+Once loaded, use `CfgNode` indexers to access collections and properties 
+(e.g. `yourCfg["sites", 0]["url"].Value`).
 
 ####Credits
 *  a modified version of a `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
