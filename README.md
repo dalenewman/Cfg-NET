@@ -7,7 +7,7 @@ The source code is hosted on [GitHub](https://github.com/dalenewman/Cfg.Net).
 
 ### An XML Configuration
 
-<pre class="prettyprint">
+<pre class="prettyprint" lang="xml">
     &lt;cfg&gt;
       &lt;servers&gt;
         &lt;add name=&quot;Gandalf&quot;&gt;
@@ -35,7 +35,7 @@ __Note__: Element and attribute names must be lower-case "slugs."  A slug separa
 
 ###C# Configuration Classes:
 
-<pre class="prettyprint">
+<pre class="prettyprint" lang="cs">
     using System.Collections.Generic;
     using Transformalize.Libs.Cfg.Net;
 
@@ -87,7 +87,7 @@ __Note__: Property names must be title (or proper) case.
 
 ### Test:
 
-<pre class="prettyprint">
+<pre class="prettyprint" lang="cs">
 using System.IO;
 using NUnit.Framework;
 
@@ -138,7 +138,7 @@ If you include an `environments` element (aka collection) just inside
 the XML's root, you can take advantage of these features.
 Your configuration must be setup like this:
 
-<pre class="prettyprint">
+<pre class="prettyprint" lang="xml">
     &lt;cfg&gt;
         &lt;environments default=&quot;test&quot;&gt;
             &lt;add name=&quot;prod&quot;&gt;
@@ -157,7 +157,7 @@ Your configuration must be setup like this:
             &lt;/add&gt;
             &lt;!-- more environments, if you want --&gt;
         &lt;/environments&gt;
-        &lt;!-- the rest of your configuration --&gt;
+        &lt;!-- the rest of your configuration with @(Server) and @(Database) place-holders --&gt;
     &lt;/cfg&gt;
 </pre>
 
@@ -200,17 +200,17 @@ different parameter values.
 
 ###A Note about the Code:
 
-Cfg.Net is "over-engineered" in an attempt to keep it fast and independent. 
+Cfg.Net is over-engineered in an attempt to keep it independent. 
 It only references `System` and `System.Core`.  It targets the .NET 4 
 Client Profile framework.
 
 #### Go Property-less?
 
-Cfg.Net may also be used without properties to avoid the cost of reflection. 
-Instead of defining your configuration with properties and attributes, 
-you may use the `Property` and `Collection` methods like this:
+Cfg.Net may also be used without properties.  Instead of defining your 
+configuration with properties and attributes, you may use 
+the `Property` and `Collection` methods like this:
 
-<pre class="prettyprint">
+<pre class="prettyprint" lang="cs">
     public class Site : CfgNode {
         public Site() {
             Property(name: &quot;name&quot;, value: &quot;&quot;, required: true, unique: true);
@@ -224,8 +224,8 @@ you may use the `Property` and `Collection` methods like this:
     }
 </pre> 
 
-Once loaded, use `CfgNode` indexers to access collections and properties 
-(e.g. `yourCfg["sites", 0]["url"].Value`).
+Once loaded, use `CfgNode` indexers to access collections and 
+properties (e.g. `yourCfg["sites", 0]["url"].Value`).
 
 ####Credits
 *  a modified version of a `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
