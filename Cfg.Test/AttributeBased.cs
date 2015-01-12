@@ -11,24 +11,21 @@ namespace Cfg.Test {
 
         [Test]
         public void TestEmptyCfg() {
-            var cfg = new AttributeCfg();
-            cfg.Load(@"<cfg></cfg>");
+            var cfg = new AttributeCfg(@"<cfg></cfg>");
             Assert.AreEqual(1, cfg.Problems().Count);
             Assert.AreEqual("The 'cfg' element is missing a 'sites' element.", cfg.Problems()[0]);
         }
 
         [Test]
         public void TestEmptySites() {
-            var cfg = new AttributeCfg();
-            cfg.Load(@"<cfg><sites/></cfg>");
+            var cfg = new AttributeCfg(@"<cfg><sites/></cfg>");
             Assert.AreEqual(1, cfg.Problems().Count);
             Assert.AreEqual("A 'sites' element is missing an 'add' element.", cfg.Problems()[0]);
         }
 
         [Test]
         public void TestInvalidProcess() {
-            var cfg = new AttributeCfg();
-            cfg.Load(
+            var cfg = new AttributeCfg(
                 @"<cfg>
                     <sites>
                         <add/>
@@ -49,8 +46,7 @@ namespace Cfg.Test {
 
         [Test]
         public void TestInvalidSiteAttribute() {
-            var cfg = new AttributeCfg();
-            cfg.Load(
+            var cfg = new AttributeCfg(
                 @"<cfg>
                     <sites>
                         <add name='dale' invalid='true' />
@@ -77,13 +73,13 @@ namespace Cfg.Test {
                         <add name='google' url='http://www.google.com' something='&lt;'/>
                         <add name='github' url='http://www.github.com' numeric='x'/>
                         <add name='stackoverflow' url='http://www.stackoverflow.com' numeric='7' />
+                        <add name='github' url='http://www.anotherGitHub.com' something='this is a duplicate!' />
                     </sites>
                 </cfg>".Replace("'", "\"");
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            var cfg = new AttributeCfg();
-            cfg.Load(xml);
+            var cfg = new AttributeCfg(xml);
             stopWatch.Stop();
 
             Console.WriteLine("cfg.net load ms:" + stopWatch.ElapsedMilliseconds);
@@ -97,10 +93,11 @@ namespace Cfg.Test {
             Assert.IsNotNull(doc);
 
             var problems = cfg.Problems();
-            Assert.AreEqual(1, problems.Count);
-            Assert.AreEqual("Could not set 'numeric' to 'x' inside 'sites' 'add'. Input string was not in a correct format.", problems[0]);
+            Assert.AreEqual(2, problems.Count);
+            Assert.AreEqual("You set a duplicate 'name' value 'github' in 'sites'.", problems[0]);
+            Assert.AreEqual("Could not set 'numeric' to 'x' inside 'sites' 'add'. Input string was not in a correct format.", problems[1]);
 
-            Assert.AreEqual(3, cfg.Sites.Count);
+            Assert.AreEqual(4, cfg.Sites.Count);
 
             Assert.AreEqual("google", cfg.Sites[0].Name);
             Assert.AreEqual("http://www.google.com", cfg.Sites[0].Url);
@@ -124,8 +121,8 @@ namespace Cfg.Test {
                     </sites>
                 </cfg>".Replace("'", "\"");
 
-            var cfg = new AttributeCfg();
-            cfg.Load(xml);
+            var cfg = new AttributeCfg(xml);
+
             Assert.AreEqual(0, cfg.Problems().Count);
             Assert.AreEqual("colts", cfg.Sites[0].Common);
             Assert.AreEqual("colts", cfg.Sites[1].Common);
@@ -133,9 +130,5 @@ namespace Cfg.Test {
 
         }
 
-        [Test]
-        public void TestReadMe()
-        {
-        }
     }
 }
