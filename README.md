@@ -257,7 +257,7 @@ foreach (var server in cfg.Servers) {
 
 Cfg-Net doesn't throw any errors (on purpose that is).  Instead, 
 it collects problems as it loads.  You should always check 
-for problems after like this:
+for problems after loading, like this:
 
 <pre class="prettyprint" lang="cs">
 //LOAD CONFIGURATION
