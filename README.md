@@ -39,7 +39,7 @@ by keeping 4 complete backup sets on disk, and deleting the rest.
 For each database, he provides you with the server name, and the 
 associated backup folder.
 
-The servers in question are named Gandalf, and Saruman. So, start 
+The servers in question are named *Gandalf*, and *Saruman*. So, start 
 with a configuration like this:
 
 <pre class="prettyprint" lang="xml">
@@ -51,7 +51,7 @@ with a configuration like this:
 &lt;/backup-manager&gt;
 </pre>
 
-Save this file as `BackupManager.xml`. 
+Save this file as *BackupManager.xml*. 
 It holds a collection of `servers`.  
 
 Here's how to model this in Cfg-Net:
@@ -105,22 +105,27 @@ var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
 </pre>
 
 Moving on, we need to add a required collection of `databases`. 
-Each database should have a required / unique name, and optional 
-`backup-folder` and `backups-to-keep` attributes.  Here's a look 
-at **BackupManager.xml**:
+Each database should have a required / unique `name` and `backup-folder`, 
+and an optional `backups-to-keep` attribute.  Here's a look 
+at an updated *BackupManager.xml*:
 
 <pre class="prettyprint" lang="xml">
 &lt;backup-manager&gt;
     &lt;servers&gt;
         &lt;add name=&quot;Gandalf&quot;&gt;
             &lt;databases&gt;
-                &lt;add name=&quot;master&quot; backups-to-keep=&quot;6&quot;/&gt;
+                &lt;add name=&quot;master&quot;
+                     backup-folder=&quot;\\san\sql-backups\gandalf\master&quot;
+                     backups-to-keep=&quot;6&quot;/&gt;
             &lt;/databases&gt;
         &lt;/add&gt;
         &lt;add name=&quot;Saruman&quot;&gt;
             &lt;databases&gt;
-                &lt;add name=&quot;master&quot; backup-folder=&quot;\\san\sql-backups\saruman\master&quot; backups-to-keep=&quot;8&quot; /&gt;
-                &lt;add name=&quot;model&quot; backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
+                &lt;add name=&quot;master&quot;
+                     backup-folder=&quot;\\san\sql-backups\saruman\master&quot;
+                     backups-to-keep=&quot;8&quot; /&gt;
+                &lt;add name=&quot;model&quot;
+                     backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
             &lt;/databases&gt;
         &lt;/add&gt;
     &lt;/servers&gt;
@@ -171,7 +176,7 @@ namespace Cfg.Test {
     public class CfgDatabase : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
-        [Cfg(value = @&quot;\\san\sql-backups&quot;)]
+        [Cfg(required = true, unique = true)]
         public string BackupFolder { get; set; }
         [Cfg(value = 4)]
         public int BackupsToKeep { get; set; }
@@ -179,7 +184,7 @@ namespace Cfg.Test {
 }
 </pre>
 
-Each class inherits from `CfgNode` and and has 
+Each class inherits from `CfgNode` and has 
 `Cfg` attributes adding metadata to it's properties.
 
 The configuration metadata is:
@@ -189,13 +194,13 @@ The configuration metadata is:
 * value (as in the default value)
 * decode (as in decode XML entities, if necessary)
 
-__Note__: In code, property names are title (or proper) case  
-(e.g. `BackupsToKeep`).  You don't have to use slugs here.
+__Note__: In code, property names are title (or proper) case (e.g. `BackupsToKeep`). 
+You don't have to use slugs here.
 
 ##Testing
 
-I good way to show that it's working is to write a unit test.
-Here's one that loads **BackupManager.xml** and checks all the 
+A good way to show that it's working is to write a unit test.
+Here's one that loads *BackupManager.xml* and checks all the 
 values.
 
 <pre class="prettyprint" lang="cs">
@@ -220,7 +225,7 @@ namespace Cfg.Test {
             Assert.AreEqual(&quot;Gandalf&quot;, cfg.Servers[0].Name);
             Assert.AreEqual(1, cfg.Servers[0].Databases.Count);
             Assert.AreEqual(&quot;master&quot;, cfg.Servers[0].Databases[0].Name);
-            Assert.AreEqual(@&quot;\\san\sql-backups&quot;, cfg.Servers[0].Databases[0].BackupFolder);
+            Assert.AreEqual(@&quot;\\san\sql-backups\gandalf\master&quot;, cfg.Servers[0].Databases[0].BackupFolder);
             Assert.AreEqual(6, cfg.Servers[0].Databases[0].BackupsToKeep);
 
             //TEST SARUMAN
@@ -262,21 +267,42 @@ var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
 Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
 </pre>
 
+##Happy End-User
+
+After you unravel the mystery of complete backup sets, 
+and your program and configuration are finished, wrap it 
+up in a Console application (e.g. *BackupManager.exe*).
+
+Allow the configuration file to be passed in as an argument, like this:
+
+<pre class="prettyprint" lang="bash">
+C:\> BackupManager.exe BackupManager.xml
+</pre>
+
+Show the DBA how to add or remove servers and 
+databases to *BackupManager.xml*.  Explain that 
+he/she can create as many configuration files 
+as necessary.
+
+When the DBA changes his/her mind about keeping 4 
+backup sets, point out the 'backups-to-keep' attribute.
+
+**Caution**: The DBA is most likely not nearly as smart as you, so speak plainly...
+
 ##Feature Summary
 
-* returns a list of configuration problems (if valid XML)
+* returns a list of configuration problems
 * allows for default values of attributes
-* enforces attribute types
-* enforces required attributes (properties)
-* enforces required elements (collections)
+* reports incompatible attribute types
+* reports missing required attributes (properties)
+* reports missing required elements (collections)
 * reports non-unique attributes as problems (within collections)
 * supports environments, parameters, and place-holders.
 
 This is all you need to know if all you need is an 
-easy way to configure your program.  You can stop reading.
+easy way to configure your program.
 
-But, if you're curious, and you're wondering what the last 
-feature indicated in the feature summary is, read on...
+If you need to make the configuration more flexible at run-time, continue reading.
 
 ##Support for Environments, Parameters, and Place-Holders
 
@@ -360,7 +386,7 @@ reflection code, it can be made a portable class.
 
 ### Go Property-less?
 
-While I don't recommend it, Cfg-Net may be used without properties. 
+While I don't recommend it, Cfg-NET may be used without properties. 
 Instead of modeling your configuration with properties and `[Cfg()]` 
 attributes, you may use the `Property()` and `Collection()` methods like this:
 
