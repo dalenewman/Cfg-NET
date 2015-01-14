@@ -1,11 +1,13 @@
-Cfg-Net
+Cfg-NET
 =======
 
-This is an alternative .NET configuration handler. 
-It is released under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0). 
-The source code is on [GitHub](https://github.com/dalenewman/Cfg.Net).
+##Introduction
 
-###Configuration is Important
+Cfg-NET is an alternative .NET configuration handler. 
+It is released under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0). 
+It is open source hosted on on [GitHub](https://github.com/dalenewman/Cfg.Net).
+
+##Configuration is Important
 We write similar programs.  So similar, in fact, that changing 
 certain variables allows us to re-use the programs.  If we re-use them 
 often, we're motivated to move the variables into a **configuration**. 
@@ -28,7 +30,7 @@ makes a return on our investment.  Executives say:
 > 
 > "@(Programmer) is the cat's pajamas."
 
-### Getting Started
+##Getting Started
 
 Your DBA is unhappy with a backup wizard's ability to manage
 previous backup sets.  He wants a program that manages backups 
@@ -190,7 +192,7 @@ The configuration metadata is:
 __Note__: In code, property names are title (or proper) case  
 (e.g. `BackupsToKeep`).  You don't have to use slugs here.
 
-### Testing:
+##Testing
 
 I good way to show that it's working is to write a unit test.
 Here's one that loads **BackupManager.xml** and checks all the 
@@ -246,7 +248,7 @@ foreach (var server in cfg.Servers) {
 }
 </pre>
 
-###Problems?
+##Problems?
 
 Cfg-Net doesn't throw any errors (on purpose that is).  Instead, 
 it collects problems as it loads.  You should always check 
@@ -260,7 +262,7 @@ var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
 Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
 </pre>
 
-###Feature Summary:
+##Feature Summary
 
 * returns a list of configuration problems (if valid XML)
 * allows for default values of attributes
@@ -276,14 +278,14 @@ easy way to configure your program.  You can stop reading.
 But, if you're curious, and you're wondering what the last 
 feature indicated in the feature summary is, read on...
 
-### Support for Environments, Parameters, and Place-Holders
+##Support for Environments, Parameters, and Place-Holders
 
 I find it necessary for key values in my configuration to 
 change depending on the environment (i.e. `production`, or `test`).
 In addition, I find it helpful to use parameters to alter the 
 configuration at run-time.
 
-####Environments
+###Environments
 If you include an `environments` element (aka collection) just inside 
 the XML's root, you can take advantage of these features.
 Your configuration must be setup like this:
@@ -323,7 +325,7 @@ represented in the C# model like this:
     public List&lt;MyEnvironment&gt; Environments { get; set; }
 </pre> 
 
-####Place-Holders
+###Place-Holders
 To affect the configuration at run-time, insert "place-holders" into 
 the XML's attribute values. Use explicit c# razor style place holders 
 that reference the parameter names, like: `@(Server)`, and `@(Database)`.
@@ -332,7 +334,7 @@ that reference the parameter names, like: `@(Server)`, and `@(Database)`.
 
 Place-holders are replaced with environment defaults.
 
-####Parameters
+###Parameters
 When environment defaults are not applicable, you may pass a `Dictionary<string,string>` 
 of parameters into the `CfgNode.Load` method. Passing in parameters 
 overrides any environment defaults.
@@ -342,21 +344,21 @@ and you don't setup a default or pass in a parameter, Cfg.Net will
 report it as a problem. So, always check for `Problems` 
 after loading the configuration.
 
-####Together
+###Together
 
 Environments, parameters, and place-holders work together in order
 to provide configuration flexibility at run-time.  You wouldn't want to 
 copy-paste a configuration 10 times when you can just pass in 10 
 different parameter values.
 
-###A Note about the Code:
+##A Note about the Code:
 
 Cfg.Net is over-engineered in an attempt to keep it independent. 
 It only references `System` and `System.Core`.  It targets the .NET 4 
 Client Profile framework.  With a slight modification to the 
 reflection code, it can be made a portable class.
 
-#### Go Property-less?
+### Go Property-less?
 
 While I don't recommend it, Cfg-Net may be used without properties. 
 Instead of modeling your configuration with properties and `[Cfg()]` 
@@ -381,7 +383,7 @@ properties as objects (e.g. `yourCfg["sites", 0]["url"].Value`).
 Because values are stored as `object` types, you'll have to 
 cast them to the appropriate type.
 
-####Credits
+###Credits
 *  for now, Cfg-Net uses a modified version of a `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
 *  .NET Source of WebUtility.HtmlDecode found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
   *  __Note__: Cfg.Net will not decode XML entities unless you ask it to (e.g. `[Cfg(decode:true)]`).
