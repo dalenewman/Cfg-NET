@@ -62,7 +62,7 @@ namespace Cfg.Test {
             this.Load(xml, parameters);
         }
 
-        [Cfg(required = false, sharedProperty = "default")]
+        [Cfg(required = false, sharedProperty = "default", sharedValue = "")]
         public List<MyEnvironment> Environments { get; set; }
 
         [Cfg(required = true)]
