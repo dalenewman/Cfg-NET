@@ -80,7 +80,7 @@ namespace Cfg.Test {
 The above code models a collection of servers. It indicates that 
 each server has a required, and unique `name`.
 
-To load *BackupManager.xml" into your model, use code like this:
+To load *BackupManager.xml* into your model, use code like this:
 
 <pre class="prettyprint" lang="cs">
 var cfg = new Cfg();
