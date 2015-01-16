@@ -55,11 +55,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CfgAttribute.cs" />
-    <Compile Include="CfgConstants.cs" />
     <Compile Include="CfgNode.cs" />
-    <Compile Include="CfgProperty.cs" />
-    <Compile Include="CharExtensions.cs" />
     <Compile Include="NanoXmlParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

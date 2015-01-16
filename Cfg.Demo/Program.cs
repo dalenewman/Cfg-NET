@@ -16,21 +16,27 @@ namespace Cfg.Demo {
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            
-            // PREPARE PARAMETER
-            var parameters = new Dictionary<string, string>();
-            if (args != null && args.Length > 0) {
-                parameters["SqlServer"] = args[0];
+
+            if (args == null || args.Length == 0) {
+                Console.WriteLine("Please pass in the configuration file.");
+                return;
+            }
+
+            // CHECK FILE
+            var fileInfo = new FileInfo(args[0]);
+            if (!fileInfo.Exists) {
+                Console.WriteLine("File {0} does not exist.", fileInfo.FullName);
+                return;
             }
 
             // LOAD FILE
-            Console.WriteLine("Loading NorthWind.xml");
-            var xml = File.ReadAllText("NorthWind.xml");
+            Console.WriteLine("Loading {0}", fileInfo.Name);
+            var xml = File.ReadAllText(fileInfo.FullName);
             Console.WriteLine("File loaded at {0} ms.", stopWatch.ElapsedMilliseconds);
 
             // LOAD CONFIGURATION
             Console.WriteLine("Loading configuration.");
-            var cfg = new TflRoot(xml, parameters);
+            var cfg = new TflRoot(xml, null);
             Console.WriteLine("Loaded Configuration at {0} ms.", stopWatch.ElapsedMilliseconds);
 
             // REPORT PROBLEMS
