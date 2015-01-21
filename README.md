@@ -231,7 +231,7 @@ The configuration metadata is:
 * value (as in the default value)
 * decode (as in decode XML entities, if necessary)
 * domain (as in a valid list of values)
-* domainDelimiter (used to delimite the domain values)
+* domainDelimiter (used to delimit the domain values)
 
 __Note__: In code, property names are title (or proper) case (e.g. `BackupsToKeep`).
 You don't have to use slugs here.  That's only for the XML.
