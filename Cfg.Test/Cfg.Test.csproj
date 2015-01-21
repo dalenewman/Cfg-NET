@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain.cs" />
     <Compile Include="ReadMe.cs" />
     <Compile Include="AttributeBased.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

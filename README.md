@@ -8,16 +8,16 @@ It is open source on [GitHub](https://github.com/dalenewman/Cfg.Net).
 
 ##Why Configure?
 We write similar programs.  Sometimes, changing variables allows
-us to re-use a program.  If we find ourselves changing the same
-variables often, we may choose to move the variables into a **configuration**.
+us to re-use a program.  If we change the same variables often, 
+we may move the variables into a **configuration**.
 
 A good configuration removes the need to alter and re-compile a program.
-We only have to change the configuration. Furthermore, we can empower
-end-users to change the configuration.
+We only have to change the configuration. Furthermore, end-users can 
+change the configuration.
 
 When an end-user re-configures and runs a program on their own,
 **everyone wins**. They accomplish their task, and you remain focused
-on the most important thing: writing programs.
+on the most important thing: writing *more* programs!
 
 When everyone wins, there is an exchange of high-fives between
 co-workers.  We celebrate because we created something that
@@ -35,8 +35,8 @@ makes a return on our investment.  Executives say:
 Cfg-NET currently uses [XML](http://en.wikipedia.org/wiki/XML) for
 configuration, not [JSON](http://en.wikipedia.org/wiki/JSON).  I chose to start with XML for a couple reasons:
 
-1. It is compatible with the [.NET 2.0 Configuration handler](http://aspnet.4guysfromrolla.com/articles/032807-1.aspx) XML.  I need it to be compatable so I can update my [Transformalize](http://www.codeproject.com/Articles/658971/Transformalizing-NorthWind) library without having to update hundreds of configurations running in production.
-2. In my opinion, it is easier for end-users to understand and edit (especially with proper syntax high-lighting).
+1. It is compatible with the [.NET 2.0 Configuration handler](http://aspnet.4guysfromrolla.com/articles/032807-1.aspx) XML.  I need it to be compatible so I can update my [Transformalize](http://www.codeproject.com/Articles/658971/Transformalizing-NorthWind) library without having to update hundreds of configurations.
+2. In my opinion, it is easier for end-users to understand and edit.
 
 Here is a small comparison (visually):
 
@@ -50,21 +50,19 @@ Here is a small comparison (visually):
 
 ###JSON
 <pre class="prettyprint" lang="js">
-{
-    &quot;connections&quot;: [
-        { &quot;name&quot;: &quot;input&quot;, &quot;server&quot;: &quot;Gandalf&quot;, &quot;database&quot;: &quot;test&quot; },
-        { &quot;name&quot;: &quot;output&quot;, &quot;server&quot;: &quot;Saruman&quot;, &quot;database&quot;: &quot;test&quot; }
-    ]
-}
+&quot;connections&quot;: [
+    { &quot;name&quot;: &quot;input&quot;, &quot;server&quot;: &quot;Gandalf&quot;, &quot;database&quot;: &quot;test&quot; },
+    { &quot;name&quot;: &quot;output&quot;, &quot;server&quot;: &quot;Saruman&quot;, &quot;database&quot;: &quot;test&quot; }
+]
 </pre>
 
 Admittedly, they are both quite [sexy](http://www.kateupton.com/) data formats.  I'd like to support JSON as well, as time permits.
 
 ##Why an Alternative?
-While the .NET 2.0 custom configuration API is quite capable, it is more work to setup. 
+While the .NET 2.0 custom configuration API is quite capable, it is more work to setup.
 I wanted the process of adding or changing a configuration to be as frictionless as possible.
 
-Because I have ["ate my own dog food"](http://en.wikipedia.org/wiki/Eating_your_own_dog_food), I can tell 
+Because I have ["ate my own dog food"](http://en.wikipedia.org/wiki/Eating_your_own_dog_food), I can tell
 you that easier configuration makes a positive change in the way you code, and the end-result.
 ##Getting Started: a Scenario
 
@@ -97,11 +95,14 @@ Here's how to model this in Cfg-NET:
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
+
 namespace Cfg.Test {
+
     public class Cfg : CfgNode {
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
     }
+
     public class CfgServer : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
@@ -186,11 +187,13 @@ only ever going to have one, it still requires a
 **collection** of one.  This convention makes it less complex
 for both the C# model, and the XML configuration.
 
-The Cfg-NET configuration model is updated:
+The Cfg-NET configuration model is updated to:
+
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
 namespace Cfg.Test {
+
     public class Cfg : CfgNode {
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
@@ -198,12 +201,14 @@ namespace Cfg.Test {
             this.Load(xml);
         }
     }
+
     public class CfgServer : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
         [Cfg(required = true)]
         public List&lt;CfgDatabase&gt; Databases { get; set; }
     }
+
     public class CfgDatabase : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
@@ -225,6 +230,8 @@ The configuration metadata is:
 * unique
 * value (as in the default value)
 * decode (as in decode XML entities, if necessary)
+* domain (as in a valid list of values)
+* domainDelimiter (used to delimite the domain values)
 
 __Note__: In code, property names are title (or proper) case (e.g. `BackupsToKeep`).
 You don't have to use slugs here.  That's only for the XML.
@@ -243,16 +250,20 @@ namespace Cfg.Test {
     public class ReadMe {
         [Test]
         public void TestReadMe() {
+
             //LOAD CONFIGURATION
             var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+
             //TEST FOR PROBLEMS
             Assert.AreEqual(0, cfg.Problems().Count);
+
             //TEST GANDALF
             Assert.AreEqual(&quot;Gandalf&quot;, cfg.Servers[0].Name);
             Assert.AreEqual(1, cfg.Servers[0].Databases.Count);
             Assert.AreEqual(&quot;master&quot;, cfg.Servers[0].Databases[0].Name);
             Assert.AreEqual(@&quot;\\san\sql-backups\gandalf\master&quot;, cfg.Servers[0].Databases[0].BackupFolder);
             Assert.AreEqual(6, cfg.Servers[0].Databases[0].BackupsToKeep);
+
             //TEST SARUMAN
             Assert.AreEqual(&quot;Saruman&quot;, cfg.Servers[1].Name);
             Assert.AreEqual(2, cfg.Servers[1].Databases.Count);
@@ -280,16 +291,20 @@ foreach (var server in cfg.Servers) {
 
 ##Problems?
 
-Cfg-Net doesn't throw errors (on purpose that is).  Instead,
+Cfg-NET doesn't throw errors (on purpose that is).  Instead,
 it collects problems as it loads.  Therefore, you should always check
 for `Problems()` after loading the XML file, like this:
 
 <pre class="prettyprint" lang="cs">
 //LOAD CONFIGURATION
 var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+
 //TEST FOR PROBLEMS
 Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
 </pre>
+
+By collecting multiple problems with the configuration, you can 
+report them to the end-user who can fix everything at once.
 
 ##Happy End-User
 
@@ -313,16 +328,20 @@ backup sets, point out the `backups-to-keep` attribute.
 
 ##Feature Summary
 
-* returns a list of configuration problems
-* allows for default values of attributes
-* reports incompatible attribute types
-* reports missing required attributes (properties)
-* reports missing required elements (collections)
-* reports non-unique attributes as problems (within collections)
-* supports flexible environments, parameters, and place-holders.
+* easy
+  * reports problems
+  * value defaults
+  * value types
+  * value domains (or valid values)
+  * required properties
+  * required collections
+  * unique properties within collections
+* advanced
+  * flexible environments, parameters, and place-holders.
 
 This is all you need to know if you just want an easy way
-to configure your program.
+to configure your program.  Just drop *NanoXmlParser.cs* and *CfgNet.cs* into 
+your project, and you're good to go.
 
 If you need a more flexible configuration, continue reading.
 
@@ -441,36 +460,12 @@ __Note__: If you have a place-holder in the configuration,
 and you don't setup an environment default, or pass in a parameter, Cfg.NET
 reports it as a problem. So, always check for `Problems()` after loading the configuration.
 
-##A Note about the Code:
+##About the Code:
 
 Cfg.Net is over-engineered in an attempt to keep it independent.
 It only references `System` and `System.Core`.  It targets the .NET 4
 Client Profile framework.  With a slight modification to the
 reflection code, it can be made a portable class.
-
-### Go Property-less?
-
-While I don't recommend it, Cfg-NET may be used without properties.
-Instead of modeling your configuration with properties and `[Cfg()]`
-attributes, you may use the `Property()` and `Collection()` methods like this:
-
-<pre class="prettyprint" lang="cs">
-    public class Site : CfgNode {
-        public Site() {
-            Property(name: &quot;name&quot;, value: &quot;&quot;, required: true, unique: true);
-            Property(name: &quot;url&quot;, value: &quot;&quot;, required: true);
-            Property(name: &quot;something&quot;, value: &quot;&quot;, decode: true);
-            Property(name: &quot;numeric&quot;, value: 0);
-            //note: you must pass in value, so that it knows the `Type` you want.
-            Collection&lt;SomethingElse&gt;(&quot;something-else&quot;);
-        }
-    }
-</pre>
-
-Once loaded, use `CfgNode` indexers to access collections and
-properties as objects (e.g. `yourCfg["sites", 0]["url"].Value`).
-Because values are stored as `object` types, you'll have to
-cast them to the appropriate type.
 
 ###Credits
 *  for now, Cfg-Net uses a modified version of a `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).

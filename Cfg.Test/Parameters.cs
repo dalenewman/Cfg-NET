@@ -52,7 +52,6 @@ namespace Cfg.Test {
             Assert.AreEqual("i am the new p1", cfg.Things[0].Value, "I should be passed in for p1.");
             Assert.AreEqual("two-2", cfg.Things[1].Value, "I am the default value for p2 in the default environment two.");
 
-            //TODO:Make it use the default parameters (unless parameters passed in via Dictionary<string,string>)
         }
 
     }

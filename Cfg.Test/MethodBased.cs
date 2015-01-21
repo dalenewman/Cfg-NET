@@ -102,16 +102,16 @@ namespace Cfg.Test {
 
             Assert.AreEqual(3, cfg.Count("sites"));
 
-            Assert.AreEqual("google", cfg["sites", 0]["name"].Value);
-            Assert.AreEqual("http://www.google.com", cfg["sites", 0]["url"].Value);
-            Assert.AreEqual("<", cfg["sites", 0]["something"].Value);
-            Assert.AreEqual(0, cfg["sites", 0]["numeric"].Value);
-            Assert.IsTrue(cfg["sites", 0]["numeric"].Value is int);
+            Assert.AreEqual("google", cfg["sites", 0]["name"].Attributes.value);
+            Assert.AreEqual("http://www.google.com", cfg["sites", 0]["url"].Attributes.value);
+            Assert.AreEqual("<", cfg["sites", 0]["something"].Attributes.value);
+            Assert.AreEqual(0, cfg["sites", 0]["numeric"].Attributes.value);
+            Assert.IsTrue(cfg["sites", 0]["numeric"].Attributes.value is int);
 
-            Assert.AreEqual("github", cfg["sites", 1]["name"].Value);
-            Assert.AreEqual("http://www.github.com", cfg["sites", 1]["url"].Value);
+            Assert.AreEqual("github", cfg["sites", 1]["name"].Attributes.value);
+            Assert.AreEqual("http://www.github.com", cfg["sites", 1]["url"].Attributes.value);
 
-            Assert.AreEqual(7, cfg["sites", 2]["numeric"].Value);
+            Assert.AreEqual(7, cfg["sites", 2]["numeric"].Attributes.value);
 
         }
 
@@ -128,9 +128,9 @@ namespace Cfg.Test {
                 </cfg>".Replace("'", "\""));
 
             Assert.AreEqual(0, cfg.Problems().Count);
-            Assert.AreEqual("colts", cfg["sites", 0]["common"].Value);
-            Assert.AreEqual("colts", cfg["sites", 1]["common"].Value);
-            Assert.AreEqual("colts", cfg["sites", 2]["common"].Value);
+            Assert.AreEqual("colts", cfg["sites", 0]["common"].Attributes.value);
+            Assert.AreEqual("colts", cfg["sites", 1]["common"].Attributes.value);
+            Assert.AreEqual("colts", cfg["sites", 2]["common"].Attributes.value);
 
         }
 
