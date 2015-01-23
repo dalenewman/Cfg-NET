@@ -126,6 +126,10 @@ namespace Transformalize.Libs.Cfg.Net {
             return _storage.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
         }
 
+        public void AddCustomProblem(string problem) {
+            _storage.Append(problem);
+            _storage.AppendLine();
+        }
     }
 
     public static class CharExtensions {
@@ -226,7 +230,11 @@ namespace Transformalize.Libs.Cfg.Net {
             get { return _properties[name]; }
         }
 
-        public void Load(string xml, Dictionary<string, string> parameters = null) {
+        protected void AddCustomProblem(string problem) {
+            _problems.AddCustomProblem(problem);
+        }
+
+        public virtual void Load(string xml, Dictionary<string, string> parameters = null) {
 
             NanoXmlNode node = null;
             try {
