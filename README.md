@@ -19,18 +19,6 @@ When an end-user re-configures and runs a program on their own,
 **everyone wins**. They accomplish their task, and you remain focused
 on the most important thing: writing *more* programs!
 
-When everyone wins, there is an exchange of high-fives between
-co-workers.  We celebrate because we created something that
-makes a return on our investment.  Executives say:
-
-> "Did you see that program?"
->
-> "Yeah, the one @(Programmer) wrote? It's awesome."
->
-> "@(Programmer) is the cat's pajamas."
-
-**Hint**: Replace `@(Programmer)` with your name.
-
 ##Why XML?  Why not JSON?
 Cfg-NET currently uses [XML](http://en.wikipedia.org/wiki/XML) for
 configuration, not [JSON](http://en.wikipedia.org/wiki/JSON).  I chose to start with XML for a couple reasons:
@@ -56,13 +44,14 @@ Here is a small comparison (visually):
 ]
 </pre>
 
-Admittedly, they are both quite [sexy](http://www.kateupton.com/) data formats.  I'd like to support JSON as well, as time permits.
+Admittedly, they are both quite [sexy](http://www.kateupton.com/) data formats. 
+I'd like to support JSON as well, as time permits.
 
 ##Why an Alternative?
 While the .NET 2.0 custom configuration API is quite capable, it is more work to setup.
 I wanted the process of adding or changing a configuration to be as frictionless as possible.
 
-Because I have ["ate my own dog food"](http://en.wikipedia.org/wiki/Eating_your_own_dog_food), I can tell
+Because I ["eat my own dog food"](http://en.wikipedia.org/wiki/Eating_your_own_dog_food), I can tell
 you that easier configuration makes a positive change in the way you code, and the end-result.
 ##Getting Started: a Scenario
 
@@ -168,11 +157,13 @@ Here's a look at an updated *BackupManager.xml*:
 &lt;/backup-manager&gt;
 </pre>
 
-This XML is following Cfg-NET's convention of using all lower-case
+###Convention
+
+The XML above is following Cfg-NET's convention of using all lower-case
 element and attribute names.  In addition, compound names are represented
 as __slugs__.  A slug separates words with hyphens (e.g. `backups-to-keep`).
 
-Another convention you may have noticed, is that everything is a
+Another convention is that everything is a
 collection of `add` elements. You might say, I just have
 one server, so I want my XML to look like this:
 
@@ -187,7 +178,7 @@ only ever going to have one, it still requires a
 **collection** of one.  This convention makes it less complex
 for both the C# model, and the XML configuration.
 
-The Cfg-NET configuration model is updated to:
+To keep the Cfg-NET C# model in sync with the XML, add a database collection like this:
 
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
@@ -205,18 +196,18 @@ namespace Cfg.Test {
     public class CfgServer : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
-        [Cfg(required = true)]
-        public List&lt;CfgDatabase&gt; Databases { get; set; }
+        <strong>[Cfg(required = true)]
+        public List&lt;CfgDatabase&gt; Databases { get; set; }</strong>
     }
 
-    public class CfgDatabase : CfgNode {
+    <strong>public class CfgDatabase : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
         [Cfg(required = true, unique = true)]
         public string BackupFolder { get; set; }
         [Cfg(value = 4)]
         public int BackupsToKeep { get; set; }
-    }
+    }</strong>
 }
 </pre>
 
@@ -305,6 +296,38 @@ Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
 
 By collecting multiple problems with the configuration, you can 
 report them to the end-user who can fix everything at once.
+
+##Validation
+Cfg-NET metadata and types offer some validation. If it's not 
+enough, you can add more. 
+
+To validate at the property level, override the 
+`Validate()` method like so:
+
+<pre class="prettyprint" lang="csharp">
+public class Connection : CfgNode {
+
+    [Cfg(required = true, domain = &quot;file,folder,other&quot;)]
+    public string Provider { get; set; }
+
+    [Cfg()]
+    public string File { get; set; }
+
+    [Cfg()]
+    public string Folder { get; set; }
+
+    <strong>// custom validation
+    protected override void Validate() {
+        if (Provider == &quot;file&quot; &amp;&amp; string.IsNullOrEmpty(File)) {
+            AddProblem(&quot;file provider needs file attribute.&quot;);
+        } else if (Provider == &quot;folder&quot; &amp;&amp; string.IsNullOrEmpty(Folder)) {
+            AddProblem(&quot;folder provider needs folder attribute.&quot;);
+        }
+    }</strong>
+}
+</pre>
+
+As you find problems, add them using the `AddProblem()` method.
 
 ##Happy End-User
 

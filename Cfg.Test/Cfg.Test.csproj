@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domain.cs" />
+    <Compile Include="CustomProblems.cs" />
     <Compile Include="ReadMe.cs" />
     <Compile Include="AttributeBased.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

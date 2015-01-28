@@ -27,7 +27,7 @@ namespace Transformalize.Libs.Cfg.Net {
         //PROBLEM PATTERNS
         public static string PROBLEM_DUPLICATE_SET = "You set a duplicate '{0}' value '{1}' in '{2}'.";
         public static string PROBLEM_INVALID_ATTRIBUTE = "A{3} '{0}' '{1}' element contains an invalid '{2}' attribute.  Valid attributes are: {4}.";
-        public static string PROBLEM_INVALID_ELEMENT = "A{2} '{0}' element has an invalid '{1}' element.";
+        public static string PROBLEM_INVALID_ELEMENT = "A{2} '{0}' element has an invalid '{1}' element.  If you need a{2} '{1}' element, decorate it with the Cfg[()] attribute in your Cfg-NET model.";
         public static string PROBLEM_INVALID_NESTED_ELEMENT = "A{3} '{0}' '{1}' element has an invalid '{2}' element.";
         public static string PROBLEM_MISSING_ADD_ELEMENT = "A{1} '{0}' element is missing an 'add' element.";
         public static string PROBLEM_MISSING_ATTRIBUTE = "A{3} '{0}' '{1}' element is missing a '{2}' attribute.";
@@ -104,7 +104,7 @@ namespace Transformalize.Libs.Cfg.Net {
         }
 
         public void UnexpectedElement(string elementName, string subNodeName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_UNEXPECTED_ELEMENT, elementName, subNodeName);
+            _storage.AppendFormat(CfgConstants.PROBLEM_UNEXPECTED_ELEMENT, subNodeName, elementName);
             _storage.AppendLine();
         }
 
@@ -230,11 +230,11 @@ namespace Transformalize.Libs.Cfg.Net {
             get { return _properties[name]; }
         }
 
-        protected void AddCustomProblem(string problem) {
+        protected void AddProblem(string problem) {
             _problems.AddCustomProblem(problem);
         }
 
-        public virtual void Load(string xml, Dictionary<string, string> parameters = null) {
+        public void Load(string xml, Dictionary<string, string> parameters = null) {
 
             NanoXmlNode node = null;
             try {
@@ -410,6 +410,10 @@ namespace Transformalize.Libs.Cfg.Net {
             return this;
         }
 
+        protected virtual void Validate() {
+            // Override this to add custom validation.  Use AddProblem() to add problems found.
+        }
+
         private void LoadCollections(NanoXmlNode node, string parentName, Dictionary<string, string> parameters = null) {
 
             ConfigureCollectionsWithPropertyAttributes();
@@ -456,7 +460,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 }
 
                 // check for duplicates of unique properties required to be unique in collections
-                if (_collections[subNode.Name].Length > 0) {
+                if (_collections.ContainsKey(subNode.Name) && _collections[subNode.Name].Length > 0) {
                     var uniques = _collections[subNode.Name][0].UniqueProperties;
                     for (var k = 0; k < uniques.Count; k++) {
                         var unique = uniques[k];
@@ -471,7 +475,6 @@ namespace Transformalize.Libs.Cfg.Net {
                         }
                     }
                 }
-
             }
 
             CheckRequiredClasses(node, parentName);
@@ -939,6 +942,8 @@ namespace Transformalize.Libs.Cfg.Net {
                 }
                 properties[key].SetValue(this, list, null);
             }
+
+            Validate();
         }
 
         private static string ToXmlNameStyle(string input, StringBuilder sb) {
