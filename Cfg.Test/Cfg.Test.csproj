@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmptyLists.cs" />
     <Compile Include="Domain.cs" />
     <Compile Include="CustomProblems.cs" />
     <Compile Include="ReadMe.cs" />
@@ -68,10 +69,7 @@
     <Compile Include="TestClasses\CfgEnvironment.cs" />
     <Compile Include="TestClasses\CfgParameter.cs" />
     <Compile Include="TestClasses\CfgServer.cs" />
-    <Compile Include="TestClasses\MethodCfg.cs" />
-    <Compile Include="MethodBased.cs" />
     <Compile Include="TestClasses\AttributeSite.cs" />
-    <Compile Include="TestClasses\MethodSite.cs" />
     <Compile Include="Parameters.cs" />
   </ItemGroup>
   <ItemGroup>

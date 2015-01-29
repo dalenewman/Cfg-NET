@@ -1,4 +1,3 @@
-using Transformalize.Libs.Cfg;
 using Transformalize.Libs.Cfg.Net;
 
 namespace Cfg.Test.TestClasses {
