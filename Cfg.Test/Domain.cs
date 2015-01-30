@@ -50,10 +50,32 @@ namespace Cfg.Test {
 
             var problems = cfg.Problems();
             Assert.AreEqual(1, problems.Count);
-            Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad' in the 'value' attribute.  The valid domain is: good, value, another, good, value.", problems[0]);
+            Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad' in the 'value' attribute.  The valid domain is: GOOD, VALUE, ANOTHER, GOOD, VALUE.", problems[0]);
 
         }
 
+        [Test]
+        public void TestDomainAndToLower() {
+            var xml = @"
+    <test>
+        <things>
+            <add value='GOOD-value' />
+            <add value='bad-value' />
+        </things>
+    </test>
+".Replace("'", "\"");
+
+            var cfg = new TestCfg(xml);
+
+            foreach (var problem in cfg.Problems()) {
+                Console.WriteLine(problem);
+            }
+
+            var problems = cfg.Problems();
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
+
+        }
     }
 
     public class TestCfg : CfgNode {
@@ -65,7 +87,7 @@ namespace Cfg.Test {
     }
 
     public class TestThing : CfgNode {
-        [Cfg(domain = "good-value,another-good-value")]
+        [Cfg(domain = "good-value,another-good-value", ignoreCase = true)]
         public string Value { get; set; }
     }
 
@@ -78,7 +100,7 @@ namespace Cfg.Test {
     }
 
     public class TestThing2 : CfgNode {
-        [Cfg(domain = "good-value-another-good-value", domainDelimiter = '-')]
+        [Cfg(domain = "GOOD-VALUE-ANOTHER-GOOD-VALUE", domainDelimiter = '-', ignoreCase = true)]
         public string Value { get; set; }
     }
 
