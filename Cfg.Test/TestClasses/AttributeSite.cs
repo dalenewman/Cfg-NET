@@ -9,7 +9,7 @@ namespace Cfg.Test.TestClasses {
         [Cfg(value = "", required = true)]
         public string Url { get; set; }
 
-        [Cfg(value = "", decode = true)]
+        [Cfg(value = "")]
         public string Something { get; set; }
 
         [Cfg(value = 0)]

@@ -220,9 +220,9 @@ The configuration metadata is:
 * required
 * unique
 * value (as in the default value)
-* decode (as in decode XML entities, if necessary)
 * domain (as in a valid list of values)
 * domainDelimiter (used to delimit the domain values)
+* ignoreCase
 
 __Note__: In code, property names are title (or proper) case (e.g. `BackupsToKeep`).
 You don't have to use slugs here.  That's only for the XML.
@@ -493,4 +493,3 @@ reflection code, it can be made a portable class.
 ###Credits
 *  for now, Cfg-Net uses a modified version of a `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
 *  .NET Source of WebUtility.HtmlDecode found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
-  *  __Note__: Cfg.Net will not decode XML entities unless you ask it to (e.g. `[Cfg(decode:true)]`).
