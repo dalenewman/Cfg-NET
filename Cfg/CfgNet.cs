@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -212,13 +211,15 @@ namespace Transformalize.Libs.Cfg.Net {
         }
 
         public bool IsInDomain(object value) {
-            return _domainSet == null || _domainSet.Contains(value.ToString());
+            return _domainSet == null || (value != null && _domainSet.Contains(value.ToString()));
         }
     }
 
     public abstract class CfgNode {
 
         private static readonly Dictionary<Type, Dictionary<string, CfgMetadata>> MetadataCache = new Dictionary<Type, Dictionary<string, CfgMetadata>>();
+        private static readonly Dictionary<Type, HashSet<string>> KeyCache = new Dictionary<Type, HashSet<string>>();
+        private static readonly Dictionary<Type, HashSet<string>> ListCache = new Dictionary<Type, HashSet<string>>();
         private static Dictionary<string, char> _entities;
 
         private readonly List<string> _propertyKeys = new List<string>();
@@ -401,7 +402,7 @@ namespace Transformalize.Libs.Cfg.Net {
             if (!_properties.ContainsKey(name)) {
                 _propertyKeys.Add(name);
             }
-            _properties[name] = new CfgProperty(name, type, value, attribute) {Set = value != null};
+            _properties[name] = new CfgProperty(name, type, value, attribute) { Set = value != null };
             if (attribute.required) {
                 _requiredProperties.Add(name);
             }
@@ -543,8 +544,14 @@ namespace Transformalize.Libs.Cfg.Net {
 
         private void LoadProperties(NanoXmlNode node, string parentName, IDictionary<string, string> parameters = null) {
 
-            //ConfigureProperties();
-            var metadata = GetMetadata(GetType(), _builder);
+            var type = GetType();
+            var metadata = GetMetadata(type, _builder);
+            var keys = KeyCache[type];
+
+            if (keys.Count == 0)
+                return;
+
+            var keyHits = new HashSet<string>();
 
             for (var i = 0; i < node.Attributes.Count; i++) {
                 var attribute = node.Attributes[i];
@@ -561,9 +568,11 @@ namespace Transformalize.Libs.Cfg.Net {
 
                     if (item.PropertyInfo.PropertyType == typeof(string) || item.PropertyInfo.PropertyType == typeof(object)) {
                         item.PropertyInfo.SetValue(this, value, null);
+                        keyHits.Add(attribute.Name);
                     } else {
                         try {
                             item.PropertyInfo.SetValue(this, Converter[item.PropertyInfo.PropertyType](value), null);
+                            keyHits.Add(attribute.Name);
                         } catch (Exception ex) {
                             _problems.SettingValue(item.PropertyInfo.Name, value, parentName, node.Name, ex.Message);
                         }
@@ -573,44 +582,21 @@ namespace Transformalize.Libs.Cfg.Net {
                         _problems.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
                     }
                 } else {
-                    _problems.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", _properties.Select(kv => kv.Key)));
+                    _problems.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
                 }
             }
 
-            //for (var i = 0; i < node.Attributes.Count; i++) {
-            //    var attribute = node.Attributes[i];
-            //    if (_properties.ContainsKey(attribute.Name)) {
-            //        if (attribute.Value == null)
-            //            continue;
+            //set missed keys
+            foreach (var key in keys.Except(keyHits)) {
+                var item = metadata[key];
+                if (item.Attribute.value != null) {
+                    item.PropertyInfo.SetValue(this, item.Attribute.value, null);
+                }
+                if (item.Attribute.required) {
+                    _problems.MissingAttribute(parentName, node.Name, key);
+                }
+            }
 
-            //        var value = CheckParameters(parameters, attribute.Value);
-            //        var property = _properties[attribute.Name];
-
-            //        if (value.IndexOf(CfgConstants.ENTITY_START) > -1) {
-            //            value = Decode(value, _builder);
-            //        }
-
-            //        if (!property.IsInDomain(value)) {
-            //            _problems.ValueNotInDomain(parentName, node.Name, property.Name, attribute.Value, property.Attributes.domain.Replace(property.Attributes.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
-            //        }
-
-            //        if (property.Type == typeof(string) || property.Type == typeof(object)) {
-            //            property.Value = value;
-            //            property.Set = true;
-            //        } else {
-            //            try {
-            //                property.Value = Converter[property.Type](value);
-            //                property.Set = true;
-            //            } catch (Exception ex) {
-            //                _problems.SettingValue(property.Name, value, parentName, node.Name, ex.Message);
-            //            }
-            //        }
-            //    } else {
-            //        _problems.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", _properties.Select(kv => kv.Key)));
-            //    }
-            //}
-
-            CheckRequiredProperties(node, parentName);
         }
 
         private string CheckParameters(IDictionary<string, string> parameters, string input) {
@@ -653,27 +639,6 @@ namespace Transformalize.Libs.Cfg.Net {
                 }
             }
             return new Tuple<string, string[]>(builder.ToString(), badKeys == null ? new string[0] : badKeys.ToArray());
-        }
-
-        private void ConfigureProperties() {
-            if (_properties.Count != 0)
-                return;
-
-            var propertyInfos = GetMetadata(GetType(), _builder);
-            foreach (var pair in propertyInfos) {
-                if (pair.Value.PropertyInfo.PropertyType.IsGenericType)
-                    continue;
-
-                Property(pair.Key, pair.Value.PropertyInfo.PropertyType, null, pair.Value.Attribute);
-            }
-        }
-
-        private void CheckRequiredProperties(NanoXmlNode node, string parentName) {
-            for (var i = 0; i < _requiredProperties.Count; i++) {
-                if (!_properties[_requiredProperties[i]].Set) {
-                    _problems.MissingAttribute(parentName, node.Name, _requiredProperties[i]);
-                }
-            }
         }
 
         protected List<string> UniqueProperties {
@@ -960,17 +925,6 @@ namespace Transformalize.Libs.Cfg.Net {
 
             var metadata = GetMetadata(GetType(), _builder);
 
-            for (var i = 0; i < _propertyKeys.Count; i++) {
-                var key = _propertyKeys[i];
-                if (!metadata.ContainsKey(key))
-                    continue;
-                try {
-                    metadata[key].PropertyInfo.SetValue(this, _properties[key].Value, null);
-                } catch (Exception ex) {
-                    _problems.SettingProperty(metadata[key].PropertyInfo.Name, _properties[key].Value, _properties[key].Name, ex.Message);
-                }
-            }
-
             foreach (var pair in _collections) {
                 if (!metadata.ContainsKey(pair.Key))
                     continue;
@@ -1015,8 +969,11 @@ namespace Transformalize.Libs.Cfg.Net {
             if (MetadataCache.TryGetValue(type, out metadata))
                 return metadata;
 
-            metadata = new Dictionary<string, CfgMetadata>();
+            var keyCache = new HashSet<string>(StringComparer.Ordinal);
+            var listCache = new HashSet<string>(StringComparer.Ordinal);
             var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            metadata = new Dictionary<string, CfgMetadata>(StringComparer.Ordinal);
             for (var i = 0; i < propertyInfos.Length; i++) {
                 var propertyInfo = propertyInfos[i];
                 if (propertyInfo.MemberType != MemberTypes.Property)
@@ -1024,11 +981,20 @@ namespace Transformalize.Libs.Cfg.Net {
                 var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute));
                 if (attribute == null)
                     continue;
-                metadata[ToXmlNameStyle(propertyInfo.Name, sb)] = new CfgMetadata(propertyInfo, attribute);
+
+                var key = ToXmlNameStyle(propertyInfo.Name, sb);
+                metadata[key] = new CfgMetadata(propertyInfo, attribute);
+
+                if (propertyInfo.PropertyType.IsGenericType) {
+                    listCache.Add(key);
+                } else {
+                    keyCache.Add(key);
+                }
             }
             MetadataCache[type] = metadata;
+            KeyCache[type] = keyCache;
+            ListCache[type] = listCache;
             return metadata;
-
         }
 
         public static string Decode(string input, StringBuilder builder) {
