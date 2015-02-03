@@ -85,7 +85,7 @@ namespace Cfg.Test {
         [Cfg(required = true)]
         public List<MyParameter> Parameters { get; set; }
 
-        //shared property, defined in parent
+        [Cfg()] //shared property, defined in parent
         public string Default { get; set; }
     }
 

@@ -61,7 +61,7 @@ namespace Cfg.Test {
             }
 
             Assert.AreEqual(2, problems.Count);
-            Assert.AreEqual("A 'sites' 'add' element contains an invalid 'invalid' attribute.  Valid attributes are: name, url, something, numeric.", problems[0]);
+            Assert.AreEqual("A 'sites' 'add' element contains an invalid 'invalid' attribute.  Valid attributes are: name, url, something, numeric, common.", problems[0]);
             Assert.AreEqual("A 'sites' 'add' element is missing a 'url' attribute.", problems[1]);
 
         }
