@@ -2,7 +2,7 @@
 using System.IO;
 using NUnit.Framework;
 
-namespace Cfg.Test {
+namespace Cfg.Test.TestClasses {
     [TestFixture]
     public class ReadMe {
 

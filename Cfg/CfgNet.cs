@@ -40,6 +40,7 @@ namespace Transformalize.Libs.Cfg.Net {
         public static string PROBLEM_UNEXPECTED_ELEMENT = "Invalid element {0} in {1}.  Only 'add' elements are allowed here.";
         public static string PROBLEM_XML_PARSE = "Could not parse the configuration. {0}";
         public static string PROBLEM_VALUE_NOT_IN_DOMAIN = "A{5} '{0}' '{1}' element has an invalid value of '{3}' in the '{2}' attribute.  The valid domain is: {4}.";
+        public static string PROBLEM_ROOT_VALUE_NOT_IN_DOMAIN = "The root element has an invalid value of '{0}' in the '{1}' attribute.  The valid domain is: {2}.";
         // ReSharper restore InconsistentNaming
     }
 
@@ -106,6 +107,11 @@ namespace Transformalize.Libs.Cfg.Net {
 
         public void ValueNotInDomain(string parentName, string nodeName, string propertyName, object value, string validValues) {
             _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_NOT_IN_DOMAIN, parentName, nodeName, propertyName, value, validValues, Suffix(parentName));
+            _storage.AppendLine();
+        }
+
+        public void RootValueNotInDomain(string propertyName, object value, string validValues) {
+            _storage.AppendFormat(CfgConstants.PROBLEM_ROOT_VALUE_NOT_IN_DOMAIN, propertyName, value, validValues);
             _storage.AppendLine();
         }
 
@@ -533,7 +539,11 @@ namespace Transformalize.Libs.Cfg.Net {
                     }
 
                     if (!item.IsInDomain(item.PropertyInfo.GetValue(this, null))) {
-                        _problems.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
+                        if (parentName == null) {
+                            _problems.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
+                        } else {
+                            _problems.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
+                        }
                     }
                 } else {
                     _problems.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
