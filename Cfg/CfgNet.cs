@@ -41,6 +41,7 @@ namespace Transformalize.Libs.Cfg.Net {
         public static string PROBLEM_XML_PARSE = "Could not parse the configuration. {0}";
         public static string PROBLEM_VALUE_NOT_IN_DOMAIN = "A{5} '{0}' '{1}' element has an invalid value of '{3}' in the '{2}' attribute.  The valid domain is: {4}.";
         public static string PROBLEM_ROOT_VALUE_NOT_IN_DOMAIN = "The root element has an invalid value of '{0}' in the '{1}' attribute.  The valid domain is: {2}.";
+        public static string PROBLEM_SHARED_PROPERTY_MISSING = "A{3} '{0}' shared property '{1}' is missing in '{2}'.  Make sure it is defined and decorated with [Cfg()].";
         // ReSharper restore InconsistentNaming
     }
 
@@ -115,13 +116,19 @@ namespace Transformalize.Libs.Cfg.Net {
             _storage.AppendLine();
         }
 
+        public void SharedPropertyMissing(string name, string sharedProperty, string listType) {
+            var type = listType.IndexOf('.') > 0 ? listType.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Last() : listType;
+            _storage.AppendFormat(CfgConstants.PROBLEM_SHARED_PROPERTY_MISSING, name, sharedProperty, type, Suffix(name));
+            _storage.AppendLine();
+        }
+
         public void XmlParse(string message) {
             _storage.AppendFormat(CfgConstants.PROBLEM_XML_PARSE, message);
             _storage.AppendLine();
         }
 
         private static string Suffix(string thing) {
-            return IsVowel(thing[0]) ? "n" : string.Empty;
+            return thing == null || IsVowel(thing[0]) ? "n" : string.Empty;
         }
 
         public string[] Yield() {
@@ -428,7 +435,12 @@ namespace Transformalize.Libs.Cfg.Net {
                     PropertyInfo sharedPropertyInfo = null;
 
                     if (item.SharedProperty != null) {
-                        sharedPropertyInfo = GetMetadata(item.ListType, _builder)[item.SharedProperty].PropertyInfo;
+                        var sharedMetadata = GetMetadata(item.ListType, _builder);
+                        if (sharedMetadata.ContainsKey(item.SharedProperty)) {
+                            sharedPropertyInfo = sharedMetadata[item.SharedProperty].PropertyInfo;
+                        } else {
+                            _problems.SharedPropertyMissing(subNode.Name, item.SharedProperty, item.ListType.ToString());
+                        }
                         NanoXmlAttribute sharedAttribute;
                         if (subNode.TryAttribute(item.SharedProperty, out sharedAttribute)) {
                             value = sharedAttribute.Value ?? item.SharedValue;
@@ -472,6 +484,7 @@ namespace Transformalize.Libs.Cfg.Net {
                             var unique = item.UniquePropertiesInList[j];
                             var duplicates = list
                                 .Cast<CfgNode>()
+                                .Where(n => n.UniqueProperties.ContainsKey(unique))
                                 .Select(n => n.UniqueProperties[unique])
                                 .GroupBy(n => n)
                                 .Where(group => group.Count() > 1)
@@ -928,7 +941,6 @@ namespace Transformalize.Libs.Cfg.Net {
                         item.SharedProperty = attribute.sharedProperty;
                         item.SharedValue = attribute.sharedValue;
                     }
-                    item.UniquePropertiesInList = GetMetadata(item.ListType, new StringBuilder()).Where(p => p.Value.Attribute.unique).Select(p => p.Key).ToArray();
                 } else {
                     keyCache.Add(key);
                 }
@@ -937,6 +949,13 @@ namespace Transformalize.Libs.Cfg.Net {
             MetadataCache[type] = metadata;
             PropertyCache[type] = keyCache;
             ElementCache[type] = listCache;
+
+            //add metadata to cache before you start digging deeper
+            foreach (var item in metadata) {
+                if (item.Value.ListType != null) {
+                    item.Value.UniquePropertiesInList = GetMetadata(item.Value.ListType, sb).Where(p => p.Value.Attribute.unique).Select(p => p.Key).ToArray();
+                }
+            }
             return metadata;
         }
 
