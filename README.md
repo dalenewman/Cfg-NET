@@ -15,9 +15,10 @@ A good configuration removes the need to alter and re-compile a program.
 We only have to change the configuration. Furthermore, end-users can 
 change the configuration.
 
-When an end-user re-configures and runs a program on their own,
-**everyone wins**. They accomplish their task, and you remain focused
-on the most important thing: writing *more* programs!
+When end-users re-configure and run programs,
+**everyone wins**. They accomplish their task, and you 
+remain focused on the most important thing: 
+writing *more* programs!
 
 ##Why XML?  Why not JSON?
 Cfg-NET currently uses [XML](http://en.wikipedia.org/wiki/XML) for
@@ -53,6 +54,7 @@ I wanted the process of adding or changing a configuration to be as frictionless
 
 Because I ["eat my own dog food"](http://en.wikipedia.org/wiki/Eating_your_own_dog_food), I can tell
 you that easier configuration makes a positive change in the way you code, and the end-result.
+
 ##Getting Started: a Scenario
 
 Your database adminstrator (DBA) is unhappy with a backup wizard's ability
@@ -299,14 +301,16 @@ report them to the end-user who can fix everything at once.
 
 ##Validation
 Cfg-NET metadata and types offer some validation. If it's not 
-enough, you can add more. 
+enough, you can add more by:
 
-To validate at the property level, override the 
-`Validate()` method like so:
+###Overriding Validate()
+
+To perform complex validation with one or more properties, 
+override the `Validate()` method like so:
 
 <pre class="prettyprint" lang="csharp">
 public class Connection : CfgNode {
-
+ 
     [Cfg(required = true, domain = &quot;file,folder,other&quot;)]
     public string Provider { get; set; }
 
@@ -327,7 +331,44 @@ public class Connection : CfgNode {
 }
 </pre>
 
-As you find problems, add them using the `AddProblem()` method.
+Above, the `Validate()` has access to the `Provider`, `File`, and `Folder` properties.  
+It runs after they're set.  So, it can perform more complex 
+validation.  As you find problems, add them using 
+the `AddProblem()` method.
+
+###Overriding Modify()
+
+If you want to quietly modify configuration, you 
+may override `Modify()` like this: 
+
+<pre class="prettyprint" lang="csharp">
+protected override void Modify() {
+    if (Provider != null) {
+        Provider = Provider.ToLower();
+    }
+}
+</pre>
+
+`Modify()` runs before `Validate()`, and also has access to 
+all the properties.
+
+###Code Inside the Property
+
+You don't have to use auto-properties.  Instead of this:
+<pre class="prettyprint" lang="csharp">
+[Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
+public string Provider { get; set; }
+</pre>
+You can use a property with a backing field:
+<pre class="prettyprint" lang="csharp">
+private string _provider;
+...
+[Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
+public string Provider {
+    get { return _provider; }
+    set { _provider = value == null ? string.Empty : value.ToLower(); }
+}
+</pre>
 
 ##Happy End-User
 
