@@ -7,13 +7,25 @@ using NUnit.Framework;
 namespace Cfg.Test {
 
     [TestFixture]
-    public class AttributeBased {
+    public class Main {
 
         [Test]
         public void TestEmptyCfg() {
             var cfg = new AttributeCfg(@"<cfg></cfg>");
             Assert.AreEqual(1, cfg.Problems().Count);
             Assert.AreEqual("The 'cfg' element is missing a 'sites' element.", cfg.Problems()[0]);
+        }
+
+        [Test]
+        public void TestGetDefaultOf() {
+            var cfg = new AttributeCfg(@"<cfg></cfg>");
+            Assert.IsNotNull(cfg);
+            Assert.IsNotNull(cfg.Sites);
+            Assert.AreEqual(0, cfg.Sites.Count);
+
+            var sites = cfg.GetDefaultOf<AttributeSite>();
+            Assert.IsNotNull(sites);
+            Assert.IsNotNull(sites.Something);
         }
 
         [Test]
@@ -93,6 +105,11 @@ namespace Cfg.Test {
             Assert.IsNotNull(doc);
 
             var problems = cfg.Problems();
+
+            foreach (var problem in problems) {
+                Console.WriteLine(problem);
+            }
+
             Assert.AreEqual(2, problems.Count);
             Assert.AreEqual("You set a duplicate 'name' value 'github' in 'sites'.", problems[0]);
             Assert.AreEqual("Could not set 'numeric' to 'x' inside 'sites' 'add'. Input string was not in a correct format.", problems[1]);
