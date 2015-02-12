@@ -29,6 +29,14 @@ namespace Cfg.Test {
         }
 
         [Test]
+        public void TestNew() {
+            var cfg = new AttributeCfg(@"<cfg></cfg>");
+            Assert.IsNotNull(cfg);
+            Assert.IsNotNull(cfg.Sites);
+            Assert.AreEqual(0, cfg.Sites.Count);
+        }
+
+        [Test]
         public void TestEmptySites() {
             var cfg = new AttributeCfg(@"<cfg><sites/></cfg>");
             Assert.AreEqual(1, cfg.Problems().Count);
