@@ -136,8 +136,8 @@ namespace Transformalize.Libs.Cfg.Net {
             return _storage.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public void AddCustomProblem(string problem) {
-            _storage.Append(problem);
+        public void AddCustomProblem(string problem, params object[] args) {
+            _storage.AppendFormat(problem, args);
             _storage.AppendLine();
         }
 
@@ -283,8 +283,8 @@ namespace Transformalize.Libs.Cfg.Net {
             }
         }
 
-        protected void AddProblem(string problem) {
-            _problems.AddCustomProblem(problem);
+        protected void AddProblem(string problem, params object[] args) {
+            _problems.AddCustomProblem(problem, args);
         }
 
         public void Load(string xml, Dictionary<string, string> parameters = null) {
