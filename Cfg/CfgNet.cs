@@ -213,6 +213,7 @@ namespace Transformalize.Libs.Cfg.Net {
         private static readonly ConcurrentDictionary<Type, Dictionary<string, CfgMetadata>> MetadataCache = new ConcurrentDictionary<Type, Dictionary<string, CfgMetadata>>();
         private static readonly ConcurrentDictionary<Type, List<string>> PropertyCache = new ConcurrentDictionary<Type, List<string>>();
         private static readonly ConcurrentDictionary<Type, List<string>> ElementCache = new ConcurrentDictionary<Type, List<string>>();
+        private static readonly ConcurrentDictionary<Type, Dictionary<string, string>> NameCache = new ConcurrentDictionary<Type, Dictionary<string, string>>();
 
         private readonly Dictionary<string, string> _uniqueProperties = new Dictionary<string, string>();
         private readonly StringBuilder _builder = new StringBuilder();
@@ -426,9 +427,10 @@ namespace Transformalize.Libs.Cfg.Net {
 
             for (var i = 0; i < node.SubNodes.Count; i++) {
                 var subNode = node.SubNodes[i];
-                if (_metadata.ContainsKey(subNode.Name)) {
-                    elementHits.Add(subNode.Name);
-                    var item = _metadata[subNode.Name];
+                var subNodeKey = NormalizeName(_type, subNode.Name, _builder);
+                if (_metadata.ContainsKey(subNodeKey)) {
+                    elementHits.Add(subNodeKey);
+                    var item = _metadata[subNodeKey];
 
                     object value = null;
                     CfgMetadata sharedCfg = null;
@@ -448,16 +450,18 @@ namespace Transformalize.Libs.Cfg.Net {
 
                     for (var j = 0; j < subNode.SubNodes.Count; j++) {
                         var add = subNode.SubNodes[j];
-                        if (add.Name.Equals("add", StringComparison.Ordinal)) {
-                            addHits.Add(subNode.Name);
+                        if (add.Name.Equals("add", StringComparison.Ordinal))
+                        {
+                            var addKey = NormalizeName(_type, subNode.Name, _builder);
+                            addHits.Add(addKey);
                             if (item.Loader == null) {
                                 if (add.Attributes.Count == 1) {
                                     var attrValue = add.Attributes[0].Value;
                                     if (item.ListType == typeof(string) || item.ListType == typeof(object)) {
-                                        elements[subNode.Name].Add(attrValue);
+                                        elements[addKey].Add(attrValue);
                                     } else {
                                         try {
-                                            elements[subNode.Name].Add(Converter[item.ListType](attrValue));
+                                            elements[addKey].Add(Converter[item.ListType](attrValue));
                                         } catch (Exception ex) {
                                             _problems.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
                                         }
@@ -473,7 +477,7 @@ namespace Transformalize.Libs.Cfg.Net {
                                         sharedCfg.Setter(loaded, value ?? item.SharedValue);
                                     }
                                 }
-                                elements[subNode.Name].Add(loaded);
+                                elements[addKey].Add(loaded);
                             }
                         } else {
                             _problems.UnexpectedElement(add.Name, subNode.Name);
@@ -528,6 +532,23 @@ namespace Transformalize.Libs.Cfg.Net {
             }
         }
 
+        private static string NormalizeName(Type type, string name, StringBuilder builder) {
+            var cache = NameCache[type];
+            if (cache.ContainsKey(name)) {
+                return cache[name];
+            }
+            builder.Clear();
+            for (var i = 0; i < name.Length; i++) {
+                var character = name[i];
+                if (char.IsLetterOrDigit(character)) {
+                    builder.Append(char.IsUpper(character) ? char.ToLowerInvariant(character) : character);
+                }
+            }
+            var result = builder.ToString();
+            cache[name] = result;
+            return result;
+        }
+
         private void LoadProperties(NanoXmlNode node, string parentName, IDictionary<string, string> parameters = null) {
 
             var keys = PropertyCache[_type];
@@ -539,7 +560,8 @@ namespace Transformalize.Libs.Cfg.Net {
 
             for (var i = 0; i < node.Attributes.Count; i++) {
                 var attribute = node.Attributes[i];
-                if (_metadata.ContainsKey(attribute.Name)) {
+                var attributeKey = NormalizeName(_type, attribute.Name, _builder);
+                if (_metadata.ContainsKey(attributeKey)) {
 
                     if (attribute.Value == null)
                         continue;
@@ -552,25 +574,25 @@ namespace Transformalize.Libs.Cfg.Net {
                         decoded = true;
                     }
 
-                    var item = _metadata[attribute.Name];
+                    var item = _metadata[attributeKey];
 
                     if (item.Attribute.unique) {
-                        UniqueProperties[attribute.Name] = attribute.Value;
+                        UniqueProperties[attributeKey] = attribute.Value;
                     }
 
                     if (item.PropertyInfo.PropertyType == typeof(string) || item.PropertyInfo.PropertyType == typeof(object)) {
                         item.Setter(this, attribute.Value);
-                        keyHits.Add(attribute.Name);
+                        keyHits.Add(attributeKey);
                     } else {
                         try {
                             item.Setter(this, Converter[item.PropertyInfo.PropertyType](attribute.Value));
-                            keyHits.Add(attribute.Name);
+                            keyHits.Add(attributeKey);
                         } catch (Exception ex) {
                             _problems.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
                         }
                     }
 
-                    // Setter has been called and may have changed it
+                    // Setter has been called and may have changed the value
                     var value = item.Getter(this);
 
                     if (!item.IsInDomain(value)) {
@@ -907,8 +929,8 @@ namespace Transformalize.Libs.Cfg.Net {
         public List<string> Problems() {
             var allProblems = new List<string>(_problems.Yield());
             for (var i = 0; i < ElementCache[_type].Count; i++) {
-                var element = ElementCache[_type][i];
-                var list = (IList)_metadata[element].Getter(this);
+                var elementKey = ElementCache[_type][i];
+                var list = (IList)_metadata[elementKey].Getter(this);
                 foreach (var node in list) {
                     if (node is CfgNode) {
                         allProblems.AddRange(((CfgNode)node).Problems());
@@ -918,26 +940,12 @@ namespace Transformalize.Libs.Cfg.Net {
             return allProblems;
         }
 
-        private static string ToXmlNameStyle(string input, StringBuilder sb) {
-            sb.Clear();
-            for (var i = 0; i < input.Length; i++) {
-                var c = input[i];
-                if (char.IsUpper(c)) {
-                    if (i > 0) {
-                        sb.Append('-');
-                    }
-                    sb.Append(char.ToLower(c));
-                } else {
-                    sb.Append(c);
-                }
-            }
-            return sb.ToString();
-        }
-
         private static Dictionary<string, CfgMetadata> GetMetadata(Type type, CfgProblems problems, StringBuilder sb) {
             Dictionary<string, CfgMetadata> metadata;
             if (MetadataCache.TryGetValue(type, out metadata))
                 return metadata;
+
+            NameCache[type] = new Dictionary<string, string>();
 
             var keyCache = new List<string>();
             var listCache = new List<string>();
@@ -958,7 +966,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 if (attribute == null)
                     continue;
 
-                var key = ToXmlNameStyle(propertyInfo.Name, sb);
+                var key = NormalizeName(type, propertyInfo.Name, sb);
                 var item = new CfgMetadata(propertyInfo, attribute);
 
                 // report default value and property type mismatches

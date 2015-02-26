@@ -7,45 +7,75 @@ It is released under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 It is open source on [GitHub](https://github.com/dalenewman/Cfg.Net).
 
 ##Why Configure?
-We write similar programs.  Sometimes, changing variables allows
-us to re-use a program.  If we change the same variables often, 
-we may move the variables into a **configuration**.
-
-A good configuration removes the need to alter and re-compile a program.
-We only have to change the configuration. Furthermore, end-users can 
-change the configuration.
+We (programmers) write similar programs. Sometimes, 
+changing collections and\or variables allows to 
+re-use programs. To expedite reuse, we move 
+collections and\or variables into a **configuration**.
 
 When end-users re-configure and run programs,
-**everyone wins**. They accomplish their task, and you 
-remain focused on the most important thing: 
+**everyone wins**. They accomplish their task, 
+and we remain focused on the most important thing: 
 writing *more* programs!
 
-##Why XML?  Why not JSON?
-Cfg-NET currently uses [XML](http://en.wikipedia.org/wiki/XML) for
-configuration, not [JSON](http://en.wikipedia.org/wiki/JSON).  I chose to start with XML for a couple reasons:
+A good configuration:
 
-1. It is compatible with the [.NET 2.0 Configuration handler](http://aspnet.4guysfromrolla.com/articles/032807-1.aspx) XML.  I need it to be compatible so I can update my [Transformalize](http://www.codeproject.com/Articles/658971/Transformalizing-NorthWind) library without having to update hundreds of configurations.
+* removes the need to re-compile
+* can be edited by an end-user
+* co-exists with other configurations
+
+A good configuration handler:
+
+* validates the configuration; reporting issues
+* allows for custom validation and modification
+* protects the program from `null`; sets defaults
+* is easy to use
+
+##Why XML?  Why not JSON?
+Cfg-NET uses [XML](http://en.wikipedia.org/wiki/XML), 
+not [JSON](http://en.wikipedia.org/wiki/JSON). 
+I started with XML for two reasons:
+
+1. It is compatible with existing [.NET 2.0 
+Configuration handler](http://aspnet.4guysfromrolla.com/articles/032807-1.aspx) 
+bconfigurations.
 2. In my opinion, it is easier for end-users to understand and edit.
 
 Here is a small comparison (visually):
 
 ###XML
 <pre class="prettyprint" lang="xml">
-&lt;connections&gt;
-    &lt;add name=&quot;input&quot; server=&quot;Gandalf&quot; database=&quot;test&quot; /&gt;
-    &lt;add name=&quot;output&quot; server=&quot;Saruman&quot; database=&quot;test&quot; /&gt;
-&lt;/connections&gt;
+&lt;root&gt;
+    &lt;connections&gt;
+        &lt;add name=&quot;input&quot; server=&quot;Gandalf&quot; database=&quot;test&quot; /&gt;
+        &lt;add name=&quot;output&quot; server=&quot;Saruman&quot; database=&quot;test&quot; /&gt;
+    &lt;/connections&gt;
+
+    &lt;dagger&gt;
+	    &lt;add handle=&quot;===&quot; guard=&quot;|&quot; blade=&quot;===================&quot; /&gt;
+    &lt;/dagger&gt;
+&lt;/root&gt;
 </pre>
 
 ###JSON
 <pre class="prettyprint" lang="js">
-&quot;connections&quot;: [
-    { &quot;name&quot;: &quot;input&quot;, &quot;server&quot;: &quot;Gandalf&quot;, &quot;database&quot;: &quot;test&quot; },
-    { &quot;name&quot;: &quot;output&quot;, &quot;server&quot;: &quot;Saruman&quot;, &quot;database&quot;: &quot;test&quot; }
-]
+{
+    &quot;connections&quot;: [
+        { &quot;name&quot;: &quot;input&quot;, &quot;server&quot;: &quot;Gandalf&quot;, &quot;database&quot;: &quot;test&quot; },
+        { &quot;name&quot;: &quot;output&quot;, &quot;server&quot;: &quot;Saruman&quot;, &quot;database&quot;: &quot;test&quot; }
+    ],
+
+    &quot;dagger&quot; : {
+	    &quot;handle&quot;:&quot;===&quot;, &quot;guard&quot;:&quot;|&quot;, &quot;blade&quot;:&quot;===================&quot; 
+    }
+}
 </pre>
 
-Admittedly, they are both quite [sexy](http://www.kateupton.com/) data formats. 
+JSON supports collections as arrays (using `[]`). 
+XML supports collections by nesting elements within elements. 
+Cfg-NET re-uses the .NET configuration convention of using `add` 
+elements within collections. 
+
+Admittedly, both data formats are quite [sexy](http://www.kateupton.com/). 
 I'd like to support JSON as well, as time permits.
 
 ##Why an Alternative?
@@ -64,24 +94,14 @@ space.  Alarms go off saying "Backup drive has less than 10% free space!"
 He wants a program that manages backups by keeping 4 complete
 backup sets on disk, and deleting the rest.
 
-For each database, he provides you with the server name, and the
-associated backup folder.
+For each _database_, he provides you with the _server name_, and the
+associated _backup folder_.
 
-The servers in question are named *Gandalf*, and *Saruman*. So, start
-with a configuration like this:
+###Create a Cfg-NET Module
 
-<pre class="prettyprint" lang="xml">
-&lt;backup-manager&gt;
-    &lt;servers&gt;
-        &lt;add name=&quot;Gandalf&quot; /&gt;
-        &lt;add name=&quot;Saruman&quot; /&gt;
-    &lt;/servers&gt;
-&lt;/backup-manager&gt;
-</pre>
-
-Save this file as *BackupManager.xml*. It holds a collection of `servers`.
-
-Here's how to model this in Cfg-NET:
+To use Cfg-NET, add the files *NanoXmlParser.cs* 
+and *CfgNet.cs* to your project.  Then, create a model 
+for your configuration:
 
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
@@ -101,86 +121,101 @@ namespace Cfg.Test {
 }
 </pre>
 
-The above code models a collection of servers. It indicates that
-each server has a required, and unique `name`.
+What makes the above code a Cfg-NET model?  Well, 
+each class inherits from `CfgNode`.
 
-To load *BackupManager.xml* into your model, use code like this:
+Moreover, each property is decorated with 
+a `Cfg` attribute that adds metadata to it. 
+The configuration metadata is:
+
+* required
+* unique
+* value (as in the default value) 
+* domain (as in a valid list of values)
+* domainDelimiter (used to delimit the domain values)
+* ignoreCase
+
+In the above code, we modeled a collection of _servers_. 
+Property attributes indicate that each _server_ has a 
+required, and unique _name_.
+
+###Create Corresponding Configuration
+
+The DBA told you the servers are named *Gandalf*, 
+and *Saruman*. So, write this XML:
+
+<pre class="prettyprint" lang="xml">
+&lt;backup-manager&gt;
+    &lt;servers&gt;
+        &lt;add name=&quot;Gandalf&quot; /&gt;
+        &lt;add name=&quot;Saruman&quot; /&gt;
+    &lt;/servers&gt;
+&lt;/backup-manager&gt;
+</pre>
+
+Save this to a file called *BackupManager.xml*. 
+
+###Load the Configuration
+
+To load *BackupManager.xml* into your model, 
+use code like this:
 
 <pre class="prettyprint" lang="cs">
 var cfg = new Cfg();
 cfg.Load(File.ReadAllText(&quot;BackupManager.xml&quot;));
 </pre>
 
-I suggest adding a constructor to the `Cfg` class, like this:
+I suggest adding a constructor to the `Cfg` class:
 
 <pre class="prettyprint" lang="cs">
 public class Cfg : CfgNode {
+
     [Cfg(required = true)]
     public List&lt;CfgServer&gt; Servers { get; set; }
+
+    //constructor
     public Cfg(string xml) {
         this.Load(xml);
     }
 }
 </pre>
 
-Now loading it is all on one line, like this:
+Now loading it is one line:
 
 <pre class="prettyprint" lang="cs">
 var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
 </pre>
 
-Moving on, we need to add a required collection of `databases`.
-Each database must have a unique `name` and unique `backup-folder`.
-Since you know the DBA will change his/her mind about the number of
-backups to keep, include an optional `backups-to-keep` attribute.
+###Is the Configuration Valid?
 
-Here's a look at an updated *BackupManager.xml*:
+When you load a configuration, Cfg-NET doesn't throw errors
+ (on purpose that is). Instead, it attempts to collect 
+_all_ the problems. So, after loading, you should always 
+check for any problems using the `Problems()` method:
 
-<pre class="prettyprint" lang="xml">
-&lt;backup-manager&gt;
-    &lt;servers&gt;
-        &lt;add name=&quot;Gandalf&quot;&gt;
-            &lt;databases&gt;
-                &lt;add name=&quot;master&quot;
-                     backup-folder=&quot;\\san\sql-backups\gandalf\master&quot;
-                     backups-to-keep=&quot;6&quot;/&gt;
-            &lt;/databases&gt;
-        &lt;/add&gt;
-        &lt;add name=&quot;Saruman&quot;&gt;
-            &lt;databases&gt;
-                &lt;add name=&quot;master&quot;
-                     backup-folder=&quot;\\san\sql-backups\saruman\master&quot;
-                     backups-to-keep=&quot;8&quot; /&gt;
-                &lt;add name=&quot;model&quot;
-                     backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
-            &lt;/databases&gt;
-        &lt;/add&gt;
-    &lt;/servers&gt;
-&lt;/backup-manager&gt;
+<pre class="prettyprint" lang="cs">
+//LOAD CONFIGURATION
+var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+
+//TEST FOR PROBLEMS
+Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
 </pre>
 
-###Convention
+By collecting multiple problems, you can report them to 
+the end-user who can fix them all at once.
 
-The XML above is following Cfg-NET's convention of using all lower-case
-element and attribute names.  In addition, compound names are represented
-as __slugs__.  A slug separates words with hyphens (e.g. `backups-to-keep`).
+---
 
-Another convention is that everything is a
-collection of `add` elements. You might say, I just have
-one server, so I want my XML to look like this:
+Moving on with our scenario; we need to make it so 
+each _server_ has add a required collection of _databases_. 
 
-<pre class="prettyprint" lang="xml">
-&lt;backup-manager&gt;
-    &lt;server name=&quot;Gandalf&quot; /&gt;
-&lt;/backup-manager&gt;
-</pre>
+Each _database_ must have a unique `name` and 
+unique `backup-folder`.
 
-Cfg-NET doesn't work that way.  Even if you think you're
-only ever going to have one, it still requires a
-**collection** of one.  This convention makes it less complex
-for both the C# model, and the XML configuration.
-
-To keep the Cfg-NET C# model in sync with the XML, add a database collection like this:
+The DBA said he wanted **4** backup sets, but since 
+we know people change their minds, we're going save 
+ourself some (future) time by adding 
+an optional `backups-to-keep` attribute.
 
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
@@ -213,99 +248,61 @@ namespace Cfg.Test {
 }
 </pre>
 
-What makes the above code a Cfg-NET model?  Well, each class
-inherits from `CfgNode`.  Moreover, each property is decorated with a
-`Cfg` attribute that adds configuration metadata.
+Now let's update *BackupManager.xml*:
 
-The configuration metadata is:
-
-* required
-* unique
-* value (as in the default value)
-* domain (as in a valid list of values)
-* domainDelimiter (used to delimit the domain values)
-* ignoreCase
-
-__Note__: In code, property names are title (or proper) case (e.g. `BackupsToKeep`).
-You don't have to use slugs here.  That's only for the XML.
-
-##Testing
-
-A good way to show it's working is to write a unit test.
-Here's one that loads *BackupManager.xml* and checks all the
-values.
-
-<pre class="prettyprint" lang="cs">
-using System.IO;
-using NUnit.Framework;
-namespace Cfg.Test {
-    [TestFixture]
-    public class ReadMe {
-        [Test]
-        public void TestReadMe() {
-
-            //LOAD CONFIGURATION
-            var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-
-            //TEST FOR PROBLEMS
-            Assert.AreEqual(0, cfg.Problems().Count);
-
-            //TEST GANDALF
-            Assert.AreEqual(&quot;Gandalf&quot;, cfg.Servers[0].Name);
-            Assert.AreEqual(1, cfg.Servers[0].Databases.Count);
-            Assert.AreEqual(&quot;master&quot;, cfg.Servers[0].Databases[0].Name);
-            Assert.AreEqual(@&quot;\\san\sql-backups\gandalf\master&quot;, cfg.Servers[0].Databases[0].BackupFolder);
-            Assert.AreEqual(6, cfg.Servers[0].Databases[0].BackupsToKeep);
-
-            //TEST SARUMAN
-            Assert.AreEqual(&quot;Saruman&quot;, cfg.Servers[1].Name);
-            Assert.AreEqual(2, cfg.Servers[1].Databases.Count);
-            Assert.AreEqual(&quot;master&quot;, cfg.Servers[1].Databases[0].Name);
-            Assert.AreEqual(@&quot;\\san\sql-backups\saruman\master&quot;, cfg.Servers[1].Databases[0].BackupFolder);
-            Assert.AreEqual(8, cfg.Servers[1].Databases[0].BackupsToKeep);
-            Assert.AreEqual(&quot;model&quot;, cfg.Servers[1].Databases[1].Name);
-            Assert.AreEqual(@&quot;\\san\sql-backups\saruman\model&quot;, cfg.Servers[1].Databases[1].BackupFolder);
-            Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
-        }
-    }
-}
+<pre class="prettyprint" lang="xml">
+&lt;backup-manager&gt;
+    &lt;servers&gt;
+        &lt;add name=&quot;Gandalf&quot;&gt;
+            &lt;databases&gt;
+                &lt;add name=&quot;master&quot;
+                     backup-folder=&quot;\\san\sql-backups\gandalf\master&quot;
+                     backups-to-keep=&quot;6&quot;/&gt;
+            &lt;/databases&gt;
+        &lt;/add&gt;
+        &lt;add name=&quot;Saruman&quot;&gt;
+            &lt;databases&gt;
+                &lt;add name=&quot;master&quot;
+                     backup-folder=&quot;\\san\sql-backups\saruman\master&quot;
+                     backups-to-keep=&quot;8&quot; /&gt;
+                &lt;add name=&quot;model&quot;
+                     backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
+            &lt;/databases&gt;
+        &lt;/add&gt;
+    &lt;/servers&gt;
+&lt;/backup-manager&gt;
 </pre>
 
-Of course, when you're writing your program, you're going to
-loop through your configuration something like this:
+Now we have a collection of servers, and each server holds 
+a collection of databases.  Our program can 
+loop through them like this:
 
 <pre class="prettyprint" lang="cs">
-foreach (var server in cfg.Servers) {
-    foreach (var database in server.Databases) {
-        // do something amazing with database.BackupFolder, etc.  
-    }
-}
-</pre>
-
-##Problems?
-
-Cfg-NET doesn't throw errors (on purpose that is).  Instead,
-it collects problems as it loads.  Therefore, you should always check
-for `Problems()` after loading the XML file, like this:
-
-<pre class="prettyprint" lang="cs">
-//LOAD CONFIGURATION
 var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
 
-//TEST FOR PROBLEMS
-Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
+//check for problems
+
+foreach (var server in cfg.Servers) {
+    foreach (var database in server.Databases) {
+        // do something amazing with server.Name, database.Name, and database.BackupFolder...  
+    }
+}
 </pre>
 
-By collecting multiple problems with the configuration, you can 
-report them to the end-user who can fix everything at once.
+Let's take a break from our scenario and learn a bit more 
+about validation.
 
 ##Validation
-Cfg-NET metadata and types offer some validation. If it's not 
-enough, you can add more by:
+Cfg-NET metadata and types offer some validation. 
+If it's not enough, you have three ways to customize it:
+
+1. Overriding Validate()
+2. Overriding Modify()
+3. Coding Inside Your Properties
 
 ###Overriding Validate()
 
-To perform complex validation with one or more properties, 
+To perform complex validation with more than one property, 
 override the `Validate()` method like so:
 
 <pre class="prettyprint" lang="csharp">
@@ -331,15 +328,17 @@ public class Connection : CfgNode {
 }
 </pre>
 
-Above, the `Validate()` has access to the `Provider`, `File`, and `Folder` properties.  
-It runs after they're set.  So, it can perform more complex 
-validation.  As you find problems, add them using 
+The `Validate()` method has access 
+to the `Provider`, `File`, and `Folder` properties.  
+It runs _after_ they're set.  So, it can perform more complex 
+validation.  If you find problems, add them using 
 the `AddProblem()` method.
 
 ###Overriding Modify()
 
-If you want to quietly modify configuration, you 
-may override `Modify()` like this: 
+If you want to quietly modify (aka fix) 
+the configuration, you may override `Modify()` 
+like this: 
 
 <pre class="prettyprint" lang="csharp">
 protected override void Modify() {
@@ -349,10 +348,10 @@ protected override void Modify() {
 }
 </pre>
 
-`Modify()` runs before `Validate()`, and also has access to 
-all the properties.
+`Modify()` runs _after_ the properties are set, but 
+_before_ `Validate()` runs.  It has access to all the properties.
 
-###Code Inside the Property
+###Coding Inside the Property
 
 You don't have to use auto-properties.  Instead of this:
 <pre class="prettyprint" lang="csharp">
@@ -370,13 +369,16 @@ public string Provider {
 }
 </pre>
 
-##Happy End-User
+##Finishing Up The Scenario
 
-After you unravel the mystery of complete backup sets,
-and your program and configuration are finished, wrap it
-up in a Console application (e.g. *BackupManager.exe*).
+After you unravel the mystery of saving _x_ complete 
+backup sets, for _y_ servers, and _z_ databases, deploy 
+your program with some method of allowing the user to 
+update and choose the configuration he/she wants to use.
 
-Allow the configuration file to be passed in as an argument, like this:
+For example, in a a Console application (e.g. *BackupManager.exe*), allow 
+the configuration file to be passed in as an argument, 
+like this:
 
 <pre class="prettyprint" lang="bash">
 C:\> BackupManager.exe BackupManager.xml
@@ -387,27 +389,15 @@ databases in *BackupManager.xml*.  Explain that
 he/she can create as many configuration files
 as necessary.
 
-When the DBA changes his/her mind about keeping 4
+When the DBA changes his/her mind about keeping **4**
 backup sets, point out the `backups-to-keep` attribute.
 
-##Feature Summary
+##Conclusion
 
-* easy
-  * reports problems
-  * value defaults
-  * value types
-  * value domains (or valid values)
-  * required properties
-  * required collections
-  * unique properties within collections
-* advanced
-  * flexible environments, parameters, and place-holders.
-
-This is all you need to know if you just want an easy way
-to configure your program.  Just drop *NanoXmlParser.cs* and *CfgNet.cs* into 
-your project, and you're good to go.
-
-If you need a more flexible configuration, continue reading.
+This is all you need to know if you just want 
+an easy way to configure your program.  If you need a more flexible configuration, that 
+can respond to parameters at run-time, 
+continue reading.
 
 ##Support for Environments, Parameters, and Place-Holders
 
