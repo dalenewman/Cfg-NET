@@ -470,7 +470,8 @@ public class MyEnvironment : CfgNode {
     public string Name { get; set; }
     [Cfg(required = true)]
     public List&lt;MyParameter&gt; Parameters { get; set; }
-    //shared property, defined in parent, is not mandatory here
+    //shared property
+    [Cfg()]
     public string Default { get; set; }
 }
 public class MyParameter : CfgNode {
