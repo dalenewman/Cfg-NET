@@ -37,7 +37,7 @@ I started with XML for two reasons:
 
 1. It is compatible with existing [.NET 2.0 
 Configuration handler](http://aspnet.4guysfromrolla.com/articles/032807-1.aspx) 
-bconfigurations.
+configurations.
 2. In my opinion, it is easier for end-users to understand and edit.
 
 Here is a small comparison (visually):
@@ -207,7 +207,7 @@ the end-user who can fix them all at once.
 ---
 
 Moving on with our scenario; we need to make it so 
-each _server_ has add a required collection of _databases_. 
+each _server_ has a required collection of _databases_. 
 
 Each _database_ must have a unique `name` and 
 unique `backup-folder`.
