@@ -43,6 +43,8 @@ namespace Transformalize.Libs.Cfg.Net {
         public static string PROBLEM_SHARED_PROPERTY_MISSING = "A{3} '{0}' shared property '{1}' is missing in '{2}'.  Make sure it is defined and decorated with [Cfg()].";
         public static string PROBLEM_ONLY_ONE_ATTRIBUTE_ALLOWED = "You must have exactly 1 attribute in '{0}' '{1}'.  You have {2}.";
         public static string PROBLEM_TYPE_MISMATCH = "The `{0}` attribute's default value's type ({1}) does not match the property type ({2}).";
+        public static string PROBLEM_VALUE_TOO_SHORT = "The `{0}` attribute's value `{1}` is too short. It's {3} characters. It must be at least {2} characters.";
+        public static string PROBLEM_VALUE_TOO_LONG = "The `{0}` attribute's value `{1}` is too long. It's {3} characters. It must not exceed {2} characters.";
         // ReSharper restore InconsistentNaming
     }
 
@@ -155,19 +157,65 @@ namespace Transformalize.Libs.Cfg.Net {
             _storage.AppendFormat(CfgConstants.PROBLEM_TYPE_MISMATCH, key, defaultType, propertyType);
             _storage.AppendLine();
         }
+
+        public void ValueTooShort(string name, string value, int minLength) {
+            _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_TOO_SHORT, name, value, minLength, value.Length);
+            _storage.AppendLine();
+        }
+
+        public void ValueTooLong(string name, string value, int maxLength) {
+            _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_TOO_LONG, name, value, maxLength, value.Length);
+            _storage.AppendLine();
+        }
+
     }
 
     [AttributeUsage(AttributeTargets.Property)]
     public class CfgAttribute : Attribute {
+        private int _minLength;
+        private int _maxLength;
+        private string _domain;
+
         // ReSharper disable InconsistentNaming
         public object value { get; set; }
         public bool required { get; set; }
         public bool unique { get; set; }
+        public bool toUpper { get; set; }
+        public bool toLower { get; set; }
         public string sharedProperty { get; set; }
         public object sharedValue { get; set; }
-        public string domain { get; set; }
+
+        public string domain {
+            get { return _domain; }
+            set {
+                _domain = value;
+                DomainSet = true;
+            }
+        }
+
         public char domainDelimiter { get; set; }
         public bool ignoreCase { get; set; }
+
+        public int minLength {
+            get { return _minLength; }
+            set {
+                _minLength = value;
+                MinLengthSet = true;
+            }
+        }
+
+        public int maxLength {
+            get { return _maxLength; }
+            set {
+                _maxLength = value;
+                MaxLengthSet = true;
+            }
+        }
+
+        public bool MaxLengthSet { get; private set; }
+        public bool MinLengthSet { get; private set; }
+        public bool DomainSet { get; private set; }
+
         // ReSharper restore InconsistentNaming
     }
 
@@ -203,8 +251,8 @@ namespace Transformalize.Libs.Cfg.Net {
             }
         }
 
-        public bool IsInDomain(object value) {
-            return _domainSet == null || (value != null && _domainSet.Contains(value.ToString()));
+        public bool IsInDomain(string value) {
+            return _domainSet == null || (value != null && _domainSet.Contains(value));
         }
     }
 
@@ -450,8 +498,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
                     for (var j = 0; j < subNode.SubNodes.Count; j++) {
                         var add = subNode.SubNodes[j];
-                        if (add.Name.Equals("add", StringComparison.Ordinal))
-                        {
+                        if (add.Name.Equals("add", StringComparison.Ordinal)) {
                             var addKey = NormalizeName(_type, subNode.Name, _builder);
                             addHits.Add(addKey);
                             if (item.Loader == null) {
@@ -576,6 +623,12 @@ namespace Transformalize.Libs.Cfg.Net {
 
                     var item = _metadata[attributeKey];
 
+                    if (item.Attribute.toLower) {
+                        attribute.Value = attribute.Value.ToLower();
+                    } else if (item.Attribute.toUpper) {
+                        attribute.Value = attribute.Value.ToUpper();
+                    }
+
                     if (item.Attribute.unique) {
                         UniqueProperties[attributeKey] = attribute.Value;
                     }
@@ -595,12 +648,32 @@ namespace Transformalize.Libs.Cfg.Net {
                     // Setter has been called and may have changed the value
                     var value = item.Getter(this);
 
-                    if (!item.IsInDomain(value)) {
-                        if (parentName == null) {
-                            _problems.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
-                        } else {
-                            _problems.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
+                    // see if we have to convert to string for testing
+                    if (item.Attribute.DomainSet || item.Attribute.MinLengthSet || item.Attribute.MaxLengthSet) {
+                        var stringValue = item.PropertyInfo.PropertyType == typeof(string) ? (string)value : value.ToString();
+
+                        if (item.Attribute.DomainSet) {
+                            if (!item.IsInDomain(stringValue)) {
+                                if (parentName == null) {
+                                    _problems.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
+                                } else {
+                                    _problems.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(CultureInfo.InvariantCulture), ", "));
+                                }
+                            }
                         }
+
+                        if (item.Attribute.MinLengthSet) {
+                            if (stringValue.Length < item.Attribute.minLength) {
+                                _problems.ValueTooShort(attribute.Name, stringValue, item.Attribute.minLength);
+                            }
+                        }
+
+                        if (item.Attribute.MaxLengthSet) {
+                            if (stringValue.Length > item.Attribute.maxLength) {
+                                _problems.ValueTooLong(attribute.Name, stringValue, item.Attribute.maxLength);
+                            }
+                        }
+
                     }
 
                     attribute.Value = decoded ? Encode(value.ToString(), _builder) : value.ToString();

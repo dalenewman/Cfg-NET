@@ -2,20 +2,12 @@ Cfg-NET
 =======
 
 ##Introduction
-Cfg-NET is an alternative to .NET 2.0 custom configuration sections.
-It is released under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
-It is open source on [GitHub](https://github.com/dalenewman/Cfg.Net).
+Cfg-NET is a .NET configuration handler.  It is an 
+alternative to using custom section handler in your 
+_app_ or _web.config_.  
 
-##Why Configure?
-We (programmers) write similar programs. Sometimes, 
-changing collections and\or variables allows to 
-re-use programs. To expedite reuse, we move 
-collections and\or variables into a **configuration**.
-
-When end-users re-configure and run programs,
-**everyone wins**. They accomplish their task, 
-and we remain focused on the most important thing: 
-writing *more* programs!
+Cfg-NET is [open sourced](https://github.com/dalenewman/Cfg.Net) 
+under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
 A good configuration:
 
@@ -25,83 +17,29 @@ A good configuration:
 
 A good configuration handler:
 
-* validates the configuration; reporting issues
+* validates and reports issues
 * allows for custom validation and modification
-* protects the program from `null`; sets defaults
+* protects the program from `null` by setting defaults
 * is easy to use
-
-##Why XML?  Why not JSON?
-Cfg-NET uses [XML](http://en.wikipedia.org/wiki/XML), 
-not [JSON](http://en.wikipedia.org/wiki/JSON). 
-I started with XML for two reasons:
-
-1. It is compatible with existing [.NET 2.0 
-Configuration handler](http://aspnet.4guysfromrolla.com/articles/032807-1.aspx) 
-configurations.
-2. In my opinion, it is easier for end-users to understand and edit.
-
-Here is a small comparison (visually):
-
-###XML
-<pre class="prettyprint" lang="xml">
-&lt;root&gt;
-    &lt;connections&gt;
-        &lt;add name=&quot;input&quot; server=&quot;Gandalf&quot; database=&quot;test&quot; /&gt;
-        &lt;add name=&quot;output&quot; server=&quot;Saruman&quot; database=&quot;test&quot; /&gt;
-    &lt;/connections&gt;
-
-    &lt;dagger&gt;
-	    &lt;add handle=&quot;===&quot; guard=&quot;|&quot; blade=&quot;===================&quot; /&gt;
-    &lt;/dagger&gt;
-&lt;/root&gt;
-</pre>
-
-###JSON
-<pre class="prettyprint" lang="js">
-{
-    &quot;connections&quot;: [
-        { &quot;name&quot;: &quot;input&quot;, &quot;server&quot;: &quot;Gandalf&quot;, &quot;database&quot;: &quot;test&quot; },
-        { &quot;name&quot;: &quot;output&quot;, &quot;server&quot;: &quot;Saruman&quot;, &quot;database&quot;: &quot;test&quot; }
-    ],
-
-    &quot;dagger&quot; : {
-	    &quot;handle&quot;:&quot;===&quot;, &quot;guard&quot;:&quot;|&quot;, &quot;blade&quot;:&quot;===================&quot; 
-    }
-}
-</pre>
-
-JSON supports collections as arrays (using `[]`). 
-XML supports collections by nesting elements within elements. 
-Cfg-NET re-uses the .NET configuration convention of using `add` 
-elements within collections. 
-
-Admittedly, both data formats are quite [sexy](http://www.kateupton.com/). 
-I'd like to support JSON as well, as time permits.
-
-##Why an Alternative?
-While the .NET 2.0 custom configuration API is quite capable, it is more work to setup.
-I wanted the process of adding or changing a configuration to be as frictionless as possible.
-
-Because I ["eat my own dog food"](http://en.wikipedia.org/wiki/Eating_your_own_dog_food), I can tell
-you that easier configuration makes a positive change in the way you code, and the end-result.
 
 ##Getting Started: a Scenario
 
-Your database adminstrator (DBA) is unhappy with a backup wizard's ability
-to manage previous backup sets.  The backups keep taking up all the disk
-space.  Alarms go off saying "Backup drive has less than 10% free space!"
+Your database adminstrator (DBA) is unhappy with a 
+backup wizard's ability to manage previous backup sets. 
+The backups use too much disk space. Alarms are triggered, 
+saying "**Backup drive has less than 10% free space!**"
 
-He wants a program that manages backups by keeping 4 complete
-backup sets on disk, and deleting the rest.
+He wants a program that manages database backups by 
+keeping **4** complete sets on disk, and deleting the rest.
 
 For each _database_, he provides you with the _server name_, and the
 associated _backup folder_.
 
-###Create a Cfg-NET Module
+###Create a Cfg-NET Model
 
 To use Cfg-NET, add the files *NanoXmlParser.cs* 
-and *CfgNet.cs* to your project.  Then, create a model 
-for your configuration:
+and *CfgNet.cs* to your project.  Then, in code, 
+_model_ your configuration:
 
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
@@ -121,23 +59,62 @@ namespace Cfg.Test {
 }
 </pre>
 
-What makes the above code a Cfg-NET model?  Well, 
-each class inherits from `CfgNode`.
+####The CfgNode Class
 
-Moreover, each property is decorated with 
-a `Cfg` attribute that adds metadata to it. 
+Each class (above) inherits from `CfgNode`. All 
+parts of your Cfg-NET configuration _model_ must inherit 
+from `CfgNode`.
+
+####The Cfg Attribute
+To have any influence over the properties, they must be
+decorated with a `Cfg` attribute.  `Cfg` adds 
+configuration _metadata_ to the property.
+ 
 The configuration metadata is:
 
+* value (default value) 
+* toLower
+* toUpper
+* domain (a valid list of values)
+  * domainDelimiter (delimits the domain)
+  * ignoreCase
+* minLength
+* maxLength
 * required
 * unique
-* value (as in the default value) 
-* domain (as in a valid list of values)
-* domainDelimiter (used to delimit the domain values)
-* ignoreCase
 
 In the above code, we modeled a collection of _servers_. 
-Property attributes indicate that each _server_ has a 
-required, and unique _name_.
+The metadata indicates that each _server_ has a 
+**required**, and **unique** _name_.
+
+You can do more than just have required unique properties though:
+
+####Metadata
+
+Metadata descibes modifications, and/or validation 
+that we need for each property.  They are processed 
+in this order:
+
+`value` sets a default value before any of the configuration is loaded.
+
+`toLower` quietly lower cases the value.
+
+`toUpper` quietly upper cases the value.
+
+`domain` validates against a list of valid values. 
+It works in conjunction with `domainDelimiter` and 
+`ignoreCase`.
+
+`minLength` validates against a minimum length.
+
+`maxLength` validates against a maximum length.
+
+`required` makes it so the value is required.
+
+`unique` makes it so, if provided, the value is unique.
+
+
+
 
 ###Create Corresponding Configuration
 
