@@ -7,8 +7,9 @@ namespace Cfg.Test.TestClasses {
         [Cfg(required = true)]
         public List<CfgServer> Servers { get; set; }
 
-        public Cfg(string xml) {
-            this.Load(xml);
+        public Cfg(string cfg) {
+            this.Load(cfg);
         }
+
     }
 }

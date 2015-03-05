@@ -9,7 +9,7 @@ namespace Cfg.Test {
     public class EmptyLists {
 
         [Test]
-        public void TestConnections() {
+        public void TestConnectionsXml() {
             var xml = @"
                 <cfg>
                 </cfg>
@@ -25,7 +25,20 @@ namespace Cfg.Test {
         }
 
         [Test]
-        public void TestOtherThings() {
+        public void TestConnectionsJson() {
+            var json = "{}";
+
+            var cfg = new EmptyListCfg(json);
+            var problems = cfg.Problems();
+
+            Assert.AreEqual(0, problems.Count);
+            Assert.IsNotNull(cfg.Connections);
+            Assert.AreEqual(0, cfg.Connections.Count);
+
+        }
+
+        [Test]
+        public void TestOtherThingsXml() {
             var xml = @"
                 <cfg>
                     <connections>
@@ -35,6 +48,26 @@ namespace Cfg.Test {
             ".Replace("'", "\"");
 
             var cfg = new EmptyListCfg(xml);
+            var problems = cfg.Problems();
+
+            Assert.AreEqual(0, problems.Count);
+            Assert.IsNotNull(cfg.Connections);
+            Assert.AreEqual(1, cfg.Connections.Count);
+            Assert.IsNotNull(cfg.Connections[0].OtherThings);
+            Assert.AreEqual(0, cfg.Connections[0].OtherThings.Count);
+
+        }
+
+        [Test]
+        public void TestOtherThingsJson() {
+            var json = @"{
+                    'connections':[
+                        { 'provider':'file', 'file':'c:\\temp.txt' }
+                    ]
+                }
+            ".Replace("'", "\"");
+
+            var cfg = new EmptyListCfg(json);
             var problems = cfg.Problems();
 
             Assert.AreEqual(0, problems.Count);

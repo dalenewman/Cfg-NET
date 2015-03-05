@@ -67,6 +67,8 @@
     <Compile Include="CustomProblems.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReadMeJson.cs" />
+    <Compile Include="ReadMe.cs" />
     <Compile Include="TestClasses\AttributeCfg.cs" />
     <Compile Include="TestClasses\Cfg.cs" />
     <Compile Include="TestClasses\CfgDatabase.cs" />
@@ -75,7 +77,6 @@
     <Compile Include="TestClasses\CfgServer.cs" />
     <Compile Include="TestClasses\AttributeSite.cs" />
     <Compile Include="Parameters.cs" />
-    <Compile Include="TestClasses\ReadMe.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -87,6 +88,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ReadMe.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="ReadMe.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

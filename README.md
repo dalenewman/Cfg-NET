@@ -2,11 +2,11 @@ Cfg-NET
 =======
 
 ##Introduction
-Cfg-NET is a .NET configuration handler.  It is an 
-alternative to using custom section handler in your 
-_app_ or _web.config_.  
+Cfg-NET is a .NET configuration handler.  It is an
+alternative to using custom section handler in your
+_app_ or _web.config_.
 
-Cfg-NET is [open sourced](https://github.com/dalenewman/Cfg.Net) 
+Cfg-NET is [open sourced](https://github.com/dalenewman/Cfg.Net)
 under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
 A good configuration:
@@ -24,12 +24,12 @@ A good configuration handler:
 
 ##Getting Started: a Scenario
 
-Your database adminstrator (DBA) is unhappy with a 
-backup wizard's ability to manage previous backup sets. 
-The backups use too much disk space. Alarms are triggered, 
+Your database adminstrator (DBA) is unhappy with a
+backup wizard's ability to manage previous backup sets.
+The backups use too much disk space. Alarms are triggered,
 saying "**Backup drive has less than 10% free space!**"
 
-He wants a program that manages database backups by 
+He wants a program that manages database backups by
 keeping **4** complete sets on disk, and deleting the rest.
 
 For each _database_, he provides you with the _server name_, and the
@@ -37,21 +37,19 @@ associated _backup folder_.
 
 ###Create a Cfg-NET Model
 
-To use Cfg-NET, add the files *NanoXmlParser.cs* 
-and *CfgNet.cs* to your project.  Then, in code, 
-_model_ your configuration:
+Using [Nuget](https://www.nuget.org/packages/Cfg-NET/) package
+manager, search for "Cfg-NET", or install
+with `PM> Install-Package Cfg-NET` command.
+Then, in code, _model_ your configuration:
 
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
-
 namespace Cfg.Test {
-
     public class Cfg : CfgNode {
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
     }
-
     public class CfgServer : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
@@ -61,18 +59,18 @@ namespace Cfg.Test {
 
 ####The CfgNode Class
 
-Each class (above) inherits from `CfgNode`. All 
-parts of your Cfg-NET configuration _model_ must inherit 
+Each class (above) inherits from `CfgNode`. All
+parts of your Cfg-NET configuration _model_ must inherit
 from `CfgNode`.
 
 ####The Cfg Attribute
 To have any influence over the properties, they must be
-decorated with a `Cfg` attribute.  `Cfg` adds 
+decorated with a `Cfg` attribute.  `Cfg` adds
 configuration _metadata_ to the property.
- 
+
 The configuration metadata is:
 
-* value (default value) 
+* value (default value)
 * toLower
 * toUpper
 * domain (a valid list of values)
@@ -83,43 +81,32 @@ The configuration metadata is:
 * required
 * unique
 
-In the above code, we modeled a collection of _servers_. 
-The metadata indicates that each _server_ has a 
+In the above code, we modeled a collection of _servers_.
+The metadata indicates that each _server_ has a
 **required**, and **unique** _name_.
 
-You can do more than just have required unique properties though:
+You can do more than just request required, unique properties though:
 
 ####Metadata
 
-Metadata descibes modifications, and/or validation 
-that we need for each property.  They are processed 
+Metadata descibes modifications, and/or validation
+that we want for each property.  It is processed
 in this order:
 
-`value` sets a default value before any of the configuration is loaded.
-
-`toLower` quietly lower cases the value.
-
-`toUpper` quietly upper cases the value.
-
-`domain` validates against a list of valid values. 
-It works in conjunction with `domainDelimiter` and 
-`ignoreCase`.
-
-`minLength` validates against a minimum length.
-
-`maxLength` validates against a maximum length.
-
-`required` makes it so the value is required.
-
-`unique` makes it so, if provided, the value is unique.
-
-
-
+1. `value` set a default value
+1. `toLower` lower case the value
+1. `toUpper` upper cases the value
+1. `domain` check value against a list of valid values
+2. `minLength` check value against a minimum length
+3. `maxLength` check value against a maximum length
+3. `required` make sure value exists
+4. `unique` make sure value is unique
 
 ###Create Corresponding Configuration
 
-The DBA told you the servers are named *Gandalf*, 
-and *Saruman*. So, write this XML:
+The DBA told you the servers are named *Gandalf*,
+and *Saruman*. So, depending on your preference,
+write your configuration in **JSON** or **XML**:
 
 <pre class="prettyprint" lang="xml">
 &lt;backup-manager&gt;
@@ -130,12 +117,20 @@ and *Saruman*. So, write this XML:
 &lt;/backup-manager&gt;
 </pre>
 
-Save this to a file called *BackupManager.xml*. 
+<pre class="prettyprint" lang="js">
+{
+    &quot;servers&quot;: [
+        { &quot;name&quot;:&quot;Gandalf&quot; }
+        { &quot;name&quot;:&quot;Saruman&quot; }
+    ]
+}
+</pre>
+
+Save this to a file called *BackupManager.xml* or *BackupManager.json*.
 
 ###Load the Configuration
 
-To load *BackupManager.xml* into your model, 
-use code like this:
+To load the file into your model like this:
 
 <pre class="prettyprint" lang="cs">
 var cfg = new Cfg();
@@ -146,13 +141,11 @@ I suggest adding a constructor to the `Cfg` class:
 
 <pre class="prettyprint" lang="cs">
 public class Cfg : CfgNode {
-
     [Cfg(required = true)]
     public List&lt;CfgServer&gt; Servers { get; set; }
-
     //constructor
-    public Cfg(string xml) {
-        this.Load(xml);
+    public Cfg(string cfg) {
+        this.Load(cfg);
     }
 }
 </pre>
@@ -166,39 +159,51 @@ var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
 ###Is the Configuration Valid?
 
 When you load a configuration, Cfg-NET doesn't throw errors
- (on purpose that is). Instead, it attempts to collect 
-_all_ the problems. So, after loading, you should always 
+ (on purpose that is). Instead, it attempts to collect
+_all_ the problems. So, after loading, you should always
 check for any problems using the `Problems()` method:
 
 <pre class="prettyprint" lang="cs">
 //LOAD CONFIGURATION
 var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-
 //TEST FOR PROBLEMS
 Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
 </pre>
 
-By collecting multiple problems, you can report them to 
-the end-user who can fix them all at once.
+By collecting multiple problems,
+you can report them to an end-user
+who can fix them all at once. Cfg-NET tries
+to produce problem messages that are
+useful. Here are some examples:
 
----
+Put another server named *Gandalf* in there, and it says:
+<pre class="prettyprint" lang="yaml">
+You set a duplicate 'name' value 'Gandalf' in 'servers'.
+</pre>
 
-Moving on with our scenario; we need to make it so 
-each _server_ has a required collection of _databases_. 
+Add a _nickName_ instead of a _name_ in servers, and it says:
+<pre class="prettyprint" lang="yaml">
+A 'servers' 'add' element contains an invalid 'nickName' attribute.  Valid attributes are: name.
+A 'servers' 'add' element is missing a 'name' attribute.
+</pre>
 
-Each _database_ must have a unique `name` and 
+###Back to the Scenario
+
+Moving on with our scenario; we need to make it so
+each _server_ has a required collection of _databases_.
+
+Each _database_ must have a unique `name` and
 unique `backup-folder`.
 
-The DBA said he wanted **4** backup sets, but since 
-we know people change their minds, we're going save 
-ourself some (future) time by adding 
+The DBA said he wanted **4** backup sets, but since
+we know people change their minds, we're going save
+ourself some (future) time by adding
 an optional `backups-to-keep` attribute.
 
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
 namespace Cfg.Test {
-
     public class Cfg : CfgNode {
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
@@ -206,15 +211,13 @@ namespace Cfg.Test {
             this.Load(xml);
         }
     }
-
     public class CfgServer : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
-        <strong>[Cfg(required = true)]
+<strong>[Cfg(required = true)]
         public List&lt;CfgDatabase&gt; Databases { get; set; }</strong>
     }
-
-    <strong>public class CfgDatabase : CfgNode {
+<strong>public class CfgDatabase : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
         [Cfg(required = true, unique = true)]
@@ -225,7 +228,7 @@ namespace Cfg.Test {
 }
 </pre>
 
-Now let's update *BackupManager.xml*:
+Now let's update *BackupManager.xml* or *BackupManager.json*:
 
 <pre class="prettyprint" lang="xml">
 &lt;backup-manager&gt;
@@ -233,15 +236,13 @@ Now let's update *BackupManager.xml*:
         &lt;add name=&quot;Gandalf&quot;&gt;
             &lt;databases&gt;
                 &lt;add name=&quot;master&quot;
-                     backup-folder=&quot;\\san\sql-backups\gandalf\master&quot;
-                     backups-to-keep=&quot;6&quot;/&gt;
+                     backup-folder=&quot;\\san\sql-backups\gandalf\master&quot; /&gt;
             &lt;/databases&gt;
         &lt;/add&gt;
         &lt;add name=&quot;Saruman&quot;&gt;
             &lt;databases&gt;
                 &lt;add name=&quot;master&quot;
-                     backup-folder=&quot;\\san\sql-backups\saruman\master&quot;
-                     backups-to-keep=&quot;8&quot; /&gt;
+                     backup-folder=&quot;\\san\sql-backups\saruman\master&quot; /&gt;
                 &lt;add name=&quot;model&quot;
                      backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
             &lt;/databases&gt;
@@ -249,16 +250,39 @@ Now let's update *BackupManager.xml*:
     &lt;/servers&gt;
 &lt;/backup-manager&gt;
 </pre>
+_or_
+<pre class="prettyprint" lang="js">
+{
+	&quot;servers&quot; : [{
+			&quot;name&quot; : &quot;Gandalf&quot;,
+			&quot;databases&quot; : [{
+					&quot;name&quot; : &quot;master&quot;,
+					&quot;backup-folder&quot; : &quot;\\\\san\\sql-backups\\gandalf\\master&quot;
+				}
+			]
+		}, {
+			&quot;name&quot; : &quot;Saruman&quot;,
+			&quot;databases&quot; : [{
+					&quot;name&quot; : &quot;master&quot;,
+					&quot;backup-folder&quot; : &quot;\\\\san\\sql-backups\\saruman\\master&quot;
+				}, {
+					&quot;name&quot; : &quot;model&quot;,
+					&quot;backup-folder&quot; : &quot;\\\\san\\sql-backups\\saruman\\model&quot;
+				}
+			]
+		}
+	]
+}
+</pre>
 
-Now we have a collection of servers, and each server holds 
-a collection of databases.  Our program can 
-loop through them like this:
+Now we have a collection of servers, and each
+server holds a collection of databases.
+Our program can easily loop through
+the servers and databases like this:
 
 <pre class="prettyprint" lang="cs">
 var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-
 //check for problems
-
 foreach (var server in cfg.Servers) {
     foreach (var database in server.Databases) {
         // do something amazing with server.Name, database.Name, and database.BackupFolder...  
@@ -266,11 +290,14 @@ foreach (var server in cfg.Servers) {
 }
 </pre>
 
-Let's take a break from our scenario and learn a bit more 
-about validation.
+If you set default values, you never have to worry
+about a property being `null`.  Moreover, you never 
+have to worry about a list being `null`; all lists 
+decorated with the `Cfg` attribute are 
+initialized.
 
-##Validation
-Cfg-NET metadata and types offer some validation. 
+##Validation &amp; Modification
+Cfg-NET metadata and types offer some validation.
 If it's not enough, you have three ways to customize it:
 
 1. Overriding Validate()
@@ -279,7 +306,7 @@ If it's not enough, you have three ways to customize it:
 
 ###Overriding Validate()
 
-To perform complex validation with more than one property, 
+To perform complex validation with more than one property,
 override the `Validate()` method like so:
 
 <pre class="prettyprint" lang="csharp">
@@ -287,13 +314,10 @@ public class Connection : CfgNode {
  
     [Cfg(required = true, domain = &quot;file,folder,other&quot;)]
     public string Provider { get; set; }
-
     [Cfg()]
     public string File { get; set; }
-
     [Cfg()]
     public string Folder { get; set; }
-
     <strong>// custom validation
     protected override void Validate() {
         if (Provider == &quot;file&quot; &amp;&amp; string.IsNullOrEmpty(File)) {
@@ -305,17 +329,17 @@ public class Connection : CfgNode {
 }
 </pre>
 
-The `Validate()` method has access 
-to the `Provider`, `File`, and `Folder` properties.  
-It runs _after_ they're set.  So, it can perform more complex 
-validation.  If you find problems, add them using 
+The `Validate()` method has access
+to the `Provider`, `File`, and `Folder` properties.
+It runs _after_ they're set.  So, it can perform more complex
+validation.  If you find problems, add them using
 the `AddProblem()` method.
 
 ###Overriding Modify()
 
-If you want to quietly modify (aka fix) 
-the configuration, you may override `Modify()` 
-like this: 
+If you want to quietly modify (aka fix)
+the configuration, you may override `Modify()`
+like this:
 
 <pre class="prettyprint" lang="csharp">
 protected override void Modify() {
@@ -325,7 +349,7 @@ protected override void Modify() {
 }
 </pre>
 
-`Modify()` runs _after_ the properties are set, but 
+`Modify()` runs _after_ the properties are set, but
 _before_ `Validate()` runs.  It has access to all the properties.
 
 ###Coding Inside the Property
@@ -348,13 +372,13 @@ public string Provider {
 
 ##Finishing Up The Scenario
 
-After you unravel the mystery of saving _x_ complete 
-backup sets, for _y_ servers, and _z_ databases, deploy 
-your program with some method of allowing the user to 
+After you unravel the mystery of saving _x_ complete
+backup sets, for _y_ servers, and _z_ databases, deploy
+your program with some method of allowing the user to
 update and choose the configuration he/she wants to use.
 
-For example, in a a Console application (e.g. *BackupManager.exe*), allow 
-the configuration file to be passed in as an argument, 
+For example, in a a Console application (e.g. *BackupManager.exe*), allow
+the configuration file to be passed in as an argument,
 like this:
 
 <pre class="prettyprint" lang="bash">
@@ -371,10 +395,12 @@ backup sets, point out the `backups-to-keep` attribute.
 
 ##Conclusion
 
-This is all you need to know if you just want 
-an easy way to configure your program.  If you need a more flexible configuration, that 
-can respond to parameters at run-time, 
+This is all you need to know if you just want
+an easy way to configure your program.  If you need a more flexible configuration, that
+can respond to parameters at run-time,
 continue reading.
+
+---
 
 ##Support for Environments, Parameters, and Place-Holders
 
@@ -477,7 +503,7 @@ exactly.  They are case-sensitive. In XML, they would look like this:
 Place-holders are replaced with environment default parameter values as the XML is loaded.
 
 When environment defaults are not applicable, or you want to override them, pass
-a `Dictionary<string,string>` of parameters into the `CfgNode.Load()` method. 
+a `Dictionary<string,string>` of parameters into the `CfgNode.Load()` method.
 Here is an example:
 
 <pre class="prettyprint" lang="cs">
@@ -494,11 +520,11 @@ reports it as a problem. So, always check for `Problems()` after loading the con
 
 ##About the Code:
 
-Cfg.Net is over-engineered in an attempt to keep it independent.
-It only references `System` and `System.Core`.  It targets the .NET 4
-Client Profile framework.  With a slight modification to the
-reflection code, it can be made a portable class.
+Cfg.Net is over-engineered to keep it independent. 
+It only references `System` and `System.Core`.  It 
+targets the .NET 4 Client Profile framework.
 
 ###Credits
-*  for now, Cfg-Net uses a modified version of a `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
+*  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
+*  a modified version of `fastJSON` found [here](http://www.codeproject.com/Articles/159450/fastJSON)
 *  .NET Source of WebUtility.HtmlDecode found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.

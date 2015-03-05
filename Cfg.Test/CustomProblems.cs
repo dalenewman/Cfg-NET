@@ -9,7 +9,7 @@ namespace Cfg.Test {
     public class CustomProblems {
 
         [Test]
-        public void Test() {
+        public void TestXml() {
             var xml = @"
     <cfg>
         <connections>
@@ -32,6 +32,31 @@ namespace Cfg.Test {
             Assert.IsTrue(problems.Contains("file provider needs file attribute."));
             Assert.IsTrue(problems.Contains("folder provider needs folder attribute."));
         }
+
+        [Test]
+        public void TestJson() {
+            var json = @"{
+  'connections': [
+      { 'provider': 'file', 'file': 'good.txt' },
+      { 'provider': 'file' },
+      { 'provider': 'folder', 'folder': 'c:\\good' },
+      { 'provider': 'folder', 'file': 'bad.txt' }
+    ]
+}
+".Replace("'", "\"");
+
+            var cfg = new CustomProblemCfg(json);
+            var problems = cfg.Problems();
+
+            foreach (var problem in problems) {
+                Console.WriteLine(problem);
+            }
+
+            Assert.AreEqual(2, problems.Count);
+            Assert.IsTrue(problems.Contains("file provider needs file attribute."));
+            Assert.IsTrue(problems.Contains("folder provider needs folder attribute."));
+        }
+
 
     }
 

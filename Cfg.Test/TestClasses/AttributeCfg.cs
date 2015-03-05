@@ -9,7 +9,7 @@ namespace Cfg.Test.TestClasses {
             this.Load(xml);
         }
 
-        [Cfg(required = true, sharedProperty = "common", sharedValue = "x")]
+        [Cfg(required = true, sharedProperty = "common", sharedValue = "")]
         public List<AttributeSite> Sites { get; set; }
     }
 

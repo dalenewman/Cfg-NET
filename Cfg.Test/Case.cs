@@ -10,7 +10,7 @@ namespace Cfg.Test {
     public class Case {
 
         [Test]
-        public void Test() {
+        public void TestXml() {
             var xml = @"
     <test>
         <things>
@@ -32,6 +32,28 @@ namespace Cfg.Test {
             Assert.AreEqual("proper case!", cfg.Things.First().LowerValue);
             Assert.AreEqual("PROPER CASE!", cfg.Things.Last().UpperValue);
 
+        }
+
+        [Test]
+        public void TestJson() {
+            var json = @"{
+        'things': [
+            { 'lowerValue':'Proper Case!'},
+            { 'upperValue':'Proper Case!'}
+        ]
+    }".Replace("'", "\"");
+
+            var cfg = new TestCase(json);
+
+            foreach (var problem in cfg.Problems()) {
+                Console.WriteLine(problem);
+            }
+
+            var problems = cfg.Problems();
+            Assert.AreEqual(0, problems.Count);
+
+            Assert.AreEqual("proper case!", cfg.Things.First().LowerValue);
+            Assert.AreEqual("PROPER CASE!", cfg.Things.Last().UpperValue);
         }
 
     }

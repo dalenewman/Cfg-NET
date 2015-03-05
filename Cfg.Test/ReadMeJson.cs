@@ -2,14 +2,15 @@
 using System.IO;
 using NUnit.Framework;
 
-namespace Cfg.Test.TestClasses {
+namespace Cfg.Test {
     [TestFixture]
-    public class ReadMe {
+    public class ReadMeJson {
 
         [Test]
         public void TestReadMe() {
-            var xml = File.ReadAllText(@"ReadMe.xml");
-            var cfg = new TestClasses.Cfg(xml);
+            var json = File.ReadAllText(@"ReadMe.json");
+
+            var cfg = new TestClasses.Cfg(json);
 
             foreach (var problem in cfg.Problems()) {
                 Console.WriteLine(problem);
@@ -17,6 +18,7 @@ namespace Cfg.Test.TestClasses {
 
             //TEST FOR PROBLEMS
             Assert.AreEqual(0, cfg.Problems().Count);
+            Assert.AreEqual(2, cfg.Servers.Count);
 
             //TEST GANDALF
             Assert.AreEqual("Gandalf", cfg.Servers[0].Name);

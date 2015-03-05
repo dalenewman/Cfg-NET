@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Xml.Linq;
 using Cfg.Test.TestClasses;
 using NUnit.Framework;
+using Transformalize.Libs.Cfg.Net;
 
 namespace Cfg.Test {
 
@@ -10,15 +13,34 @@ namespace Cfg.Test {
     public class Main {
 
         [Test]
-        public void TestEmptyCfg() {
+        public void TestEmptyXmlCfg() {
             var cfg = new AttributeCfg(@"<cfg></cfg>");
             Assert.AreEqual(1, cfg.Problems().Count);
             Assert.AreEqual("The 'cfg' element is missing a 'sites' element.", cfg.Problems()[0]);
         }
 
         [Test]
+        public void TestEmptyJsonCfg() {
+            var cfg = new AttributeCfg(@"{}");
+            Assert.AreEqual(1, cfg.Problems().Count);
+            Assert.AreEqual("The root element is missing a 'sites' element.", cfg.Problems()[0]);
+        }
+
+        [Test]
         public void TestGetDefaultOf() {
             var cfg = new AttributeCfg(@"<cfg></cfg>");
+            Assert.IsNotNull(cfg);
+            Assert.IsNotNull(cfg.Sites);
+            Assert.AreEqual(0, cfg.Sites.Count);
+
+            var sites = cfg.GetDefaultOf<AttributeSite>();
+            Assert.IsNotNull(sites);
+            Assert.IsNotNull(sites.Something);
+        }
+
+        [Test]
+        public void TestGetJsonDefaultOf() {
+            var cfg = new AttributeCfg(@"{}");
             Assert.IsNotNull(cfg);
             Assert.IsNotNull(cfg.Sites);
             Assert.AreEqual(0, cfg.Sites.Count);
@@ -37,10 +59,25 @@ namespace Cfg.Test {
         }
 
         [Test]
+        public void TestNewJson() {
+            var cfg = new AttributeCfg(@"{}");
+            Assert.IsNotNull(cfg);
+            Assert.IsNotNull(cfg.Sites);
+            Assert.AreEqual(0, cfg.Sites.Count);
+        }
+
+        [Test]
         public void TestEmptySites() {
             var cfg = new AttributeCfg(@"<cfg><sites/></cfg>");
             Assert.AreEqual(1, cfg.Problems().Count);
-            Assert.AreEqual("A 'sites' element is missing an 'add' element.", cfg.Problems()[0]);
+            Assert.AreEqual("A 'sites' element is missing a child element.", cfg.Problems()[0]);
+        }
+
+        [Test]
+        public void TestEmptyJsonSites() {
+            var cfg = new AttributeCfg("{\"sites\":[]}");
+            Assert.AreEqual(1, cfg.Problems().Count);
+            Assert.AreEqual("A 'sites' element is missing a child element.", cfg.Problems()[0]);
         }
 
         [Test]
@@ -155,5 +192,25 @@ namespace Cfg.Test {
 
         }
 
+        [Test]
+        public void TestSharedPropertyJson() {
+            var xml = @"{
+                    'sites':[
+                        { 'name':'google',        'url':'http://www.google.com',        'something':'&lt;', 'common':'colts' },
+                        { 'name':'github',        'url':'http://www.github.com',        'numeric':'5',      'common':'colts' },
+                        { 'name':'stackoverflow', 'url':'http://www.stackoverflow.com', 'numeric':'7',      'common':'colts' }
+                    ]
+                }".Replace("'", "\"");
+
+            var cfg = new AttributeCfg(xml);
+
+            Assert.AreEqual(0, cfg.Problems().Count);
+            Assert.AreEqual("colts", cfg.Sites[0].Common);
+            Assert.AreEqual("colts", cfg.Sites[1].Common);
+            Assert.AreEqual("colts", cfg.Sites[2].Common);
+
+        }
+
     }
+
 }

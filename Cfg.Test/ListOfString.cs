@@ -9,7 +9,7 @@ namespace Cfg.Test {
     public class ListOfString {
 
         [Test]
-        public void Test() {
+        public void TestXml() {
             var xml = @"
     <cfg>
         <strings>
@@ -31,13 +31,38 @@ namespace Cfg.Test {
             Assert.AreEqual(3, cfg.Strings.Count);
 
         }
+
+        [Test]
+        public void TestJson() {
+            var json = @"
+    {
+        'strings': [
+            { 'value':'1' },
+            { 'value':'2' },
+            { 'value':'3' }
+        ]
+    }
+".Replace("'", "\"");
+
+            var cfg = new Los(json);
+
+            foreach (var problem in cfg.Problems()) {
+                Console.WriteLine(problem);
+            }
+
+            var problems = cfg.Problems();
+            Assert.AreEqual(0, problems.Count);
+            Assert.AreEqual(3, cfg.Strings.Count);
+
+        }
+
     }
 
     [TestFixture]
     public class RequiredListOfNumbers {
 
         [Test]
-        public void Test() {
+        public void TestXml() {
             var xml = @"
     <cfg>
         <numbers>
@@ -68,6 +93,65 @@ namespace Cfg.Test {
             Assert.AreEqual(10, cfg.Numbers[0].InnerNumbers[2]);
 
         }
+
+        [Test]
+        public void TestJson() {
+            var json = @"
+    {
+        'numbers':[
+            { 'inner-numbers': [
+                    { 'x':1 },
+                    { 'y':5 },
+                    { 'z':10 }
+                ]
+            }
+        ]
+    }
+".Replace("'", "\"");
+
+            var cfg = new Los(json);
+
+            foreach (var problem in cfg.Problems()) {
+                Console.WriteLine(problem);
+            }
+
+            var problems = cfg.Problems();
+            Assert.AreEqual(0, problems.Count);
+            Assert.AreEqual(0, cfg.Strings.Count);
+            Assert.AreEqual(1, cfg.Numbers.Count);
+            Assert.AreEqual(3, cfg.Numbers[0].InnerNumbers.Count);
+            Assert.AreEqual(1, cfg.Numbers[0].InnerNumbers[0]);
+            Assert.AreEqual(5, cfg.Numbers[0].InnerNumbers[1]);
+            Assert.AreEqual(10, cfg.Numbers[0].InnerNumbers[2]);
+
+        }
+
+        [Test]
+        public void TestJsonArray() {
+            var json = @"{
+        'numbers':[
+            { 'inner-numbers': [ 1, 5, 10 ] }
+        ]
+    }
+".Replace("'", "\"");
+
+            var cfg = new Los(json);
+
+            foreach (var problem in cfg.Problems()) {
+                Console.WriteLine(problem);
+            }
+
+            var problems = cfg.Problems();
+            Assert.AreEqual(0, problems.Count);
+            Assert.AreEqual(0, cfg.Strings.Count);
+            Assert.AreEqual(1, cfg.Numbers.Count);
+            Assert.AreEqual(3, cfg.Numbers[0].InnerNumbers.Count);
+            Assert.AreEqual(1, cfg.Numbers[0].InnerNumbers[0]);
+            Assert.AreEqual(5, cfg.Numbers[0].InnerNumbers[1]);
+            Assert.AreEqual(10, cfg.Numbers[0].InnerNumbers[2]);
+
+        }
+
     }
 
     public class Los : CfgNode {

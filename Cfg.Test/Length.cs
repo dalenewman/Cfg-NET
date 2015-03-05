@@ -9,7 +9,7 @@ namespace Cfg.Test {
     public class Length {
 
         [Test]
-        public void Test() {
+        public void TestXml() {
             var xml = @"
     <test>
         <things>
@@ -21,6 +21,30 @@ namespace Cfg.Test {
 ".Replace("'", "\"");
 
             var cfg = new TestLength(xml);
+
+            foreach (var problem in cfg.Problems()) {
+                Console.WriteLine(problem);
+            }
+
+            var problems = cfg.Problems();
+            Assert.AreEqual(2, problems.Count);
+            Assert.IsTrue(problems.Contains("The `value` attribute's value `too-short` is too short. It's 9 characters. It must be at least 10 characters."));
+            Assert.IsTrue(problems.Contains("The `value` attribute's value `this-is-way-too-long` is too long. It's 20 characters. It must not exceed 15 characters."));
+
+        }
+
+        [Test]
+        public void TestJson() {
+            var json = @"{
+        'things':[
+            { 'value':'too-short' },
+            { 'value':'this-is-way-too-long' },
+            { 'value':'just-right' }
+        ]
+    }
+".Replace("'", "\"");
+
+            var cfg = new TestLength(json);
 
             foreach (var problem in cfg.Problems()) {
                 Console.WriteLine(problem);

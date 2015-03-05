@@ -9,7 +9,7 @@ namespace Cfg.Test {
     public class Domain {
 
         [Test]
-        public void Test() {
+        public void TestXml() {
             var xml = @"
     <test>
         <things>
@@ -20,6 +20,27 @@ namespace Cfg.Test {
 ".Replace("'", "\"");
 
             var cfg = new TestCfg(xml);
+
+            foreach (var problem in cfg.Problems()) {
+                Console.WriteLine(problem);
+            }
+
+            var problems = cfg.Problems();
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
+
+        }
+
+        [Test]
+        public void TestJson() {
+            var json = @"{
+        'things': [
+            { 'value':'good-value' },
+            { 'value':'bad-value' }
+        ]
+    }".Replace("'", "\"");
+
+            var cfg = new TestCfg(json);
 
             foreach (var problem in cfg.Problems()) {
                 Console.WriteLine(problem);

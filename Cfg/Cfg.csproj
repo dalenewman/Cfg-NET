@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Transformalize.Libs.Cfg.Net</RootNamespace>
-    <AssemblyName>Cfg</AssemblyName>
+    <AssemblyName>CfgNet</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -55,13 +55,34 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CfgNet.cs" />
-    <Compile Include="NanoXmlParser.cs" />
+    <Compile Include="CfgAttribute.cs" />
+    <Compile Include="CfgConstants.cs" />
+    <Compile Include="CfgMetadata.cs" />
+    <Compile Include="CfgNode.cs" />
+    <Compile Include="CfgProblems.cs" />
+    <Compile Include="fastJSON\Formatter.cs" />
+    <Compile Include="fastJSON\Getters.cs" />
+    <Compile Include="fastJSON\JSON.cs" />
+    <Compile Include="fastJSON\JsonParser.cs" />
+    <Compile Include="fastJSON\JsonSerializer.cs" />
+    <Compile Include="fastJSON\Reflection.cs" />
+    <Compile Include="fastJSON\SafeDictionary.cs" />
+    <Compile Include="IAttribute.cs" />
+    <Compile Include="INode.cs" />
+    <Compile Include="JsonNode.cs" />
+    <Compile Include="nanoXML\NanoXmlAttribute.cs" />
+    <Compile Include="nanoXML\NanoXmlBase.cs" />
+    <Compile Include="nanoXML\NanoXmlDocument.cs" />
+    <Compile Include="nanoXML\NanoXmlNode.cs" />
+    <Compile Include="nanoXML\NanoXmlParsingException.cs" />
+    <Compile Include="NodeAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReflectionHelper.cs" />
+    <Compile Include="XmlNode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>IF EXIST C:\Code\Transformalize\Transformalize\Libs\Cfg.Net XCOPY /y $(ProjectDir)*.cs C:\Code\Transformalize\Transformalize\Libs\Cfg.Net</PostBuildEvent>
+    <PostBuildEvent>IF EXIST C:\Code\Transformalize\Transformalize\Libs\Cfg.Net XCOPY /s /y $(ProjectDir)*.cs C:\Code\Transformalize\Transformalize\Libs\Cfg.Net</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

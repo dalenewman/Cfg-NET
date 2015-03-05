@@ -6,255 +6,10 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Transformalize.Libs.Cfg.Net.fastJSON;
+using Transformalize.Libs.Cfg.Net.nanoXML;
 
 namespace Transformalize.Libs.Cfg.Net {
-
-    public static class CfgConstants {
-
-        // ReSharper disable InconsistentNaming
-        public static char ENTITY_END = ';';
-        public static char ENTITY_START = '&';
-        public static char HIGH_SURROGATE = '\uD800';
-        public static char LOW_SURROGATE = '\uDC00';
-        public static char PLACE_HOLDER_FIRST = '@';
-        public static char PLACE_HOLDER_LAST = ')';
-        public static char PLACE_HOLDER_SECOND = '(';
-        public static int UNICODE_00_END = 0x00FFFF;
-        public static int UNICODE_01_START = 0x10000;
-        public static string ENVIRONMENTS_DEFAULT_NAME = "default";
-        public static string ENVIRONMENTS_ELEMENT_NAME = "environments";
-        public static string PARAMETERS_ELEMENT_NAME = "parameters";
-
-        //PROBLEM PATTERNS
-        public static string PROBLEM_DUPLICATE_SET = "You set a duplicate '{0}' value '{1}' in '{2}'.";
-        public static string PROBLEM_INVALID_ATTRIBUTE = "A{3} '{0}' '{1}' element contains an invalid '{2}' attribute.  Valid attributes are: {4}.";
-        public static string PROBLEM_INVALID_ELEMENT = "A{2} '{0}' element has an invalid '{1}' element.  If you need a{2} '{1}' element, decorate it with the Cfg[()] attribute in your Cfg-NET model.";
-        public static string PROBLEM_INVALID_NESTED_ELEMENT = "A{3} '{0}' '{1}' element has an invalid '{2}' element.";
-        public static string PROBLEM_MISSING_ADD_ELEMENT = "A{1} '{0}' element is missing an 'add' element.";
-        public static string PROBLEM_MISSING_ATTRIBUTE = "A{3} '{0}' '{1}' element is missing a '{2}' attribute.";
-        public static string PROBLEM_MISSING_ELEMENT = "The '{0}' element is missing a{2} '{1}' element.";
-        public static string PROBLEM_MISSING_NESTED_ELEMENT = "A{3} '{0}' '{1}' element is missing a{4} '{2}' element.";
-        public static string PROBLEM_MISSING_PLACE_HOLDER_VALUE = "You're missing {0} for {1}.";
-        public static string PROBLEM_SETTING_VALUE = "Could not set '{0}' to '{1}' inside '{2}' '{3}'. {4}";
-        public static string PROBLEM_UNEXPECTED_ELEMENT = "Invalid element {0} in {1}.  Only 'add' elements are allowed here.";
-        public static string PROBLEM_XML_PARSE = "Could not parse the configuration. {0}";
-        public static string PROBLEM_VALUE_NOT_IN_DOMAIN = "A{5} '{0}' '{1}' element has an invalid value of '{3}' in the '{2}' attribute.  The valid domain is: {4}.";
-        public static string PROBLEM_ROOT_VALUE_NOT_IN_DOMAIN = "The root element has an invalid value of '{0}' in the '{1}' attribute.  The valid domain is: {2}.";
-        public static string PROBLEM_SHARED_PROPERTY_MISSING = "A{3} '{0}' shared property '{1}' is missing in '{2}'.  Make sure it is defined and decorated with [Cfg()].";
-        public static string PROBLEM_ONLY_ONE_ATTRIBUTE_ALLOWED = "You must have exactly 1 attribute in '{0}' '{1}'.  You have {2}.";
-        public static string PROBLEM_TYPE_MISMATCH = "The `{0}` attribute's default value's type ({1}) does not match the property type ({2}).";
-        public static string PROBLEM_VALUE_TOO_SHORT = "The `{0}` attribute's value `{1}` is too short. It's {3} characters. It must be at least {2} characters.";
-        public static string PROBLEM_VALUE_TOO_LONG = "The `{0}` attribute's value `{1}` is too long. It's {3} characters. It must not exceed {2} characters.";
-        // ReSharper restore InconsistentNaming
-    }
-
-
-    public class CfgProblems {
-
-        private readonly StringBuilder _storage = new StringBuilder();
-
-        public void DuplicateSet(string uniqueAttribute, object value, string nodeName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_DUPLICATE_SET, uniqueAttribute, value, nodeName);
-            _storage.AppendLine();
-        }
-
-        public void InvalidAttribute(string parentName, string nodeName, string attributeName, string validateAttributes) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_INVALID_ATTRIBUTE, parentName, nodeName, attributeName, Suffix(parentName), validateAttributes);
-            _storage.AppendLine();
-        }
-
-        public void InvalidElement(string nodeName, string subNodeName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_INVALID_ELEMENT, nodeName, subNodeName, Suffix(nodeName));
-            _storage.AppendLine();
-        }
-
-        public void InvalidNestedElement(string parentName, string nodeName, string subNodeName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_INVALID_NESTED_ELEMENT, parentName, nodeName, subNodeName, Suffix(parentName));
-            _storage.AppendLine();
-        }
-
-        public void MissingAttribute(string parentName, string nodeName, string attributeName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_MISSING_ATTRIBUTE, parentName, nodeName, attributeName, Suffix(parentName));
-            _storage.AppendLine();
-        }
-
-        public void MissingElement(string nodeName, string elementName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_MISSING_ELEMENT, nodeName, elementName, Suffix(elementName));
-            _storage.AppendLine();
-        }
-
-        public void MissingAddElement(string elementName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_MISSING_ADD_ELEMENT, elementName, Suffix(elementName));
-            _storage.AppendLine();
-        }
-
-        public void MissingNestedElement(string parentName, string nodeName, string elementName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_MISSING_NESTED_ELEMENT, parentName, nodeName, elementName, Suffix(parentName), Suffix(elementName));
-            _storage.AppendLine();
-        }
-
-        public void MissingPlaceHolderValues(string[] keys) {
-            var formatted = "@(" + string.Join("), @(", keys) + ")";
-            _storage.AppendFormat(CfgConstants.PROBLEM_MISSING_PLACE_HOLDER_VALUE, keys.Length == 1 ? "a value" : "values", formatted);
-            _storage.AppendLine();
-        }
-
-        public void SettingValue(string propertyName, object value, string parentName, string nodeName, string message) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_SETTING_VALUE, propertyName, value, parentName, nodeName, message);
-            _storage.AppendLine();
-        }
-
-        public void UnexpectedElement(string elementName, string subNodeName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_UNEXPECTED_ELEMENT, subNodeName, elementName);
-            _storage.AppendLine();
-        }
-
-        public void ValueNotInDomain(string parentName, string nodeName, string propertyName, object value, string validValues) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_NOT_IN_DOMAIN, parentName, nodeName, propertyName, value, validValues, Suffix(parentName));
-            _storage.AppendLine();
-        }
-
-        public void RootValueNotInDomain(object value, string propertyName, string validValues) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_ROOT_VALUE_NOT_IN_DOMAIN, value, propertyName, validValues);
-            _storage.AppendLine();
-        }
-
-        public void SharedPropertyMissing(string name, string sharedProperty, string listType) {
-            var type = listType.IndexOf('.') > 0 ? listType.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Last() : listType;
-            _storage.AppendFormat(CfgConstants.PROBLEM_SHARED_PROPERTY_MISSING, name, sharedProperty, type, Suffix(name));
-            _storage.AppendLine();
-        }
-
-        public void XmlParse(string message) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_XML_PARSE, message);
-            _storage.AppendLine();
-        }
-
-        private static string Suffix(string thing) {
-            return thing == null || IsVowel(thing[0]) ? "n" : string.Empty;
-        }
-
-        public string[] Yield() {
-            return _storage.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-        }
-
-        public void AddCustomProblem(string problem, params object[] args) {
-            _storage.AppendFormat(problem, args);
-            _storage.AppendLine();
-        }
-
-        private static bool IsVowel(char c) {
-            return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'A' || c == 'E' || c == 'I' ||
-                   c == 'O' || c == 'U';
-        }
-
-        public void OnlyOneAttributeAllowed(string parentName, string name, int count) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_ONLY_ONE_ATTRIBUTE_ALLOWED, parentName, name, count);
-            _storage.AppendLine();
-        }
-
-        public void TypeMismatch(string key, Type defaultType, Type propertyType) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_TYPE_MISMATCH, key, defaultType, propertyType);
-            _storage.AppendLine();
-        }
-
-        public void ValueTooShort(string name, string value, int minLength) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_TOO_SHORT, name, value, minLength, value.Length);
-            _storage.AppendLine();
-        }
-
-        public void ValueTooLong(string name, string value, int maxLength) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_TOO_LONG, name, value, maxLength, value.Length);
-            _storage.AppendLine();
-        }
-
-    }
-
-    [AttributeUsage(AttributeTargets.Property)]
-    public class CfgAttribute : Attribute {
-        private int _minLength;
-        private int _maxLength;
-        private string _domain;
-
-        // ReSharper disable InconsistentNaming
-        public object value { get; set; }
-        public bool required { get; set; }
-        public bool unique { get; set; }
-        public bool toUpper { get; set; }
-        public bool toLower { get; set; }
-        public string sharedProperty { get; set; }
-        public object sharedValue { get; set; }
-
-        public string domain {
-            get { return _domain; }
-            set {
-                _domain = value;
-                DomainSet = true;
-            }
-        }
-
-        public char domainDelimiter { get; set; }
-        public bool ignoreCase { get; set; }
-
-        public int minLength {
-            get { return _minLength; }
-            set {
-                _minLength = value;
-                MinLengthSet = true;
-            }
-        }
-
-        public int maxLength {
-            get { return _maxLength; }
-            set {
-                _maxLength = value;
-                MaxLengthSet = true;
-            }
-        }
-
-        public bool MaxLengthSet { get; private set; }
-        public bool MinLengthSet { get; private set; }
-        public bool DomainSet { get; private set; }
-
-        // ReSharper restore InconsistentNaming
-    }
-
-    public class CfgMetadata {
-        private readonly HashSet<string> _domainSet;
-
-        public PropertyInfo PropertyInfo { get; set; }
-        public CfgAttribute Attribute { get; set; }
-        public Type ListType { get; set; }
-        public Func<CfgNode> Loader { get; set; }
-        public string[] UniquePropertiesInList { get; set; }
-        public string SharedProperty { get; set; }
-        public object SharedValue { get; set; }
-        public Action<object, object> Setter { get; set; }
-        public Func<object, object> Getter { get; set; }
-        public bool TypeMismatch { get; set; }
-
-        public CfgMetadata(PropertyInfo propertyInfo, CfgAttribute attribute) {
-            PropertyInfo = propertyInfo;
-            Attribute = attribute;
-
-            if (string.IsNullOrEmpty(attribute.domain))
-                return;
-
-            if (attribute.domainDelimiter == default(char)) {
-                attribute.domainDelimiter = ',';
-            }
-
-            if (attribute.ignoreCase) {
-                _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.domainDelimiter }, StringSplitOptions.None), StringComparer.OrdinalIgnoreCase);
-            } else {
-                _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.domainDelimiter }, StringSplitOptions.None), StringComparer.Ordinal);
-            }
-        }
-
-        public bool IsInDomain(string value) {
-            return _domainSet == null || (value != null && _domainSet.Contains(value));
-        }
-    }
 
     public abstract class CfgNode {
 
@@ -269,7 +24,6 @@ namespace Transformalize.Libs.Cfg.Net {
         private readonly Type _type;
         private readonly Dictionary<string, CfgMetadata> _metadata;
         private static Dictionary<string, char> _entities;
-        private NanoXmlNode _node;
 
         protected CfgNode() {
             _type = GetType();
@@ -336,11 +90,18 @@ namespace Transformalize.Libs.Cfg.Net {
             _problems.AddCustomProblem(problem, args);
         }
 
-        public void Load(string xml, Dictionary<string, string> parameters = null) {
+        public void Load(string cfg, Dictionary<string, string> parameters = null) {
 
+            INode node;
             try {
-                _node = new NanoXmlDocument(xml).RootNode;
-                var environmentDefaults = LoadEnvironment(_node, parameters).ToArray();
+                cfg = cfg.Trim();
+                if (cfg.StartsWith("{")) {
+                    node = new JsonNode(JSON.Parse(cfg));
+                } else {
+                    node = new XmlNode(new NanoXmlDocument(cfg).RootNode);
+                }
+
+                var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
                 if (environmentDefaults.Length > 0) {
                     for (var i = 0; i < environmentDefaults.Length; i++) {
                         if (i == 0 && parameters == null) {
@@ -352,43 +113,43 @@ namespace Transformalize.Libs.Cfg.Net {
                     }
                 }
             } catch (Exception ex) {
-                _problems.XmlParse(ex.Message);
+                _problems.ParseException(ex.Message);
                 return;
             }
 
-            LoadProperties(_node, null, parameters);
-            LoadCollections(_node, null, parameters);
+            LoadProperties(node, null, parameters);
+            LoadCollections(node, null, parameters);
             Modify();
             Validate();
         }
 
-        protected IEnumerable<string[]> LoadEnvironment(NanoXmlNode node, Dictionary<string, string> parameters) {
+        protected IEnumerable<string[]> LoadEnvironment(INode node, Dictionary<string, string> parameters) {
 
             for (var i = 0; i < node.SubNodes.Count; i++) {
                 var environmentsNode = node.SubNodes[i];
                 if (environmentsNode.Name != CfgConstants.ENVIRONMENTS_ELEMENT_NAME)
                     continue;
 
-                if (!environmentsNode.HasSubNode())
+                if (environmentsNode.SubNodes.Count == 0)
                     break;
 
-                NanoXmlNode environmentNode;
+                INode environmentNode;
 
                 if (environmentsNode.SubNodes.Count > 1) {
-                    NanoXmlAttribute defaultEnvironment;
+                    IAttribute defaultEnvironment;
                     if (!environmentsNode.TryAttribute(CfgConstants.ENVIRONMENTS_DEFAULT_NAME, out defaultEnvironment))
                         continue;
 
                     for (var j = 0; j < environmentsNode.SubNodes.Count; j++) {
                         environmentNode = environmentsNode.SubNodes[j];
 
-                        NanoXmlAttribute environmentName;
+                        IAttribute environmentName;
                         if (!environmentNode.TryAttribute("name", out environmentName))
                             continue;
 
                         var value = CheckParameters(parameters, defaultEnvironment.Value);
 
-                        if (value != environmentName.Value || !environmentNode.HasSubNode())
+                        if (!value.Equals(environmentName.Value) || environmentNode.SubNodes.Count == 0)
                             continue;
 
                         return GetParameters(environmentNode.SubNodes[0]);
@@ -396,12 +157,12 @@ namespace Transformalize.Libs.Cfg.Net {
                 }
 
                 environmentNode = environmentsNode.SubNodes[0];
-                if (!environmentNode.HasSubNode())
+                if (environmentNode.SubNodes.Count == 0)
                     break;
 
                 var parametersNode = environmentNode.SubNodes[0];
 
-                if (parametersNode.Name != CfgConstants.PARAMETERS_ELEMENT_NAME || !parametersNode.HasSubNode())
+                if (parametersNode.Name != CfgConstants.PARAMETERS_ELEMENT_NAME || environmentNode.SubNodes.Count == 0)
                     break;
 
                 return GetParameters(parametersNode);
@@ -411,7 +172,7 @@ namespace Transformalize.Libs.Cfg.Net {
             return Enumerable.Empty<string[]>();
         }
 
-        private static IEnumerable<string[]> GetParameters(NanoXmlNode parametersNode) {
+        private static IEnumerable<string[]> GetParameters(INode parametersNode) {
             var parameters = new List<string[]>();
 
             for (var j = 0; j < parametersNode.SubNodes.Count; j++) {
@@ -436,18 +197,12 @@ namespace Transformalize.Libs.Cfg.Net {
             return parameters;
         }
 
-        protected CfgNode Load(NanoXmlNode node, string parentName, Dictionary<string, string> parameters) {
-            _node = node;
-            LoadProperties(_node, parentName, parameters);
-            LoadCollections(_node, parentName, parameters);
+        protected CfgNode Load(INode node, string parentName, Dictionary<string, string> parameters) {
+            LoadProperties(node, parentName, parameters);
+            LoadCollections(node, parentName, parameters);
             Modify();
             Validate();
             return this;
-        }
-
-        //returns original xml string, does not reflect modifications
-        public override string ToString() {
-            return _node == null ? string.Empty : _node.ToString();
         }
 
         /// <summary>
@@ -460,7 +215,7 @@ namespace Transformalize.Libs.Cfg.Net {
         /// </summary>
         protected virtual void Modify() { }
 
-        private void LoadCollections(NanoXmlNode node, string parentName, Dictionary<string, string> parameters = null) {
+        private void LoadCollections(INode node, string parentName, Dictionary<string, string> parameters = null) {
 
             var keys = ElementCache[_type];
             var elements = new Dictionary<string, IList>();
@@ -490,7 +245,7 @@ namespace Transformalize.Libs.Cfg.Net {
                         } else {
                             _problems.SharedPropertyMissing(subNode.Name, item.SharedProperty, item.ListType.ToString());
                         }
-                        NanoXmlAttribute sharedAttribute;
+                        IAttribute sharedAttribute;
                         if (subNode.TryAttribute(item.SharedProperty, out sharedAttribute)) {
                             value = sharedAttribute.Value ?? item.SharedValue;
                         }
@@ -596,7 +351,7 @@ namespace Transformalize.Libs.Cfg.Net {
             return result;
         }
 
-        private void LoadProperties(NanoXmlNode node, string parentName, IDictionary<string, string> parameters = null) {
+        private void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
 
             var keys = PropertyCache[_type];
 
@@ -1184,34 +939,4 @@ namespace Transformalize.Libs.Cfg.Net {
 
     }
 
-    // Credit to http://stackoverflow.com/users/478478/alex-hope-oconnor
-    public static class ReflectionHelper {
-
-        public static Func<object, object> CreateGetter(PropertyInfo property) {
-            var getter = property.GetGetMethod();
-            var genericMethod = typeof(ReflectionHelper).GetMethod("CreateGetterGeneric");
-            var genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
-            return (Func<object, object>)genericHelper.Invoke(null, new object[] { getter });
-        }
-
-        public static Func<object, object> CreateGetterGeneric<T, R>(MethodInfo getter) where T : class {
-            var getterTypedDelegate = (Func<T, R>)Delegate.CreateDelegate(typeof(Func<T, R>), getter);
-            var getterDelegate = (Func<object, object>)((object instance) => getterTypedDelegate((T)instance));
-            return getterDelegate;
-        }
-
-        public static Action<object, object> CreateSetter(PropertyInfo property) {
-            var setter = property.GetSetMethod();
-            var genericMethod = typeof(ReflectionHelper).GetMethod("CreateSetterGeneric");
-            var genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
-            return (Action<object, object>)genericHelper.Invoke(null, new object[] { setter });
-        }
-
-        public static Action<object, object> CreateSetterGeneric<T, V>(MethodInfo setter) where T : class {
-            var setterTypedDelegate = (Action<T, V>)Delegate.CreateDelegate(typeof(Action<T, V>), setter);
-            var setterDelegate = (Action<object, object>)((instance, value) => setterTypedDelegate((T)instance, (V)value));
-            return setterDelegate;
-        }
-
-    }
 }
