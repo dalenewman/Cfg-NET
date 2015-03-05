@@ -4,9 +4,7 @@ Cfg-NET
 ##Introduction
 Cfg-NET is a .NET configuration handler.  It is an
 alternative to using custom section handler in your
-_app_ or _web.config_.
-
-Cfg-NET is [open sourced](https://github.com/dalenewman/Cfg.Net)
+_app_ or _web.config_. It is [open sourced](https://github.com/dalenewman/Cfg.Net)
 under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
 A good configuration:
@@ -68,26 +66,11 @@ To have any influence over the properties, they must be
 decorated with a `Cfg` attribute.  `Cfg` adds
 configuration _metadata_ to the property.
 
-The configuration metadata is:
-
-* value (default value)
-* toLower
-* toUpper
-* domain (a valid list of values)
-  * domainDelimiter (delimits the domain)
-  * ignoreCase
-* minLength
-* maxLength
-* required
-* unique
-
 In the above code, we modeled a collection of _servers_.
 The metadata indicates that each _server_ has a
 **required**, and **unique** _name_.
 
-You can do more than just request required, unique properties though:
-
-####Metadata
+####Cfg Attribute Metadata
 
 Metadata descibes modifications, and/or validation
 that we want for each property.  It is processed
@@ -140,20 +123,20 @@ cfg.Load(File.ReadAllText(&quot;BackupManager.xml&quot;));
 I suggest adding a constructor to the `Cfg` class:
 
 <pre class="prettyprint" lang="cs">
-public class Cfg : CfgNode {
-    [Cfg(required = true)]
-    public List&lt;CfgServer&gt; Servers { get; set; }
-    //constructor
-    public Cfg(string cfg) {
-        this.Load(cfg);
+    public class Cfg : CfgNode {
+        [Cfg(required = true)]
+        public List&lt;CfgServer&gt; Servers { get; set; }
+        //constructor
+        public Cfg(string cfg) {
+            this.Load(cfg);
+        }
     }
-}
 </pre>
 
 Now loading it is one line:
 
 <pre class="prettyprint" lang="cs">
-var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+    var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
 </pre>
 
 ###Is the Configuration Valid?
@@ -164,10 +147,10 @@ _all_ the problems. So, after loading, you should always
 check for any problems using the `Problems()` method:
 
 <pre class="prettyprint" lang="cs">
-//LOAD CONFIGURATION
-var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-//TEST FOR PROBLEMS
-Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
+    //LOAD CONFIGURATION
+    var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+    //TEST FOR PROBLEMS
+    Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
 </pre>
 
 By collecting multiple problems,
@@ -203,9 +186,7 @@ an optional `backups-to-keep` attribute.
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
-
 namespace Cfg.Test {
-
     public class Cfg : CfgNode {
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
@@ -213,14 +194,12 @@ namespace Cfg.Test {
             this.Load(xml);
         }
     }
-
     public class CfgServer : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
         <strong>[Cfg(required = true)]
         public List&lt;CfgDatabase&gt; Databases { get; set; }</strong>
     }
-
     <strong>public class CfgDatabase : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
@@ -229,31 +208,30 @@ namespace Cfg.Test {
         [Cfg(value = 4)]
         public int BackupsToKeep { get; set; }
     }</strong>
-
 }
 </pre>
 
 Now let's update *BackupManager.xml* or *BackupManager.json*:
 
 <pre class="prettyprint" lang="xml">
-&lt;backup-manager&gt;
-    &lt;servers&gt;
-        &lt;add name=&quot;Gandalf&quot;&gt;
-            &lt;databases&gt;
-                &lt;add name=&quot;master&quot;
-                     backup-folder=&quot;\\san\sql-backups\gandalf\master&quot; /&gt;
-            &lt;/databases&gt;
-        &lt;/add&gt;
-        &lt;add name=&quot;Saruman&quot;&gt;
-            &lt;databases&gt;
-                &lt;add name=&quot;master&quot;
-                     backup-folder=&quot;\\san\sql-backups\saruman\master&quot; /&gt;
-                &lt;add name=&quot;model&quot;
-                     backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
-            &lt;/databases&gt;
-        &lt;/add&gt;
-    &lt;/servers&gt;
-&lt;/backup-manager&gt;
+    &lt;backup-manager&gt;
+        &lt;servers&gt;
+            &lt;add name=&quot;Gandalf&quot;&gt;
+                &lt;databases&gt;
+                    &lt;add name=&quot;master&quot;
+                         backup-folder=&quot;\\san\sql-backups\gandalf\master&quot; /&gt;
+                &lt;/databases&gt;
+            &lt;/add&gt;
+            &lt;add name=&quot;Saruman&quot;&gt;
+                &lt;databases&gt;
+                    &lt;add name=&quot;master&quot;
+                         backup-folder=&quot;\\san\sql-backups\saruman\master&quot; /&gt;
+                    &lt;add name=&quot;model&quot;
+                         backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
+                &lt;/databases&gt;
+            &lt;/add&gt;
+        &lt;/servers&gt;
+    &lt;/backup-manager&gt;
 </pre>
 _or_
 <pre class="prettyprint" lang="js">
@@ -286,15 +264,15 @@ Our program can easily loop through
 the servers and databases like this:
 
 <pre class="prettyprint" lang="cs">
-var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+    var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
 
-//check for problems
+    //check for problems
 
-foreach (var server in cfg.Servers) {
-    foreach (var database in server.Databases) {
-        // do something amazing with server.Name, database.Name, and database.BackupFolder...  
+    foreach (var server in cfg.Servers) {
+        foreach (var database in server.Databases) {
+            // do something amazing with server.Name, database.Name, and database.BackupFolder...  
+        }
     }
-}
 </pre>
 
 If you set default values, you never have to worry
@@ -321,11 +299,14 @@ public class Connection : CfgNode {
  
     [Cfg(required = true, domain = &quot;file,folder,other&quot;)]
     public string Provider { get; set; }
+
     [Cfg()]
     public string File { get; set; }
+
     [Cfg()]
     public string Folder { get; set; }
-<strong>// custom validation
+
+    <strong>// custom validation
     protected override void Validate() {
         if (Provider == &quot;file&quot; &amp;&amp; string.IsNullOrEmpty(File)) {
             AddProblem(&quot;file provider needs file attribute.&quot;);
@@ -363,18 +344,18 @@ _before_ `Validate()` runs.  It has access to all the properties.
 
 You don't have to use auto-properties.  Instead of this:
 <pre class="prettyprint" lang="csharp">
-[Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
-public string Provider { get; set; }
+    [Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
+    public string Provider { get; set; }
 </pre>
 You can use a property with a backing field:
 <pre class="prettyprint" lang="csharp">
-private string _provider;
-...
-[Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
-public string Provider {
-    get { return _provider; }
-    set { _provider = value == null ? string.Empty : value.ToLower(); }
-}
+    private string _provider;
+    ...
+    [Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
+    public string Provider {
+        get { return _provider; }
+        set { _provider = value == null ? string.Empty : value.ToLower(); }
+    }
 </pre>
 
 ##Finishing Up The Scenario
@@ -389,7 +370,7 @@ the configuration file to be passed in as an argument,
 like this:
 
 <pre class="prettyprint" lang="bash">
-C:\> BackupManager.exe BackupManager.xml
+    C:\> BackupManager.exe BackupManager.xml
 </pre>
 
 Show the DBA how to add or remove servers and
@@ -511,8 +492,8 @@ exactly.  They are case-sensitive. In XML, they would look like this:
 
 Place-holders are replaced with environment default parameter values as the XML is loaded.
 
-When environment defaults are not applicable, 
-or you want to override them, pass a dictionary 
+When environment defaults are not applicable,
+or you want to override them, pass a dictionary
 of parameters into the `CfgNode.Load()` method.
 
 Here is an example:
