@@ -203,7 +203,9 @@ an optional `backups-to-keep` attribute.
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
+
 namespace Cfg.Test {
+
     public class Cfg : CfgNode {
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
@@ -211,13 +213,15 @@ namespace Cfg.Test {
             this.Load(xml);
         }
     }
+
     public class CfgServer : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
-<strong>[Cfg(required = true)]
+        <strong>[Cfg(required = true)]
         public List&lt;CfgDatabase&gt; Databases { get; set; }</strong>
     }
-<strong>public class CfgDatabase : CfgNode {
+
+    <strong>public class CfgDatabase : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
         [Cfg(required = true, unique = true)]
@@ -225,6 +229,7 @@ namespace Cfg.Test {
         [Cfg(value = 4)]
         public int BackupsToKeep { get; set; }
     }</strong>
+
 }
 </pre>
 
@@ -282,7 +287,9 @@ the servers and databases like this:
 
 <pre class="prettyprint" lang="cs">
 var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+
 //check for problems
+
 foreach (var server in cfg.Servers) {
     foreach (var database in server.Databases) {
         // do something amazing with server.Name, database.Name, and database.BackupFolder...  
@@ -291,9 +298,9 @@ foreach (var server in cfg.Servers) {
 </pre>
 
 If you set default values, you never have to worry
-about a property being `null`.  Moreover, you never 
-have to worry about a list being `null`; all lists 
-decorated with the `Cfg` attribute are 
+about a property being `null`.  Moreover, you never
+have to worry about a list being `null`; all lists
+decorated with the `Cfg` attribute are
 initialized.
 
 ##Validation &amp; Modification
@@ -318,7 +325,7 @@ public class Connection : CfgNode {
     public string File { get; set; }
     [Cfg()]
     public string Folder { get; set; }
-    <strong>// custom validation
+<strong>// custom validation
     protected override void Validate() {
         if (Provider == &quot;file&quot; &amp;&amp; string.IsNullOrEmpty(File)) {
             AddProblem(&quot;file provider needs file attribute.&quot;);
@@ -377,7 +384,7 @@ backup sets, for _y_ servers, and _z_ databases, deploy
 your program with some method of allowing the user to
 update and choose the configuration he/she wants to use.
 
-For example, in a a Console application (e.g. *BackupManager.exe*), allow
+For example, in a Console application (e.g. *BackupManager.exe*), allow
 the configuration file to be passed in as an argument,
 like this:
 
@@ -503,8 +510,9 @@ exactly.  They are case-sensitive. In XML, they would look like this:
 Place-holders are replaced with environment default parameter values as the XML is loaded.
 
 When environment defaults are not applicable, or you want to override them, pass
-a `Dictionary<string,string>` of parameters into the `CfgNode.Load()` method.
-Here is an example:
+a `Dictionary<string,string>`<string,string>
+    `` of parameters into the `CfgNode.Load()` method.
+    Here is an example:
 
 <pre class="prettyprint" lang="cs">
 var parameters = new Dictionary&lt;string, string&gt; {
@@ -514,17 +522,17 @@ var parameters = new Dictionary&lt;string, string&gt; {
 var cfg = new Cfg(File.ReadAllText(&quot;Something.xml&quot;), parameters);
 </pre>
 
-__Note__: If you have a place-holder in the configuration,
-and you don't setup an environment default, or pass in a parameter, Cfg.NET
-reports it as a problem. So, always check for `Problems()` after loading the configuration.
+    __Note__: If you have a place-holder in the configuration,
+    and you don't setup an environment default, or pass in a parameter, Cfg.NET
+    reports it as a problem. So, always check for `Problems()` after loading the configuration.
 
-##About the Code:
+    ##About the Code:
 
-Cfg.Net is over-engineered to keep it independent. 
-It only references `System` and `System.Core`.  It 
-targets the .NET 4 Client Profile framework.
+    Cfg.Net is over-engineered to keep it independent.
+    It only references `System` and `System.Core`.  It
+    targets the .NET 4 Client Profile framework.
 
-###Credits
-*  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
-*  a modified version of `fastJSON` found [here](http://www.codeproject.com/Articles/159450/fastJSON)
-*  .NET Source of WebUtility.HtmlDecode found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
+    ###Credits
+    *  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
+    *  a modified version of `fastJSON` found [here](http://www.codeproject.com/Articles/159450/fastJSON)
+    *  .NET Source of WebUtility.HtmlDecode found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
