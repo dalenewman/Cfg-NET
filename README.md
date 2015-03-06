@@ -37,20 +37,27 @@ associated _backup folder_.
 
 Using [Nuget](https://www.nuget.org/packages/Cfg-NET/) package
 manager, search for "Cfg-NET", or install
-with `PM> Install-Package Cfg-NET` command.
+with the `PM> Install-Package Cfg-NET` command.
 Then, in code, _model_ your configuration:
 
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
-using Transformalize.Libs.Cfg.Net;
+<strong>using Transformalize.Libs.Cfg.Net;</strong>
+
 namespace Cfg.Test {
-    public class Cfg : CfgNode {
-        [Cfg(required = true)]
+
+    public class Cfg : <strong>CfgNode</strong> {
+
+        <strong>[Cfg(required = true)]</strong>
         public List&lt;CfgServer&gt; Servers { get; set; }
+
     }
-    public class CfgServer : CfgNode {
-        [Cfg(required = true, unique = true)]
+
+    public class CfgServer : <strong>CfgNode</strong> {
+
+        <strong>[Cfg(required = true, unique = true)]</strong>
         public string Name { get; set; }
+
     }
 }
 </pre>
@@ -64,26 +71,28 @@ from `CfgNode`.
 ####The Cfg Attribute
 To have any influence over the properties, they must be
 decorated with a `Cfg` attribute.  `Cfg` adds
-configuration _metadata_ to the property.
+configuration instructions to the property.
 
 In the above code, we modeled a collection of _servers_.
-The metadata indicates that each _server_ has a
-**required**, and **unique** _name_.
+The `Cfg` attribute properties indicate that 
+each _server_ has a **required**, 
+and **unique** _name_.
 
-####Cfg Attribute Metadata
+####Cfg Attribute Properties
 
-Metadata descibes modifications, and/or validation
-that we want for each property.  It is processed
-in this order:
+The properties descibe modification, 
+and/or validation instructions for each property. 
+The properties are processed against configuration 
+values in this order:
 
 1. `value` set a default value
 1. `toLower` lower case the value
 1. `toUpper` upper cases the value
 1. `domain` check value against a list of valid values
-2. `minLength` check value against a minimum length
-3. `maxLength` check value against a maximum length
-3. `required` make sure value exists
-4. `unique` make sure value is unique
+1. `minLength` check value against a minimum length
+1. `maxLength` check value against a maximum length
+1. `required` make sure value exists
+1. `unique` make sure value is unique
 
 ###Create Corresponding Configuration
 
@@ -113,23 +122,25 @@ Save this to a file called *BackupManager.xml* or *BackupManager.json*.
 
 ###Load the Configuration
 
-To load the file into your model like this:
+Load the file into your model like this:
 
 <pre class="prettyprint" lang="cs">
-var cfg = new Cfg();
-cfg.Load(File.ReadAllText(&quot;BackupManager.xml&quot;));
+    var cfg = new Cfg();
+    cfg.Load(File.ReadAllText(&quot;BackupManager.xml&quot;));
 </pre>
 
 I suggest adding a constructor to the `Cfg` class:
 
 <pre class="prettyprint" lang="cs">
     public class Cfg : CfgNode {
+
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
+
         //constructor
-        public Cfg(string cfg) {
+        <strong>public Cfg(string cfg) {
             this.Load(cfg);
-        }
+        }</strong>
     }
 </pre>
 
@@ -149,15 +160,16 @@ check for any problems using the `Problems()` method:
 <pre class="prettyprint" lang="cs">
     //LOAD CONFIGURATION
     var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+
     //TEST FOR PROBLEMS
     Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
 </pre>
 
 By collecting multiple problems,
 you can report them to an end-user
-who can fix them all at once. Cfg-NET tries
-to produce problem messages that are
-useful. Here are some examples:
+who can attempt to fix them all at once. 
+The problem messages produced are usually 
+quite helpful. Here are some examples:
 
 Put another server named *Gandalf* in there, and it says:
 <pre class="prettyprint" lang="yaml">
@@ -179,32 +191,43 @@ Each _database_ must have a unique `name` and
 unique `backup-folder`.
 
 The DBA said he wanted **4** backup sets, but since
-we know people change their minds, we're going save
+we know people change their minds, we're going to save
 ourself some (future) time by adding
 an optional `backups-to-keep` attribute.
 
 <pre class="prettyprint" lang="cs">
 using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
+
 namespace Cfg.Test {
+
     public class Cfg : CfgNode {
+
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
+
         public Cfg(string xml) {
             this.Load(xml);
         }
     }
+
     public class CfgServer : CfgNode {
+
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
+
         <strong>[Cfg(required = true)]
         public List&lt;CfgDatabase&gt; Databases { get; set; }</strong>
     }
+
     <strong>public class CfgDatabase : CfgNode {
+
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
+
         [Cfg(required = true, unique = true)]
         public string BackupFolder { get; set; }
+
         [Cfg(value = 4)]
         public int BackupsToKeep { get; set; }
     }</strong>
@@ -270,7 +293,7 @@ the servers and databases like this:
 
     foreach (var server in cfg.Servers) {
         foreach (var database in server.Databases) {
-            // do something amazing with server.Name, database.Name, and database.BackupFolder...  
+            // use server.Name, database.Name, and database.BackupFolder...  
         }
     }
 </pre>
@@ -282,8 +305,8 @@ decorated with the `Cfg` attribute are
 initialized.
 
 ##Validation &amp; Modification
-Cfg-NET metadata and types offer some validation.
-If it's not enough, you have three ways to customize it:
+The `Cfg` attribute properties offer validation. 
+If it's not enough, you have three ways to add more:
 
 1. Overriding Validate()
 2. Overriding Modify()
@@ -330,11 +353,12 @@ the configuration, you may override `Modify()`
 like this:
 
 <pre class="prettyprint" lang="csharp">
-protected override void Modify() {
-    if (Provider != null) {
-        Provider = Provider.ToLower();
+    protected override void Modify() {
+
+        if (Provider != null) {
+            Provider = Provider.ToLower();
+        }
     }
-}
 </pre>
 
 `Modify()` runs _after_ the properties are set, but
@@ -450,26 +474,33 @@ A Cfg-NET implementation of the above XML looks like this:
 
 <pre class="prettyprint" lang="cs">
     public class MyCfg : CfgNode {
+
         public MyCfg(string xml) {
             this.Load(xml);
         }
+
         [Cfg(required = false, sharedProperty = &quot;default&quot;, sharedValue = &quot;&quot;)]
         public List&lt;MyEnvironment&gt; Environments { get; set; }
     }
 
     public class MyEnvironment : CfgNode {
+
         [Cfg(required = true)]
         public string Name { get; set; }
+
         [Cfg(required = true)]
         public List&lt;MyParameter&gt; Parameters { get; set; }
+
         //shared property
         [Cfg()]
         public string Default { get; set; }
     }
 
     public class MyParameter : CfgNode {
+
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
+
         [Cfg(required = true)]
         public string Value { get; set; }
     }
