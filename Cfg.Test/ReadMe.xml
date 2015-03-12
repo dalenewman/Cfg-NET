@@ -6,7 +6,6 @@
         <add name="master" backups-to-keep="6"/>
       </databases>
     </add>
-    <add nickName="Aladin" />
     <add name="Saruman">
       <databases>
         <add name="master" backup-folder="\\san\sql-backups\saruman\master" backups-to-keep="8" />

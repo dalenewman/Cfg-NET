@@ -24,6 +24,11 @@ namespace Cfg.Test {
             var cfg = new Big(json);
             var problems = cfg.Problems();
 
+            foreach (var problem in problems)
+            {
+                Console.WriteLine(problem);
+            }
+
             Assert.AreEqual(0, problems.Count);
             Assert.AreEqual(99999999, cfg.BigValues.First().BigValue);
         }

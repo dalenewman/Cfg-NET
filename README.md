@@ -64,35 +64,37 @@ namespace Cfg.Test {
 
 ####The CfgNode Class
 
-Each class (above) inherits from `CfgNode`. All
-parts of your Cfg-NET configuration _model_ must inherit
-from `CfgNode`.
+The classes above model a 
+collection of _servers_.  `Cfg` is 
+the root, and it holds a list of 
+`CfgServer`.  Both `Cfg` and `CfgServer` 
+inherit from `CfgNode`.  Your configuration 
+model must inherit from `CfgNode`. 
 
 ####The Cfg Attribute
-To have any influence over the properties, they must be
-decorated with a `Cfg` attribute.  `Cfg` adds
-configuration instructions to the property.
 
-In the above code, we modeled a collection of _servers_.
-The `Cfg` attribute properties indicate that 
-each _server_ has a **required**, 
-and **unique** _name_.
+To control your model's properties, 
+decorate them with a `Cfg` attribute. `Cfg` adds
+validation and modification instructions 
+to the property.
 
-####Cfg Attribute Properties
+In our model above, the `Cfg` 
+attribute properties indicate that 
+each server has a **required**, 
+and **unique** name.
 
-The properties descibe modification, 
-and/or validation instructions for each property. 
-The properties are processed against configuration 
-values in this order:
+Attributes are processed in this order:
 
 1. `value` set a default value
-1. `toLower` lower case the value
-1. `toUpper` upper cases the value
-1. `domain` check value against a list of valid values
-1. `minLength` check value against a minimum length
-1. `maxLength` check value against a maximum length
-1. `required` make sure value exists
-1. `unique` make sure value is unique
+1. `toLower` lower case the input
+1. `toUpper` upper case the input
+1. `domain` checks input against valid values
+1. `minLength` checks input against a minimum length
+1. `maxLength` checks input against a maximum length
+1. `minValue` checks input against a minimum value
+1. `maxValue` checks input against a maximum value
+1. `required` confirms value exists
+1. `unique` confirms value is unique
 
 ###Create Corresponding Configuration
 
@@ -181,6 +183,10 @@ Add a _nickName_ instead of a _name_ in servers, and it says:
 A 'servers' 'add' element contains an invalid 'nickName' attribute.  Valid attributes are: name.
 A 'servers' 'add' element is missing a 'name' attribute.
 </pre>
+
+If Cfg-NET doesn't report any problems, you can 
+be sure your configuration conforms
+to your model.
 
 ###Back to the Scenario
 

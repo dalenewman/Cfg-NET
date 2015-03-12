@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -361,6 +362,7 @@ namespace Transformalize.Libs.Cfg.Net {
             var keyHits = new HashSet<string>();
 
             for (var i = 0; i < node.Attributes.Count; i++) {
+
                 var attribute = node.Attributes[i];
                 var attributeKey = NormalizeName(_type, attribute.Name, _builder);
                 if (_metadata.ContainsKey(attributeKey)) {
@@ -403,8 +405,8 @@ namespace Transformalize.Libs.Cfg.Net {
                     // Setter has been called and may have changed the value
                     var value = item.Getter(this);
 
-                    // see if we have to convert to string for testing
-                    if (item.Attribute.DomainSet || item.Attribute.MinLengthSet || item.Attribute.MaxLengthSet) {
+                    if (item.Attribute.NeedString) {
+
                         var stringValue = item.PropertyInfo.PropertyType == typeof(string) ? (string)value : value.ToString();
 
                         if (item.Attribute.DomainSet) {
@@ -417,19 +419,11 @@ namespace Transformalize.Libs.Cfg.Net {
                             }
                         }
 
-                        if (item.Attribute.MinLengthSet) {
-                            if (stringValue.Length < item.Attribute.minLength) {
-                                _problems.ValueTooShort(attribute.Name, stringValue, item.Attribute.minLength);
-                            }
-                        }
-
-                        if (item.Attribute.MaxLengthSet) {
-                            if (stringValue.Length > item.Attribute.maxLength) {
-                                _problems.ValueTooLong(attribute.Name, stringValue, item.Attribute.maxLength);
-                            }
-                        }
+                        CheckValueLength(item.Attribute, attribute.Name, stringValue);
 
                     }
+
+                    CheckValueBoundaries(item.Attribute, attribute.Name, value);
 
                     attribute.Value = decoded ? Encode(value.ToString(), _builder) : value.ToString();
                 } else {
@@ -445,6 +439,46 @@ namespace Transformalize.Libs.Cfg.Net {
                 }
             }
 
+        }
+
+        private void CheckValueLength(CfgAttribute itemAttributes, string name, string value) {
+
+            if (itemAttributes.MinLengthSet) {
+                if (value.Length < itemAttributes.minLength) {
+                    _problems.ValueTooShort(name, value, itemAttributes.minLength);
+                }
+            }
+
+            if (!itemAttributes.MaxLengthSet)
+                return;
+
+            if (value.Length > itemAttributes.maxLength) {
+                _problems.ValueTooLong(name, value, itemAttributes.maxLength);
+            }
+        }
+
+        private void CheckValueBoundaries(CfgAttribute itemAttributes, string name, object value) {
+
+            if (!itemAttributes.MinValueSet && !itemAttributes.MaxValueSet)
+                return;
+
+            var comparable = value as IComparable;
+            if (comparable == null) {
+                _problems.ValueIsNotComparable(name, value);
+            } else {
+                if (itemAttributes.MinValueSet) {
+                    if (comparable.CompareTo(itemAttributes.minValue) < 0) {
+                        _problems.ValueTooSmall(name, value, itemAttributes.minValue);
+                    }
+                }
+
+                if (!itemAttributes.MaxValueSet)
+                    return;
+
+                if (comparable.CompareTo(itemAttributes.maxValue) > 0) {
+                    _problems.ValueTooBig(name, value, itemAttributes.maxValue);
+                }
+            }
         }
 
         private string CheckParameters(IDictionary<string, string> parameters, string input) {
@@ -797,13 +831,33 @@ namespace Transformalize.Libs.Cfg.Net {
                 var key = NormalizeName(type, propertyInfo.Name, sb);
                 var item = new CfgMetadata(propertyInfo, attribute);
 
-                // report default value and property type mismatches
-                if (attribute.value != null) {
-                    var attributeType = attribute.value.GetType();
-                    if (attributeType != propertyInfo.PropertyType) {
-                        item.TypeMismatch = true;
-                        problems.TypeMismatch(key, attributeType, propertyInfo.PropertyType);
+                // check default value for type mismatch
+                if (attribute.ValueIsSet) {
+                    if (attribute.value.GetType() != propertyInfo.PropertyType) {
+                        var value = attribute.value;
+                        if (TryConvertValue(ref value, propertyInfo.PropertyType)) {
+                            attribute.value = value;
+                        } else {
+                            item.TypeMismatch = true;
+                            problems.TypeMismatch(key, value, propertyInfo.PropertyType);
+                        }
                     }
+                }
+
+                // type safety for value, min value, and max value
+                var defaultValue = attribute.value;
+                if (ResolveType(() => attribute.ValueIsSet, ref defaultValue, key, item, problems)) {
+                    attribute.value = defaultValue;
+                }
+
+                var minValue = attribute.minValue;
+                if (ResolveType(() => attribute.MinValueSet, ref minValue, key, item, problems)) {
+                    attribute.minValue = minValue;
+                }
+
+                var maxValue = attribute.maxValue;
+                if (ResolveType(() => attribute.MaxValueSet, ref maxValue, key, item, problems)) {
+                    attribute.maxValue = maxValue;
                 }
 
                 if (propertyInfo.PropertyType.IsGenericType) {
@@ -835,6 +889,35 @@ namespace Transformalize.Libs.Cfg.Net {
                 }
             }
             return metadata;
+        }
+
+        private static bool ResolveType(Func<bool> isSet, ref object input, string key, CfgMetadata metadata, CfgProblems problems) {
+            if (!isSet())
+                return true;
+
+            var type = metadata.PropertyInfo.PropertyType;
+
+            if (input.GetType() == type)
+                return true;
+
+            var value = input;
+            if (TryConvertValue(ref value, type)) {
+                input = value;
+                return true;
+            }
+
+            metadata.TypeMismatch = true;
+            problems.TypeMismatch(key, value, type);
+            return false;
+        }
+
+        private static bool TryConvertValue(ref object value, Type conversionType) {
+            try {
+                value = Convert.ChangeType(value, conversionType);
+                return true;
+            } catch {
+                return false;
+            }
         }
 
         // a naive implementation for hand-written configurations

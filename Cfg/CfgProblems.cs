@@ -2,8 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 
-namespace Transformalize.Libs.Cfg.Net
-{
+namespace Transformalize.Libs.Cfg.Net {
     public class CfgProblems {
 
         private readonly StringBuilder _storage = new StringBuilder();
@@ -34,7 +33,7 @@ namespace Transformalize.Libs.Cfg.Net
         }
 
         public void MissingElement(string nodeName, string elementName) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_MISSING_ELEMENT, nodeName == string.Empty ? "root" : "'"+nodeName+"'", elementName, Suffix(elementName));
+            _storage.AppendFormat(CfgConstants.PROBLEM_MISSING_ELEMENT, nodeName == string.Empty ? "root" : "'" + nodeName + "'", elementName, Suffix(elementName));
             _storage.AppendLine();
         }
 
@@ -108,8 +107,8 @@ namespace Transformalize.Libs.Cfg.Net
             _storage.AppendLine();
         }
 
-        public void TypeMismatch(string key, Type defaultType, Type propertyType) {
-            _storage.AppendFormat(CfgConstants.PROBLEM_TYPE_MISMATCH, key, defaultType, propertyType);
+        public void TypeMismatch(string key, object value, Type propertyType) {
+            _storage.AppendFormat(CfgConstants.PROBLEM_TYPE_MISMATCH, key, value, propertyType);
             _storage.AppendLine();
         }
 
@@ -120,6 +119,21 @@ namespace Transformalize.Libs.Cfg.Net
 
         public void ValueTooLong(string name, string value, int maxLength) {
             _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_TOO_LONG, name, value, maxLength, value.Length);
+            _storage.AppendLine();
+        }
+
+        public void ValueIsNotComparable(string name, object value) {
+            _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_IS_NOT_COMPARABLE, name, value);
+            _storage.AppendLine();
+        }
+
+        public void ValueTooSmall(string name, object value, object minValue) {
+            _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_IS_TOO_SMALL, name, value, minValue);
+            _storage.AppendLine();
+        }
+
+        public void ValueTooBig(string name, object value, object maxValue) {
+            _storage.AppendFormat(CfgConstants.PROBLEM_VALUE_IS_TOO_BIG, name, value, maxValue);
             _storage.AppendLine();
         }
 

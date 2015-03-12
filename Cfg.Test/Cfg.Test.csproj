@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Case.cs" />
+    <Compile Include="Value.cs" />
     <Compile Include="Length.cs" />
     <Compile Include="ElementNameVariations.cs" />
     <Compile Include="ListOfString.cs" />

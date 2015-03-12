@@ -33,9 +33,12 @@ namespace Transformalize.Libs.Cfg.Net
         public static string PROBLEM_ROOT_VALUE_NOT_IN_DOMAIN = "The root element has an invalid value of '{0}' in the '{1}' attribute.  The valid domain is: {2}.";
         public static string PROBLEM_SHARED_PROPERTY_MISSING = "A{3} '{0}' shared property '{1}' is missing in '{2}'.  Make sure it is defined and decorated with [Cfg()].";
         public static string PROBLEM_ONLY_ONE_ATTRIBUTE_ALLOWED = "You must have exactly 1 attribute in '{0}' '{1}'.  You have {2}.";
-        public static string PROBLEM_TYPE_MISMATCH = "The `{0}` attribute's default value's type ({1}) does not match the property type ({2}).";
+        public static string PROBLEM_TYPE_MISMATCH = "The `{0}` attribute's default value `{1}` does not have the same type as the property type of `{2}`.";
         public static string PROBLEM_VALUE_TOO_SHORT = "The `{0}` attribute's value `{1}` is too short. It's {3} characters. It must be at least {2} characters.";
         public static string PROBLEM_VALUE_TOO_LONG = "The `{0}` attribute's value `{1}` is too long. It's {3} characters. It must not exceed {2} characters.";
+        public static string PROBLEM_VALUE_IS_NOT_COMPARABLE = "The `{0}` attribute's value `{1}` is not comparable.  Having a minValue or maxValue set on an incomparable property type causes this.";
+        public static string PROBLEM_VALUE_IS_TOO_SMALL = "The `{0}` attribute's value `{1}` is too small. The minimum value allowed is `{2}`.";
+        public static string PROBLEM_VALUE_IS_TOO_BIG = "The `{0}` attribute's value `{1}` is too big. The maximum value allowed is `{2}`.";
         // ReSharper restore InconsistentNaming
     }
 }

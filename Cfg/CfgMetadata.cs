@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Transformalize.Libs.Cfg.Net
-{
+namespace Transformalize.Libs.Cfg.Net {
+
     public class CfgMetadata {
+
         private readonly HashSet<string> _domainSet;
 
         public PropertyInfo PropertyInfo { get; set; }
@@ -29,11 +30,7 @@ namespace Transformalize.Libs.Cfg.Net
                 attribute.domainDelimiter = ',';
             }
 
-            if (attribute.ignoreCase) {
-                _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.domainDelimiter }, StringSplitOptions.None), StringComparer.OrdinalIgnoreCase);
-            } else {
-                _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.domainDelimiter }, StringSplitOptions.None), StringComparer.Ordinal);
-            }
+            _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.domainDelimiter }, StringSplitOptions.None), attribute.ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         }
 
         public bool IsInDomain(string value) {
