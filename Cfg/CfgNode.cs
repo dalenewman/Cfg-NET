@@ -824,7 +824,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 if (!propertyInfo.CanWrite)
                     continue;
 
-                var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute));
+                var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
                 if (attribute == null)
                     continue;
 
@@ -863,7 +863,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 if (propertyInfo.PropertyType.IsGenericType) {
                     listCache.Add(key);
                     item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                    if (item.ListType.BaseType == typeof(CfgNode)) {
+                    if (item.ListType.IsSubclassOf(typeof(CfgNode))) {
                         item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
                     }
                     if (attribute.sharedProperty != null) {
