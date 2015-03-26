@@ -86,6 +86,9 @@
     <None Include="ReadMe.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Content Include="ReadMe2.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ReadMe.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

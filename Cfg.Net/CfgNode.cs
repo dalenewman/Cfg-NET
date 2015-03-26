@@ -318,23 +318,33 @@ namespace Transformalize.Libs.Cfg.Net {
                 var list = elements[key];
 
                 if (list.Count > 1) {
-                    if (item.UniquePropertiesInList.Length > 0) {
-                        for (var j = 0; j < item.UniquePropertiesInList.Length; j++) {
-                            var unique = item.UniquePropertiesInList[j];
-                            var duplicates = list
-                                .Cast<CfgNode>()
-                                .Where(n => n.UniqueProperties.ContainsKey(unique))
-                                .Select(n => n.UniqueProperties[unique])
-                                .GroupBy(n => n)
-                                .Where(group => group.Count() > 1)
-                                .Select(group => group.Key)
+
+                    lock (Locker) {
+                        if (item.UniquePropertiesInList == null) {
+                            item.UniquePropertiesInList = GetMetadata(item.ListType, _problems, _builder)
+                                .Where(p => p.Value.Attribute.unique)
+                                .Select(p => p.Key)
                                 .ToArray();
-
-                            for (var l = 0; l < duplicates.Length; l++) {
-                                _problems.DuplicateSet(unique, duplicates[l], key);
-                            }
                         }
+                    }
 
+                    if (item.UniquePropertiesInList.Length <= 0) 
+                        continue;
+
+                    for (var j = 0; j < item.UniquePropertiesInList.Length; j++) {
+                        var unique = item.UniquePropertiesInList[j];
+                        var duplicates = list
+                            .Cast<CfgNode>()
+                            .Where(n => n.UniqueProperties.ContainsKey(unique))
+                            .Select(n => n.UniqueProperties[unique])
+                            .GroupBy(n => n)
+                            .Where(group => @group.Count() > 1)
+                            .Select(group => @group.Key)
+                            .ToArray();
+
+                        for (var l = 0; l < duplicates.Length; l++) {
+                            _problems.DuplicateSet(unique, duplicates[l], key);
+                        }
                     }
                 } else if (list.Count == 0 && item.Attribute.required) {
                     if (elementHits.Contains(key) && !addHits.Contains(key)) {
@@ -896,16 +906,13 @@ namespace Transformalize.Libs.Cfg.Net {
                     metadata[key] = item;
                 }
 
-                foreach (var item in metadata) {
-                    if (item.Value.ListType != null) {
-                        item.Value.UniquePropertiesInList = GetMetadata(item.Value.ListType, problems, sb).Where(p => p.Value.Attribute.unique).Select(p => p.Key).ToArray();
-                    }
-                }
-
                 _propertyCache[type] = keyCache;
                 _elementCache[type] = listCache;
-                return _metadataCache[type] = metadata;
+                _metadataCache[type] = metadata;
+
             }
+
+            return _metadataCache[type];
 
         }
 

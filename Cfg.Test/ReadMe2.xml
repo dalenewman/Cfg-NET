@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<cfg>
+  <servers>
+    <add name="Sam">
+      <databases>
+        <add name="master" backups-to-keep="5"/>
+        <add name="msdb" backups-to-keep="2"/>
+      </databases>
+    </add>
+    <add name="Vinny">
+      <databases>
+        <add name="master" backup-folder="\\san\sql-backups\vinny\master" backups-to-keep="3" />
+        <add name="model" backup-folder="\\san\sql-backups\vinny\model" />
+      </databases>
+    </add>
+  </servers>
+</cfg>
