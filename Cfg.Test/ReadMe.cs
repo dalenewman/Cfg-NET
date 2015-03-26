@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -36,5 +37,32 @@ namespace Cfg.Test {
             Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
 
         }
+
+        [Test]
+        public void TestReadMeThreads1() {
+            var thread1 = new Thread(TestReadMe);
+            var thread2 = new Thread(TestReadMe);
+            var thread3 = new Thread(TestReadMe);
+            var thread4 = new Thread(TestReadMe);
+            var thread5 = new Thread(TestReadMe);
+            var thread6 = new Thread(TestReadMe);
+            thread1.Start();
+            thread2.Start();
+            thread3.Start();
+            thread4.Start();
+            thread5.Start();
+            thread6.Start();
+            TestReadMe();
+        }
+
+        [Test]
+        public void TestReadMeThreads2() {
+            var thread1 = new Thread(TestReadMe);
+            var thread2 = new Thread(TestReadMe);
+            thread1.Start();
+            thread2.Start();
+            TestReadMe();
+        }
+
     }
 }

@@ -837,13 +837,10 @@ namespace Transformalize.Libs.Cfg.Net {
                 for (var i = 0; i < propertyInfos.Length; i++) {
                     var propertyInfo = propertyInfos[i];
 
-                    //if (propertyInfo.MemberType != MemberTypes.Property)
-                        //continue;
                     if (!propertyInfo.CanRead)
                         continue;
                     if (!propertyInfo.CanWrite)
                         continue;
-
                     var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
                     if (attribute == null)
                         continue;

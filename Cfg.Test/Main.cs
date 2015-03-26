@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Xml.Linq;
 using Cfg.Test.TestClasses;
 using NUnit.Framework;
-using Transformalize.Libs.Cfg.Net;
 
 namespace Cfg.Test {
 
