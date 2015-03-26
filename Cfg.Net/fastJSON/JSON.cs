@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Globalization;
 
 namespace Transformalize.Libs.Cfg.Net.fastJSON {
-    public delegate string Serialize(object data);
-    public delegate object Deserialize(string data);
 
     public sealed class JSONParameters {
         /// <summary>

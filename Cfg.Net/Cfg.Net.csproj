@@ -42,10 +42,8 @@
     <Compile Include="CfgMetadata.cs" />
     <Compile Include="CfgNode.cs" />
     <Compile Include="CfgProblems.cs" />
-    <Compile Include="fastJSON\Getters.cs" />
     <Compile Include="fastJSON\JSON.cs" />
     <Compile Include="fastJSON\JsonParser.cs" />
-    <Compile Include="fastJSON\SafeDictionary.cs" />
     <Compile Include="IAttribute.cs" />
     <Compile Include="INode.cs" />
     <Compile Include="JsonNode.cs" />
@@ -60,6 +58,9 @@
     <Compile Include="XmlNode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>IF EXIST C:\Code\Transformalize\Transformalize\Libs\Cfg.Net XCOPY /s /y $(ProjectDir)*.cs C:\Code\Transformalize\Transformalize\Libs\Cfg.Net</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
