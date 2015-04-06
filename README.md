@@ -2,23 +2,24 @@ Cfg-NET
 =======
 
 ##Introduction
-Cfg-NET is a .NET configuration handler.  It is an
-alternative to using custom section handler in your
-_app_ or _web.config_. It is [open sourced](https://github.com/dalenewman/Cfg.Net)
-under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
+Cfg-NET is a JSON or XML based [open source](https://github.com/dalenewman/Cfg.Net) .NET 
+configuration handler. It is an alternative for custom sections 
+in _app_ or _web.config_. It is licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
-A good configuration:
+####Good Configurations:
 
-* removes the need to re-compile
-* can be edited by an end-user
-* co-exists with other configurations
+* remove the need to re-compile
+* may be edited by end-users (in [JSON](http://en.wikipedia.org/wiki/JSON) or [XML](http://en.wikipedia.org/wiki/XML))
+* co-exist with other configurations
 
-A good configuration handler:
+####Good Configuration Handlers:
 
-* validates and reports issues
-* allows for custom validation and modification
-* protects the program from `null` by setting defaults
-* is easy to use
+* validate and report issues
+* allow for custom validation and modification
+* protect the program from `null`, by setting defaults
+* are easy to use
+* are available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
+* are portable
 
 ##Getting Started: a Scenario
 
@@ -430,7 +431,7 @@ It may be necessary for values in your configuration to
 change depending on the program's environment (i.e. `production`, or `test`).
 
 To take advantage of Cfg-NET's built-in environment features, include
-`environments` with nested `parameters` just inside your XML's root.
+`environments` with nested `parameters` just inside your configuration's root.
 Your configuration should look similar to this:
 
 <pre class="prettyprint" lang="xml">
