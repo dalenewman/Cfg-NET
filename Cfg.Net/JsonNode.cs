@@ -95,7 +95,10 @@ namespace Transformalize.Libs.Cfg.Net {
                 return;
             }
 
-            attributes.Add(new NodeAttribute() { Name = name, Value = value.ToString() });
+            attributes.Add(new NodeAttribute {
+                Name = name, 
+                Value = value == null ? string.Empty : value.ToString()
+            });
         }
 
         private void HandleList(IList<object> parsed) {
