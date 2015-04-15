@@ -89,16 +89,19 @@ namespace Transformalize.Libs.Cfg.Net {
         }
 
         private static void AddAttribute(ICollection<IAttribute> attributes, string name, object value) {
+
             var str = value as string;
             if (str != null) {
                 attributes.Add(new NodeAttribute() { Name = name, Value = str });
                 return;
             }
 
-            attributes.Add(new NodeAttribute {
-                Name = name, 
-                Value = value == null ? string.Empty : value.ToString()
-            });
+            if (value != null) {
+                attributes.Add(new NodeAttribute {
+                    Name = name,
+                    Value = value.ToString()
+                });
+            }
         }
 
         private void HandleList(IList<object> parsed) {

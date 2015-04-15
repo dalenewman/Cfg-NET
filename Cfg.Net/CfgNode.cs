@@ -274,19 +274,28 @@ namespace Transformalize.Libs.Cfg.Net {
                             var addKey = NormalizeName(_type, subNode.Name, _builder);
                             addHits.Add(addKey);
                             if (item.Loader == null) {
-                                if (add.Attributes.Count == 1) {
-                                    var attrValue = add.Attributes[0].Value;
-                                    if (item.ListType == typeof(string) || item.ListType == typeof(object)) {
-                                        elements[addKey].Add(attrValue);
-                                    } else {
-                                        try {
-                                            elements[addKey].Add(_converter[item.ListType](attrValue));
-                                        } catch (Exception ex) {
-                                            _problems.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
-                                        }
+                                if (item.ListType == typeof(Dictionary<string, string>)) {
+                                    var dict = new Dictionary<string, string>();
+                                    for (var k = 0; k < add.Attributes.Count; k++) {
+                                        var attribute = add.Attributes[k];
+                                        dict[attribute.Name] = attribute.Value;
                                     }
+                                    elements[addKey].Add(dict);
                                 } else {
-                                    _problems.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
+                                    if (add.Attributes.Count == 1) {
+                                        var attrValue = add.Attributes[0].Value;
+                                        if (item.ListType == typeof(string) || item.ListType == typeof(object)) {
+                                            elements[addKey].Add(attrValue);
+                                        } else {
+                                            try {
+                                                elements[addKey].Add(_converter[item.ListType](attrValue));
+                                            } catch (Exception ex) {
+                                                _problems.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
+                                            }
+                                        }
+                                    } else {
+                                        _problems.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
+                                    }
                                 }
                             } else {
                                 var loaded = item.Loader().Load(add, subNode.Name, parameters);
@@ -328,7 +337,7 @@ namespace Transformalize.Libs.Cfg.Net {
                         }
                     }
 
-                    if (item.UniquePropertiesInList.Length <= 0) 
+                    if (item.UniquePropertiesInList.Length <= 0)
                         continue;
 
                     for (var j = 0; j < item.UniquePropertiesInList.Length; j++) {
