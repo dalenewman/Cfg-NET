@@ -550,11 +550,18 @@ reports it as a problem. So, always check for `Problems()` after loading the con
 
 ##About the Code:
 
-Cfg.Net is over-engineered to keep it independent.
-It only references `System` and `System.Core`.  It
-targets the .NET 4 Client Profile framework.
+Cfg.Net is over-engineered to keep it independent. It has built in `XML` and `JSON` 
+default parsers.  You can inject your own parser if you want. Examples using 
+`XDocument` and `JSON.NET` are in the test app.  Cfg-NET is is a portable class 
+library targeting:
+
+* .NET 4
+* Silverlight 5
+* Windows 8
+* Windows Phone 8.1
+* Windows Phone Silverlight 8
 
 ###Credits
-*  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
+*  a modified version of _NanoXmlParser_ found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
 *  a modified version of `fastJSON` found [here](http://www.codeproject.com/Articles/159450/fastJSON)
 *  .NET Source of WebUtility.HtmlDecode found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
