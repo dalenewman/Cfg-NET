@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
-namespace Transformalize.Libs.Cfg.Net {
-
+namespace Transformalize.Libs.Cfg.Net.Parsers {
     public class JsonNode : INode {
 
         private Dictionary<string, IAttribute> _attributes;
@@ -140,5 +137,6 @@ namespace Transformalize.Libs.Cfg.Net {
             attr = null;
             return false;
         }
+
     }
 }

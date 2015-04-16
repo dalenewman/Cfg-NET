@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Transformalize.Libs.Cfg.Net.nanoXML
+namespace Transformalize.Libs.Cfg.Net.Parsers.nanoXML
 {
     /// <summary>
     ///     Element node of document

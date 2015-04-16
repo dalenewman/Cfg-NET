@@ -10,7 +10,7 @@ namespace Cfg.Test {
         public void TestReadMe() {
             var json = File.ReadAllText(@"ReadMe.json");
 
-            var cfg = new TestClasses.Cfg(json);
+            var cfg = new TestClasses.Cfg(json, null);
 
             foreach (var problem in cfg.Problems()) {
                 Console.WriteLine(problem);

@@ -1,7 +1,8 @@
 ﻿// credits to http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser
+
 using System.Collections.Generic;
 
-namespace Transformalize.Libs.Cfg.Net.nanoXML {
+namespace Transformalize.Libs.Cfg.Net.Parsers.nanoXML {
     /// <summary>
     ///     Base class containing useful features for all XML classes
     /// </summary>

@@ -1,4 +1,4 @@
-namespace Transformalize.Libs.Cfg.Net.nanoXML
+namespace Transformalize.Libs.Cfg.Net.Parsers.nanoXML
 {
     /// <summary>
     ///     XML element attribute

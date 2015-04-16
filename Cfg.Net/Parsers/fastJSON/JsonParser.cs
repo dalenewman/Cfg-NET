@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace Transformalize.Libs.Cfg.Net.fastJSON
+namespace Transformalize.Libs.Cfg.Net.Parsers.fastJSON
 {
 
     /// <summary>

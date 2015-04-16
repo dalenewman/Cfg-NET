@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
-namespace Transformalize.Libs.Cfg.Net
-{
+namespace Transformalize.Libs.Cfg.Net.Parsers {
+
     public interface INode {
         string Name { get; }
         List<IAttribute> Attributes { get; }

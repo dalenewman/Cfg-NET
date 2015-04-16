@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 
 namespace Transformalize.Libs.Cfg.Net {
+
     public class CfgProblems {
 
         private readonly StringBuilder _storage = new StringBuilder();

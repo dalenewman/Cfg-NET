@@ -5,8 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Transformalize.Libs.Cfg.Net.fastJSON;
-using Transformalize.Libs.Cfg.Net.nanoXML;
+using Transformalize.Libs.Cfg.Net.Parsers;
 
 namespace Transformalize.Libs.Cfg.Net {
 
@@ -28,9 +27,12 @@ namespace Transformalize.Libs.Cfg.Net {
         private readonly Dictionary<string, CfgMetadata> _metadata;
         private static Dictionary<string, char> _entities;
 
-        protected CfgNode() {
+        private IParser Parser { get; set; }
+
+        protected CfgNode(IParser parser = null) {
             lock (Locker) {
                 if (!_initialized) {
+                    Parser = parser;
                     Initialize();
                     _initialized = true;
                 }
@@ -56,12 +58,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 {typeof (UInt32), (x => Convert.ToUInt32(x))},
                 {typeof (UInt64), (x => Convert.ToUInt64(x))},
                 {typeof (Double), (x => Convert.ToDouble(x))},
-                {
-                    typeof (Decimal),
-                    (x =>
-                        Decimal.Parse(x, NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol,
-                            (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo))))
-                },
+                {typeof (Decimal), (x => Decimal.Parse(x, NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol, (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo)))) },
                 {typeof (Char), (x => Convert.ToChar(x))},
                 {typeof (DateTime), (x => Convert.ToDateTime(x))},
                 {typeof (Boolean), (x => Convert.ToBoolean(x))},
@@ -112,11 +109,8 @@ namespace Transformalize.Libs.Cfg.Net {
             INode node;
             try {
                 cfg = cfg.Trim();
-                if (cfg.StartsWith("{")) {
-                    node = new JsonNode(JSON.Parse(cfg));
-                } else {
-                    node = new XmlNode(new NanoXmlDocument(cfg).RootNode);
-                }
+                var parser = Parser ?? (cfg.StartsWith("{") ? (IParser)new FastJsonParser() : (IParser)new NanoXmlParser());
+                node = parser.Parse(cfg);
 
                 var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
                 if (environmentDefaults.Length > 0) {

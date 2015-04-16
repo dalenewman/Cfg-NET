@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
 
@@ -10,6 +11,10 @@ namespace Cfg.Test {
 
         [Test]
         public void TestXml() {
+
+            
+
+
             var xml = @"
     <cfg>
         <connections>

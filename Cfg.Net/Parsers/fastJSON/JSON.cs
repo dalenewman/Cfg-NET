@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 
-namespace Transformalize.Libs.Cfg.Net.fastJSON {
+namespace Transformalize.Libs.Cfg.Net.Parsers.fastJSON {
 
     public sealed class JSONParameters {
         /// <summary>
