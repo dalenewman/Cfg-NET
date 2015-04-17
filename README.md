@@ -432,4 +432,4 @@ library targeting:
 
 ###Further Reading
 
-* (Environments, Parameters, and @(Place-Holders))[https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md]
+* [Environments, Parameters, and __@(__Place-Holders__)__](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
