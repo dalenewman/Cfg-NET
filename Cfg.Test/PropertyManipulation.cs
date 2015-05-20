@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -16,12 +17,12 @@ namespace Cfg.Test {
 
             var cfg = new Pm(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(1, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(1, problems.Length);
             Assert.AreEqual("The root element has an invalid value of 'System.Int16' in the 'thing1' attribute.  The valid domain is: int16.", problems[0]);
             Assert.AreEqual("System.Int16", cfg.Thing1);
             Assert.AreEqual("int16", cfg.Thing2);
@@ -33,12 +34,12 @@ namespace Cfg.Test {
 
             var cfg = new Pm(json);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(1, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(1, problems.Length);
             Assert.AreEqual("The root element has an invalid value of 'System.Int16' in the 'thing1' attribute.  The valid domain is: int16.", problems[0]);
             Assert.AreEqual("System.Int16", cfg.Thing1);
             Assert.AreEqual("int16", cfg.Thing2);

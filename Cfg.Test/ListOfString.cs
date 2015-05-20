@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -22,12 +23,12 @@ namespace Cfg.Test {
 
             var cfg = new Los(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(0, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(0, problems.Length);
             Assert.AreEqual(3, cfg.Strings.Count);
 
         }
@@ -46,12 +47,12 @@ namespace Cfg.Test {
 
             var cfg = new Los(json);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(0, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(0, problems.Length);
             Assert.AreEqual(3, cfg.Strings.Count);
 
         }
@@ -79,12 +80,12 @@ namespace Cfg.Test {
 
             var cfg = new Los(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(0, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(0, problems.Length);
             Assert.AreEqual(0, cfg.Strings.Count);
             Assert.AreEqual(1, cfg.Numbers.Count);
             Assert.AreEqual(3, cfg.Numbers[0].InnerNumbers.Count);
@@ -111,12 +112,12 @@ namespace Cfg.Test {
 
             var cfg = new Los(json);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(0, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(0, problems.Length);
             Assert.AreEqual(0, cfg.Strings.Count);
             Assert.AreEqual(1, cfg.Numbers.Count);
             Assert.AreEqual(3, cfg.Numbers[0].InnerNumbers.Count);
@@ -137,12 +138,12 @@ namespace Cfg.Test {
 
             var cfg = new Los(json);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(0, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(0, problems.Length);
             Assert.AreEqual(0, cfg.Strings.Count);
             Assert.AreEqual(1, cfg.Numbers.Count);
             Assert.AreEqual(3, cfg.Numbers[0].InnerNumbers.Count);

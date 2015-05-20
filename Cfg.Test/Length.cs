@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -22,14 +23,14 @@ namespace Cfg.Test {
 
             var cfg = new TestLength(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(2, problems.Count);
-            Assert.IsTrue(problems.Contains("The `value` attribute's value `too-short` is too short. It's 9 characters. It must be at least 10 characters."));
-            Assert.IsTrue(problems.Contains("The `value` attribute's value `this-is-way-too-long` is too long. It's 20 characters. It must not exceed 15 characters."));
+            var problems = cfg.Errors();
+            Assert.AreEqual(2, problems.Length);
+            Assert.IsTrue(problems[0] == "The 'value' attribute value 'too-short' is too short. It is 9 characters. It must be at least 10 characters.");
+            Assert.IsTrue(problems[1] == "The 'value' attribute value 'this-is-way-too-long' is too long. It is 20 characters. It must not exceed 15 characters.");
 
         }
 
@@ -46,14 +47,14 @@ namespace Cfg.Test {
 
             var cfg = new TestLength(json);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(2, problems.Count);
-            Assert.IsTrue(problems.Contains("The `value` attribute's value `too-short` is too short. It's 9 characters. It must be at least 10 characters."));
-            Assert.IsTrue(problems.Contains("The `value` attribute's value `this-is-way-too-long` is too long. It's 20 characters. It must not exceed 15 characters."));
+            var problems = cfg.Errors();
+            Assert.AreEqual(2, problems.Length);
+            Assert.IsTrue(problems[0] == "The 'value' attribute value 'too-short' is too short. It is 9 characters. It must be at least 10 characters.");
+            Assert.IsTrue(problems[1] == "The 'value' attribute value 'this-is-way-too-long' is too long. It is 20 characters. It must not exceed 15 characters.");
 
         }
 

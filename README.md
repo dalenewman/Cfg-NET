@@ -413,7 +413,6 @@ When the DBA changes his/her mind about keeping **4**
 backup sets, point out the `backups-to-keep` attribute.
 
 ##About the Code:
-
 Cfg.Net is over-engineered to keep it independent. It has built in `XML` and `JSON` 
 default parsers.  You can inject your own parser if you want. Examples using 
 `XDocument` and `JSON.NET` are in the test app.  Cfg-NET is is a portable class 

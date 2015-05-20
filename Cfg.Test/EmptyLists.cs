@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -16,9 +17,9 @@ namespace Cfg.Test {
             ".Replace("'", "\"");
 
             var cfg = new EmptyListCfg(xml);
-            var problems = cfg.Problems();
+            var problems = cfg.Errors();
 
-            Assert.AreEqual(0, problems.Count);
+            Assert.AreEqual(0, problems.Length);
             Assert.IsNotNull(cfg.Connections);
             Assert.AreEqual(0, cfg.Connections.Count);
 
@@ -29,9 +30,9 @@ namespace Cfg.Test {
             var json = "{}";
 
             var cfg = new EmptyListCfg(json);
-            var problems = cfg.Problems();
+            var problems = cfg.Errors();
 
-            Assert.AreEqual(0, problems.Count);
+            Assert.AreEqual(0, problems.Length);
             Assert.IsNotNull(cfg.Connections);
             Assert.AreEqual(0, cfg.Connections.Count);
 
@@ -48,9 +49,9 @@ namespace Cfg.Test {
             ".Replace("'", "\"");
 
             var cfg = new EmptyListCfg(xml);
-            var problems = cfg.Problems();
+            var problems = cfg.Errors();
 
-            Assert.AreEqual(0, problems.Count);
+            Assert.AreEqual(0, problems.Length);
             Assert.IsNotNull(cfg.Connections);
             Assert.AreEqual(1, cfg.Connections.Count);
             Assert.IsNotNull(cfg.Connections[0].OtherThings);
@@ -68,9 +69,9 @@ namespace Cfg.Test {
             ".Replace("'", "\"");
 
             var cfg = new EmptyListCfg(json);
-            var problems = cfg.Problems();
+            var problems = cfg.Errors();
 
-            Assert.AreEqual(0, problems.Count);
+            Assert.AreEqual(0, problems.Length);
             Assert.IsNotNull(cfg.Connections);
             Assert.AreEqual(1, cfg.Connections.Count);
             Assert.IsNotNull(cfg.Connections[0].OtherThings);

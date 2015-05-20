@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using NUnit.Framework;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
     [TestFixture]
@@ -12,12 +13,12 @@ namespace Cfg.Test {
 
             var cfg = new TestClasses.Cfg(json, null);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
             //TEST FOR PROBLEMS
-            Assert.AreEqual(0, cfg.Problems().Count);
+            Assert.AreEqual(0, cfg.Errors().Length);
             Assert.AreEqual(2, cfg.Servers.Count);
 
             //TEST GANDALF

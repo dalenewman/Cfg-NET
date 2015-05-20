@@ -6,6 +6,7 @@ using Cfg.Test.Parsers;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
 using Transformalize.Libs.Cfg.Net.Parsers;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -24,12 +25,12 @@ namespace Cfg.Test {
 
             var cfg = new TestDifferentJsonParser(json, new JsonNetParser());
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(0, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(0, problems.Length);
 
             Assert.AreEqual(true, cfg.Parameters.First().Value);
             Assert.AreEqual(false, cfg.Parameters.Last().Value);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -39,11 +40,11 @@ namespace Cfg.Test {
 
             var cfg = new MyCfg(xml, parameters);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            Assert.AreEqual(0, cfg.Problems().Count);
+            Assert.AreEqual(0, cfg.Errors().Length);
 
             Assert.AreEqual(2, cfg.Environments.Count);
             Assert.AreEqual(false, cfg.Environments[0].Default == cfg.Environments[0].Name);
@@ -89,11 +90,11 @@ namespace Cfg.Test {
 
             var cfg = new MyCfg(json, parameters);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            Assert.AreEqual(0, cfg.Problems().Count);
+            Assert.AreEqual(0, cfg.Errors().Length);
 
             Assert.AreEqual(2, cfg.Environments.Count);
             Assert.AreEqual(false, cfg.Environments[0].Default == cfg.Environments[0].Name);

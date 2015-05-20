@@ -55,6 +55,12 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Serilog">
+      <HintPath>..\packages\Serilog.1.5.6\lib\net45\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.FullNetFx">
+      <HintPath>..\packages\Serilog.1.5.6\lib\net45\Serilog.FullNetFx.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -62,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DifferentJsonParser.cs" />
+    <Compile Include="PassInLogger.cs" />
     <Compile Include="DifferentXmlParser.cs" />
     <Compile Include="FreeFormData.cs" />
     <Compile Include="Case.cs" />

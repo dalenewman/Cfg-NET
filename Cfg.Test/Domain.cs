@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -21,12 +22,12 @@ namespace Cfg.Test {
 
             var cfg = new TestCfg(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(1, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(1, problems.Length);
             Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }
@@ -42,12 +43,12 @@ namespace Cfg.Test {
 
             var cfg = new TestCfg(json);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(1, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(1, problems.Length);
             Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }
@@ -65,12 +66,12 @@ namespace Cfg.Test {
 
             var cfg = new TestCfg2(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(1, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(1, problems.Length);
             Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad' in the 'value' attribute.  The valid domain is: GOOD, VALUE, ANOTHER, GOOD, VALUE.", problems[0]);
 
         }
@@ -88,12 +89,12 @@ namespace Cfg.Test {
 
             var cfg = new TestCfg(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(1, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(1, problems.Length);
             Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }

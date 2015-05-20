@@ -5,6 +5,7 @@ using System.Threading;
 using Cfg.Test.Parsers;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net.Parsers;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
     [TestFixture]
@@ -39,12 +40,12 @@ namespace Cfg.Test {
             Assert.IsNotNull(cfg2Hot);
             Assert.IsNotNull(cfg1Hot);
 
-            foreach (var problem in cfg1.Problems()) {
+            foreach (var problem in cfg1.Errors()) {
                 Console.WriteLine(problem);
             }
 
             //TEST FOR PROBLEMS
-            Assert.AreEqual(0, cfg1.Problems().Count);
+            Assert.AreEqual(0, cfg1.Errors().Length);
 
             //TEST GANDALF
             Assert.AreEqual("Gandalf", cfg1.Servers[0].Name);
@@ -70,12 +71,12 @@ namespace Cfg.Test {
             var xml = File.ReadAllText(@"ReadMe2.xml");
             var cfg = new TestClasses.Cfg(xml, null);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
             //TEST FOR PROBLEMS
-            Assert.AreEqual(0, cfg.Problems().Count);
+            Assert.AreEqual(0, cfg.Errors().Length);
 
             //TEST SAM
             Assert.AreEqual("Sam", cfg.Servers[0].Name);

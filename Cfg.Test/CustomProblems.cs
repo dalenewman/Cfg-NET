@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -11,9 +11,6 @@ namespace Cfg.Test {
 
         [Test]
         public void TestXml() {
-
-            
-
 
             var xml = @"
     <cfg>
@@ -27,15 +24,15 @@ namespace Cfg.Test {
 ".Replace("'", "\"");
 
             var cfg = new CustomProblemCfg(xml);
-            var problems = cfg.Problems();
+            var problems = cfg.Errors();
 
             foreach (var problem in problems) {
                 Console.WriteLine(problem);
             }
 
-            Assert.AreEqual(2, problems.Count);
-            Assert.IsTrue(problems.Contains("file provider needs file attribute."));
-            Assert.IsTrue(problems.Contains("folder provider needs folder attribute."));
+            Assert.AreEqual(2, problems.Length);
+            Assert.IsTrue(problems[0] == "file provider needs file attribute.");
+            Assert.IsTrue(problems[1] == "folder provider needs folder attribute.");
         }
 
         [Test]
@@ -51,21 +48,21 @@ namespace Cfg.Test {
 ".Replace("'", "\"");
 
             var cfg = new CustomProblemCfg(json);
-            var problems = cfg.Problems();
+            var problems = cfg.Errors();
 
             foreach (var problem in problems) {
                 Console.WriteLine(problem);
             }
 
-            Assert.AreEqual(2, problems.Count);
-            Assert.IsTrue(problems.Contains("file provider needs file attribute."));
-            Assert.IsTrue(problems.Contains("folder provider needs folder attribute."));
+            Assert.AreEqual(2, problems.Length);
+            Assert.IsTrue(problems[0] == "file provider needs file attribute.");
+            Assert.IsTrue(problems[1] == "folder provider needs folder attribute.");
         }
 
 
     }
 
-    public sealed class CustomProblemCfg : CfgNode {
+    public class CustomProblemCfg : CfgNode {
         public CustomProblemCfg(string xml) {
             Load(xml);
         }
@@ -89,9 +86,9 @@ namespace Cfg.Test {
         // custom validation
         protected override void Validate() {
             if (Provider == "file" && string.IsNullOrEmpty(File)) {
-                AddProblem("file provider needs file attribute.");
+                Error("file provider needs file attribute.");
             } else if (Provider == "folder" && string.IsNullOrEmpty(Folder)) {
-                AddProblem("folder provider needs folder attribute.");
+                Error("folder provider needs folder attribute.");
             }
         }
 

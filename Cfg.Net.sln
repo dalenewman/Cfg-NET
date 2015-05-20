@@ -13,6 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net", "Cfg.Net\Cfg.Net.csproj", "{6CCFD0FD-C0B7-4B2B-AB17-2D8E3567B7E2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{8BF2C711-7979-40D0-AE9D-A4F57340C50E}"
+	ProjectSection(SolutionItems) = preProject
+		Articles\EnvironmentsAndParameters.md = Articles\EnvironmentsAndParameters.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +35,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8BF2C711-7979-40D0-AE9D-A4F57340C50E} = {937D9058-D53A-4341-B076-284442EADE2D}
 	EndGlobalSection
 EndGlobal

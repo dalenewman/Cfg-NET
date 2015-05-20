@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -22,15 +23,15 @@ namespace Cfg.Test {
 
             var cfg = new TestValue(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(3, problems.Count);
-            Assert.IsTrue(problems.Contains("The `value` attribute's value `5` is too small. The minimum value allowed is `6`."));
-            Assert.IsTrue(problems.Contains("The `longValue` attribute's value `5` is too small. The minimum value allowed is `6`."));
-            Assert.IsTrue(problems.Contains("The `stringValue` attribute's value `6` is too big. The maximum value allowed is `5`."));
+            var problems = cfg.Errors();
+            Assert.AreEqual(3, problems.Length);
+            Assert.IsTrue(problems[0] == "The 'value' attribute value '5' is too small. The minimum value allowed is '6'.");
+            Assert.IsTrue(problems[1] == "The 'longValue' attribute value '5' is too small. The minimum value allowed is '6'.");
+            Assert.IsTrue(problems[2] == "The 'stringValue' attribute value '6' is too big. The maximum value allowed is '5'.");
 
         }
 
@@ -47,15 +48,15 @@ namespace Cfg.Test {
 
             var cfg = new TestValue(json);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(3, problems.Count);
-            Assert.IsTrue(problems.Contains("The `value` attribute's value `5` is too small. The minimum value allowed is `6`."));
-            Assert.IsTrue(problems.Contains("The `longValue` attribute's value `5` is too small. The minimum value allowed is `6`."));
-            Assert.IsTrue(problems.Contains("The `stringValue` attribute's value `6` is too big. The maximum value allowed is `5`."));
+            var problems = cfg.Errors();
+            Assert.AreEqual(3, problems.Length);
+            Assert.IsTrue(problems[0] == "The 'value' attribute value '5' is too small. The minimum value allowed is '6'.");
+            Assert.IsTrue(problems[1] == "The 'longValue' attribute value '5' is too small. The minimum value allowed is '6'.");
+            Assert.IsTrue(problems[2] == "The 'stringValue' attribute value '6' is too big. The maximum value allowed is '5'.");
 
         }
 

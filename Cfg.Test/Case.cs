@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
+using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -22,12 +23,12 @@ namespace Cfg.Test {
 
             var cfg = new TestCase(xml);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(0, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(0, problems.Length);
 
             Assert.AreEqual("proper case!", cfg.Things.First().LowerValue);
             Assert.AreEqual("PROPER CASE!", cfg.Things.Last().UpperValue);
@@ -45,12 +46,12 @@ namespace Cfg.Test {
 
             var cfg = new TestCase(json);
 
-            foreach (var problem in cfg.Problems()) {
+            foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
-            var problems = cfg.Problems();
-            Assert.AreEqual(0, problems.Count);
+            var problems = cfg.Errors();
+            Assert.AreEqual(0, problems.Length);
 
             Assert.AreEqual("proper case!", cfg.Things.First().LowerValue);
             Assert.AreEqual("PROPER CASE!", cfg.Things.Last().UpperValue);
