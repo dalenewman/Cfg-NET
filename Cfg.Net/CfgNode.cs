@@ -27,9 +27,13 @@ namespace Transformalize.Libs.Cfg.Net {
         private readonly StringBuilder _builder = new StringBuilder();
         private readonly Type _type;
         private Dictionary<string, CfgMetadata> _metadata;
+        private CfgEvents _events;
         private static Dictionary<string, char> _entities;
 
-        private CfgEvents Events { get; set; }
+        private CfgEvents Events {
+            get { return _events ?? (_events = new CfgEvents(new CfgLogger(new MemoryLogger(), null))); }
+            set { _events = value; }
+        }
 
         protected CfgNode(IParser parser = null, ILogger logger = null) {
             _parser = parser;
@@ -77,9 +81,6 @@ namespace Transformalize.Libs.Cfg.Net {
         /// <returns></returns>
         public T GetDefaultOf<T>(Action<T> setter = null) {
             var obj = Activator.CreateInstance(typeof(T));
-            if (Events == null) {
-                Events = new CfgEvents(new CfgLogger(new MemoryLogger(), _logger));
-            }
 
             SetDefaults(obj, GetMetadata(typeof(T), Events, _builder));
 
