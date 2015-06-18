@@ -77,7 +77,7 @@ namespace Transformalize.Libs.Cfg.Net {
             return thing == null || IsVowel(thing[0]) ? "n" : string.Empty;
         }
 
-        [Obsolete("AddCustomProblem is deprecated, please use AddError or AddWarning.")]
+        [Obsolete("AddCustomProblem is deprecated, please use Error or Warning.")]
         public void AddCustomProblem(string problem, params object[] args) {
             _logger.Error(problem, args);
         }

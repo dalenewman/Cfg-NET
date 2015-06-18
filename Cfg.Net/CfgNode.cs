@@ -134,7 +134,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
                 if (environmentDefaults.Length > 0) {
                     if (parameters == null) {
-                        parameters = new Dictionary<string, string>(StringComparer.Ordinal);
+                        parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                     }
                     for (var i = 0; i < environmentDefaults.Length; i++) {
                         if (!parameters.ContainsKey(environmentDefaults[i][0])) {
