@@ -23,6 +23,7 @@ namespace Transformalize.Libs.Cfg.Net
         public static string PROBLEM_INVALID_NESTED_ELEMENT = "A{3} '{0}' '{1}' element has an invalid '{2}' element.";
         public static string PROBLEM_MISSING_ADD_ELEMENT = "A{1} '{0}' element is missing a child element.";
         public static string PROBLEM_MISSING_ATTRIBUTE = "A{3} '{0}' '{1}' element is missing a '{2}' attribute.";
+        public static string PROBLEM_SHORTHAND_NOT_LOADED = "A{3} '{0}' '{1}' element's '{2}' attribute needs a shorthand configuration, but none was loaded.";
         public static string PROBLEM_MISSING_ELEMENT = "The {0} element is missing a{2} '{1}' element.";
         public static string PROBLEM_MISSING_NESTED_ELEMENT = "A{3} '{0}' '{1}' element is missing a{4} '{2}' element.";
         public static string PROBLEM_MISSING_PLACE_HOLDER_VALUE = "Missing {0} for {1}.";

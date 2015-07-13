@@ -56,6 +56,10 @@ namespace Transformalize.Libs.Cfg.Net {
             _logger.Error(CfgConstants.PROBLEM_UNEXPECTED_ELEMENT, subNodeName, elementName);
         }
 
+        public void ShorthandNotLoaded(string parentName, string nodeName, string attributeName) {
+            _logger.Error(CfgConstants.PROBLEM_SHORTHAND_NOT_LOADED, parentName, nodeName, attributeName, Suffix(parentName));
+        }
+
         public void ValueNotInDomain(string parentName, string nodeName, string propertyName, object value, string validValues) {
             _logger.Error(CfgConstants.PROBLEM_VALUE_NOT_IN_DOMAIN, parentName, nodeName, propertyName, value, validValues, Suffix(parentName));
         }

@@ -1,0 +1,28 @@
+﻿<cfg>
+
+  <signatures>
+    <add name="padding">
+      <parameters>
+        <add name="total-width" />
+        <add name="padding-char" value="0" />
+      </parameters>
+    </add>
+    <add name="length">
+      <parameters>
+        <add name="length" />
+      </parameters>
+    </add>
+  </signatures>
+
+  <targets>
+    <add name="t" collection="transforms" property="method" />
+  </targets>
+
+  <methods>
+    <add name="left" signature="length" target="t" />
+    <add name="right" signature="length" target="t" />
+    <add name="padleft" signature="padding" target="t" />
+    <add name="padright" signature="padding" target="t" />
+  </methods>
+
+</cfg>

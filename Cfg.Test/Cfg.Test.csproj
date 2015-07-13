@@ -76,6 +76,7 @@
     <Compile Include="Parsers\JsonNetParser.cs" />
     <Compile Include="Parsers\XDocumentNode.cs" />
     <Compile Include="Parsers\XDocumentParser.cs" />
+    <Compile Include="Shorthand\ShorthandTest.cs" />
     <Compile Include="Value.cs" />
     <Compile Include="Length.cs" />
     <Compile Include="ElementNameVariations.cs" />
@@ -101,6 +102,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="shorthand.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="ReadMe.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

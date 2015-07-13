@@ -7,12 +7,16 @@ using System.Reflection;
 using System.Text;
 using Transformalize.Libs.Cfg.Net.Loggers;
 using Transformalize.Libs.Cfg.Net.Parsers;
+using Transformalize.Libs.Cfg.Net.Shorthand;
 
 namespace Transformalize.Libs.Cfg.Net {
 
     public abstract class CfgNode {
+
+        internal static string ControlString = ((char)31).ToString();
         private readonly IParser _parser;
         private readonly ILogger _logger;
+        private ShorthandRoot _shorthand;
 
         //shared cache
         private static bool _initialized;
@@ -29,11 +33,6 @@ namespace Transformalize.Libs.Cfg.Net {
         private Dictionary<string, CfgMetadata> _metadata;
         private CfgEvents _events;
         private static Dictionary<string, char> _entities;
-
-        private CfgEvents Events {
-            get { return _events ?? (_events = new CfgEvents(new CfgLogger(new MemoryLogger(), null))); }
-            set { _events = value; }
-        }
 
         protected CfgNode(IParser parser = null, ILogger logger = null) {
             _parser = parser;
@@ -82,7 +81,7 @@ namespace Transformalize.Libs.Cfg.Net {
         public T GetDefaultOf<T>(Action<T> setter = null) {
             var obj = Activator.CreateInstance(typeof(T));
 
-            SetDefaults(obj, GetMetadata(typeof(T), Events, _builder));
+            SetDefaults(obj, GetMetadata(typeof(T), _events, _builder));
 
             if (setter != null) {
                 setter((T)obj);
@@ -107,22 +106,44 @@ namespace Transformalize.Libs.Cfg.Net {
 
         [Obsolete("AddProblem is deprecated, please use Error or Warn instead.")]
         protected void AddProblem(string problem, params object[] args) {
-            Events.AddCustomProblem(problem, args);
+            _events.AddCustomProblem(problem, args);
         }
 
         protected void Error(string message, params object[] args) {
-            Events.Error(message, args);
+            _events.Error(message, args);
         }
 
         protected void Warn(string message, params object[] args) {
-            Events.Warning(message, args);
+            _events.Warning(message, args);
+        }
+
+        protected void LoadShorthand(string cfg) {
+
+            _events = _events ?? new CfgEvents(new CfgLogger(new MemoryLogger(), _logger));
+
+            _shorthand = new ShorthandRoot(cfg);
+
+            if (_shorthand.Warnings().Any()) {
+                foreach (var warning in _shorthand.Warnings()) {
+                    _events.Warning(warning);
+                }
+            }
+
+            if (_shorthand.Errors().Any()) {
+                foreach (var error in _shorthand.Errors()) {
+                    _events.Error(error);
+                }
+                return;
+            }
+
+            _shorthand.InitializeMethodDataLookup();
         }
 
         public void Load(string cfg, Dictionary<string, string> parameters = null) {
 
-            Events = new CfgEvents(new CfgLogger(new MemoryLogger(), _logger));
+            _events = _events ?? new CfgEvents(new CfgLogger(new MemoryLogger(), _logger));
 
-            _metadata = GetMetadata(_type, Events, _builder);
+            _metadata = GetMetadata(_type, _events, _builder);
             SetDefaults(this, _metadata);
 
             INode node;
@@ -143,7 +164,7 @@ namespace Transformalize.Libs.Cfg.Net {
                     }
                 }
             } catch (Exception ex) {
-                Events.ParseException(ex.Message);
+                _events.ParseException(ex.Message);
                 return;
             }
 
@@ -227,8 +248,9 @@ namespace Transformalize.Libs.Cfg.Net {
             return parameters;
         }
 
-        private CfgNode Load(INode node, string parentName, CfgEvents events, Dictionary<string, string> parameters) {
-            Events = events;
+        private CfgNode Load(INode node, string parentName, CfgEvents events, ShorthandRoot shorthand, Dictionary<string, string> parameters) {
+            _events = events;
+            _shorthand = shorthand;
             _metadata = GetMetadata(_type, events, _builder);
             SetDefaults(this, _metadata);
             LoadProperties(node, parentName, parameters);
@@ -272,11 +294,11 @@ namespace Transformalize.Libs.Cfg.Net {
                     CfgMetadata sharedCfg = null;
 
                     if (item.SharedProperty != null) {
-                        var sharedMetadata = GetMetadata(item.ListType, Events, _builder);
+                        var sharedMetadata = GetMetadata(item.ListType, _events, _builder);
                         if (sharedMetadata.ContainsKey(item.SharedProperty)) {
                             sharedCfg = sharedMetadata[item.SharedProperty];
                         } else {
-                            Events.SharedPropertyMissing(subNode.Name, item.SharedProperty, item.ListType.ToString());
+                            _events.SharedPropertyMissing(subNode.Name, item.SharedProperty, item.ListType.ToString());
                         }
                         IAttribute sharedAttribute;
                         if (subNode.TryAttribute(item.SharedProperty, out sharedAttribute)) {
@@ -306,15 +328,15 @@ namespace Transformalize.Libs.Cfg.Net {
                                             try {
                                                 elements[addKey].Add(_converter[item.ListType](attrValue));
                                             } catch (Exception ex) {
-                                                Events.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
+                                                _events.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
                                             }
                                         }
                                     } else {
-                                        Events.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
+                                        _events.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
                                     }
                                 }
                             } else {
-                                var loaded = item.Loader().Load(add, subNode.Name, Events, parameters);
+                                var loaded = item.Loader().Load(add, subNode.Name, _events, _shorthand, parameters);
                                 if (sharedCfg != null) {
                                     var sharedValue = sharedCfg.Getter(loaded);
                                     if (sharedValue == null) {
@@ -324,14 +346,14 @@ namespace Transformalize.Libs.Cfg.Net {
                                 elements[addKey].Add(loaded);
                             }
                         } else {
-                            Events.UnexpectedElement(add.Name, subNode.Name);
+                            _events.UnexpectedElement(add.Name, subNode.Name);
                         }
                     }
                 } else {
                     if (parentName == null) {
-                        Events.InvalidElement(node.Name, subNode.Name);
+                        _events.InvalidElement(node.Name, subNode.Name);
                     } else {
-                        Events.InvalidNestedElement(parentName, node.Name, subNode.Name);
+                        _events.InvalidNestedElement(parentName, node.Name, subNode.Name);
                     }
                 }
             }
@@ -346,7 +368,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
                     lock (Locker) {
                         if (item.UniquePropertiesInList == null) {
-                            item.UniquePropertiesInList = GetMetadata(item.ListType, Events, _builder)
+                            item.UniquePropertiesInList = GetMetadata(item.ListType, _events, _builder)
                                 .Where(p => p.Value.Attribute.unique)
                                 .Select(p => p.Key)
                                 .ToArray();
@@ -368,17 +390,17 @@ namespace Transformalize.Libs.Cfg.Net {
                             .ToArray();
 
                         for (var l = 0; l < duplicates.Length; l++) {
-                            Events.DuplicateSet(unique, duplicates[l], key);
+                            _events.DuplicateSet(unique, duplicates[l], key);
                         }
                     }
                 } else if (list.Count == 0 && item.Attribute.required) {
                     if (elementHits.Contains(key) && !addHits.Contains(key)) {
-                        Events.MissingAddElement(key);
+                        _events.MissingAddElement(key);
                     } else {
                         if (parentName == null) {
-                            Events.MissingElement(node.Name, key);
+                            _events.MissingElement(node.Name, key);
                         } else {
-                            Events.MissingNestedElement(parentName, node.Name, key);
+                            _events.MissingNestedElement(parentName, node.Name, key);
                         }
                     }
                 }
@@ -441,6 +463,14 @@ namespace Transformalize.Libs.Cfg.Net {
                         UniqueProperties[attributeKey] = attribute.Value;
                     }
 
+                    if (item.Attribute.shorthand) {
+                        if (_shorthand == null || _shorthand.MethodDataLookup == null) {
+                            _events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
+                        } else {
+                            TranslateShorthand(node, attribute);
+                        }
+                    }
+
                     if (item.PropertyInfo.PropertyType == typeof(string) || item.PropertyInfo.PropertyType == typeof(object)) {
                         item.Setter(this, attribute.Value);
                         keyHits.Add(attributeKey);
@@ -449,7 +479,7 @@ namespace Transformalize.Libs.Cfg.Net {
                             item.Setter(this, _converter[item.PropertyInfo.PropertyType](attribute.Value));
                             keyHits.Add(attributeKey);
                         } catch (Exception ex) {
-                            Events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
+                            _events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
                         }
                     }
 
@@ -463,9 +493,9 @@ namespace Transformalize.Libs.Cfg.Net {
                         if (item.Attribute.DomainSet) {
                             if (!item.IsInDomain(stringValue)) {
                                 if (parentName == null) {
-                                    Events.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                                    _events.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
                                 } else {
-                                    Events.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                                    _events.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
                                 }
                             }
                         }
@@ -478,7 +508,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
                     attribute.Value = decoded ? Encode(value.ToString(), _builder) : value.ToString();
                 } else {
-                    Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
+                    _events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
                 }
             }
 
@@ -486,17 +516,54 @@ namespace Transformalize.Libs.Cfg.Net {
             foreach (var key in keys.Except(keyHits)) {
                 var item = _metadata[key];
                 if (item.Attribute.required) {
-                    Events.MissingAttribute(parentName, node.Name, key);
+                    _events.MissingAttribute(parentName, node.Name, key);
                 }
             }
 
+        }
+
+        private void TranslateShorthand(INode node, IAttribute attribute) {
+
+            var expressions = new Expressions(attribute.Value);
+            var shorthandNodes = new Dictionary<string, List<INode>>();
+
+            for (var j = 0; j < expressions.Count; j++) {
+                var expression = expressions[j];
+                if (_shorthand.MethodDataLookup.ContainsKey(expression.Method)) {
+                    var methodData = _shorthand.MethodDataLookup[expression.Method];
+                    var shorthandNode = new ShorthandNode("add");
+                    shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
+                    for (int m = 0; m < methodData.Signature.Parameters.Count; m++) {
+                        var signatureParameter = methodData.Signature.Parameters[m];
+                        shorthandNode.Attributes.Add(m < expression.Parameters.Length
+                            ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
+                            : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
+                    }
+                    if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
+                        shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
+                    } else {
+                        shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
+                    }
+                }
+            }
+
+            foreach (var pair in shorthandNodes) {
+                var shorthandCollection = node.SubNodes.FirstOrDefault(sn => sn.Name == pair.Key);
+                if (shorthandCollection == null) {
+                    shorthandCollection = new ShorthandNode(pair.Key);
+                    shorthandCollection.SubNodes.AddRange(pair.Value);
+                    node.SubNodes.Add(shorthandCollection);
+                } else {
+                    shorthandCollection.SubNodes.InsertRange(0, pair.Value);
+                }
+            }
         }
 
         private void CheckValueLength(CfgAttribute itemAttributes, string name, string value) {
 
             if (itemAttributes.MinLengthSet) {
                 if (value.Length < itemAttributes.minLength) {
-                    Events.ValueTooShort(name, value, itemAttributes.minLength);
+                    _events.ValueTooShort(name, value, itemAttributes.minLength);
                 }
             }
 
@@ -504,7 +571,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 return;
 
             if (value.Length > itemAttributes.maxLength) {
-                Events.ValueTooLong(name, value, itemAttributes.maxLength);
+                _events.ValueTooLong(name, value, itemAttributes.maxLength);
             }
         }
 
@@ -515,11 +582,11 @@ namespace Transformalize.Libs.Cfg.Net {
 
             var comparable = value as IComparable;
             if (comparable == null) {
-                Events.ValueIsNotComparable(name, value);
+                _events.ValueIsNotComparable(name, value);
             } else {
                 if (itemAttributes.MinValueSet) {
                     if (comparable.CompareTo(itemAttributes.minValue) < 0) {
-                        Events.ValueTooSmall(name, value, itemAttributes.minValue);
+                        _events.ValueTooSmall(name, value, itemAttributes.minValue);
                     }
                 }
 
@@ -527,7 +594,7 @@ namespace Transformalize.Libs.Cfg.Net {
                     return;
 
                 if (comparable.CompareTo(itemAttributes.maxValue) > 0) {
-                    Events.ValueTooBig(name, value, itemAttributes.maxValue);
+                    _events.ValueTooBig(name, value, itemAttributes.maxValue);
                 }
             }
         }
@@ -537,7 +604,7 @@ namespace Transformalize.Libs.Cfg.Net {
                 return input;
             var response = ReplaceParameters(input, parameters, _builder);
             if (response.Item2.Length > 1) {
-                Events.MissingPlaceHolderValues(response.Item2);
+                _events.MissingPlaceHolderValues(response.Item2);
             }
             return response.Item1;
         }
@@ -851,11 +918,11 @@ namespace Transformalize.Libs.Cfg.Net {
         }
 
         public string[] Errors() {
-            return Events.Errors();
+            return _events.Errors();
         }
 
         public string[] Warnings() {
-            return Events.Warnings();
+            return _events.Warnings();
         }
 
         private static Dictionary<string, CfgMetadata> GetMetadata(Type type, CfgEvents events, StringBuilder sb) {
@@ -973,6 +1040,16 @@ namespace Transformalize.Libs.Cfg.Net {
             } catch {
                 return false;
             }
+        }
+
+        internal static string[] Split(string arg, char[] splitter, int skip = 0) {
+            if (arg.Equals(String.Empty))
+                return new string[0];
+
+            var special = new string(splitter);
+
+            var split = arg.Replace("\\" + special, ControlString).Split(splitter);
+            return split.Select(s => s.Replace(ControlString, special)).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
         }
 
         // a naive implementation for hand-written configurations
