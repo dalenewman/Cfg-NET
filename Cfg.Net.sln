@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{8BF2C711-7979-40D0-AE9D-A4F57340C50E}"
 	ProjectSection(SolutionItems) = preProject
 		Articles\EnvironmentsAndParameters.md = Articles\EnvironmentsAndParameters.md
+		Articles\Shorthand.md = Articles\Shorthand.md
 	EndProjectSection
 EndProject
 Global

@@ -6,7 +6,8 @@ using NUnit.Framework;
 using Transformalize.Libs.Cfg.Net;
 using Transformalize.Libs.Cfg.Net.Shorthand;
 
-namespace Cfg.Test.Shorthand {
+namespace Cfg.Test {
+
     [TestFixture]
     public class ShorthandTest {
 
