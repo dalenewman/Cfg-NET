@@ -102,3 +102,7 @@ this:
         //...
     }
 </pre>
+
+###Updates
+
+* 2015-07-17: Added support for named parameters (e.g. `padleft(total-width:10,padding-char:X)`)

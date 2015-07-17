@@ -89,6 +89,7 @@ Attributes are processed in this order:
 1. `value` set a default value
 1. `toLower` lower case the input
 1. `toUpper` upper case the input
+1. `shorthand` checks for shorthand translation
 1. `domain` checks input against valid values
 1. `minLength` checks input against a minimum length
 1. `maxLength` checks input against a maximum length

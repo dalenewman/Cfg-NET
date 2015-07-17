@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +15,7 @@ namespace Transformalize.Libs.Cfg.Net {
     public abstract class CfgNode {
 
         internal static string ControlString = ((char)31).ToString();
+        internal static char[] NamedParameterSplitter = { ':' };
         private readonly IParser _parser;
         private readonly ILogger _logger;
         private ShorthandRoot _shorthand;
@@ -533,12 +535,30 @@ namespace Transformalize.Libs.Cfg.Net {
                     var methodData = _shorthand.MethodDataLookup[expression.Method];
                     var shorthandNode = new ShorthandNode("add");
                     shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
-                    for (int m = 0; m < methodData.Signature.Parameters.Count; m++) {
-                        var signatureParameter = methodData.Signature.Parameters[m];
-                        shorthandNode.Attributes.Add(m < expression.Parameters.Length
+
+                    var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
+                    var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
+
+                    // named parameters
+                    for (int i = 0; i < passedParameters.Length; i++) {
+                        var parameter = passedParameters[i];
+                        var split = Split(parameter, NamedParameterSplitter);
+                        if (split.Length == 2) {
+                            var name = NormalizeName(typeof(Parameter), split[0],_builder);
+                            shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
+                            signatureParameters.RemoveAll(p => NormalizeName(typeof(Parameter), p.Name, _builder) == name);
+                            expression.Parameters.RemoveAll(p => p == parameter);
+                        }
+                    }
+
+                    // ordered nameless parameters
+                    for (int m = 0; m < signatureParameters.Count; m++) {
+                        var signatureParameter = signatureParameters[m];
+                        shorthandNode.Attributes.Add(m < expression.Parameters.Count
                             ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
                             : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
                     }
+
                     if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
                         shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
                     } else {

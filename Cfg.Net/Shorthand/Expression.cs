@@ -1,9 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Transformalize.Libs.Cfg.Net.Shorthand {
     public class Expression {
         private static readonly char[] ParameterSplitter = { ',' };
 
         public string Method { get; private set; }
-        public string[] Parameters { get; private set; }
+        public List<string> Parameters { get; private set; }
         public string OriginalExpression { get; private set; }
 
         public Expression(string expression) {
@@ -16,10 +19,10 @@ namespace Transformalize.Libs.Cfg.Net.Shorthand {
                 if (parameters.EndsWith(")")) {
                     parameters = parameters.Substring(0, parameters.Length - 1);
                 }
-                Parameters = CfgNode.Split(parameters, ParameterSplitter);
+                Parameters = CfgNode.Split(parameters, ParameterSplitter).ToList();
             } else {
                 Method = expression;
-                Parameters = new string[0];
+                Parameters = new List<string>();
             }
         }
     }
