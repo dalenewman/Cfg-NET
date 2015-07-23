@@ -12,6 +12,11 @@
         <add name="length" />
       </parameters>
     </add>
+    <add name="script">
+      <parameters>
+        <add name="script" />
+      </parameters>
+    </add>
   </signatures>
 
   <targets>
@@ -23,6 +28,7 @@
     <add name="right" signature="length" target="t" />
     <add name="padleft" signature="padding" target="t" />
     <add name="padright" signature="padding" target="t" />
+    <add name="javascript" signature="script" target="t" />
   </methods>
 
 </cfg>

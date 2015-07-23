@@ -20,9 +20,9 @@ namespace Cfg.Test {
             }
 
             Assert.AreEqual(0, root.Errors().Count());
-            Assert.AreEqual(2, root.Signatures.Count);
+            Assert.AreEqual(3, root.Signatures.Count);
             Assert.AreEqual(1, root.Targets.Count);
-            Assert.AreEqual(4, root.Methods.Count);
+            Assert.AreEqual(5, root.Methods.Count);
         }
 
         [Test]
@@ -106,6 +106,27 @@ namespace Cfg.Test {
         }
 
         [Test]
+        public void TestSingleParameterShouldNotConsiderUnescapedSplitter() {
+            const string xml = @"
+                <cfg>
+                    <fields>
+                        <add name='javascript' t='javascript(x === y ? x : ,)' />
+                    </fields>
+                </cfg>";
+
+            var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+
+            foreach (var error in sample.Errors()) {
+                Console.WriteLine(error);
+            }
+
+            Assert.AreEqual(0, sample.Errors().Count());
+            var transform = sample.Fields[0].Transforms[0];
+            Assert.AreEqual("javascript", transform.Method);
+            Assert.AreEqual("x === y ? x : ,", transform.Script);
+        }
+
+        [Test]
         public void TestMixedParameters() {
             const string xml = @"
                 <cfg>
@@ -174,7 +195,7 @@ namespace Cfg.Test {
         [Cfg(required = true, shorthand = true)]
         public string T { get; set; }
 
-        [Cfg()]
+        [Cfg]
         public List<ShTestTransform> Transforms { get; set; }
     }
 
@@ -182,11 +203,14 @@ namespace Cfg.Test {
         [Cfg(required = true)]
         public string Method { get; set; }
 
-        [Cfg()]
+        [Cfg]
         public int TotalWidth { get; set; }
-        [Cfg()]
+        [Cfg]
         public char PaddingChar { get; set; }
-        [Cfg()]
+        [Cfg]
         public int Length { get; set; }
+
+        [Cfg(value="")]
+        public string Script { get; set; }
     }
 }

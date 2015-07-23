@@ -524,7 +524,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
         }
 
-        private void TranslateShorthand(INode node, IAttribute attribute) {
+        void TranslateShorthand(INode node, IAttribute attribute) {
 
             var expressions = new Expressions(attribute.Value);
             var shorthandNodes = new Dictionary<string, List<INode>>();
@@ -539,24 +539,31 @@ namespace Transformalize.Libs.Cfg.Net {
                     var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
                     var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
 
-                    // named parameters
-                    for (int i = 0; i < passedParameters.Length; i++) {
-                        var parameter = passedParameters[i];
-                        var split = Split(parameter, NamedParameterSplitter);
-                        if (split.Length == 2) {
-                            var name = NormalizeName(typeof(Parameter), split[0],_builder);
-                            shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
-                            signatureParameters.RemoveAll(p => NormalizeName(typeof(Parameter), p.Name, _builder) == name);
-                            expression.Parameters.RemoveAll(p => p == parameter);
+                    // single parameters
+                    if (methodData.Signature.Parameters.Count == 1 && expression.SingleParameter != string.Empty) {
+                        var name = methodData.Signature.Parameters[0].Name;
+                        var value = expression.SingleParameter.StartsWith(name + ":", StringComparison.OrdinalIgnoreCase) ? expression.SingleParameter.Remove(0,name.Length+1) : expression.SingleParameter;
+                        shorthandNode.Attributes.Add(new ShorthandAttribute(name, value));
+                    } else {
+                        // named parameters
+                        for (int i = 0; i < passedParameters.Length; i++) {
+                            var parameter = passedParameters[i];
+                            var split = Split(parameter, NamedParameterSplitter);
+                            if (split.Length == 2) {
+                                var name = NormalizeName(typeof(Parameter), split[0], _builder);
+                                shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
+                                signatureParameters.RemoveAll(p => NormalizeName(typeof(Parameter), p.Name, _builder) == name);
+                                expression.Parameters.RemoveAll(p => p == parameter);
+                            }
                         }
-                    }
 
-                    // ordered nameless parameters
-                    for (int m = 0; m < signatureParameters.Count; m++) {
-                        var signatureParameter = signatureParameters[m];
-                        shorthandNode.Attributes.Add(m < expression.Parameters.Count
-                            ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
-                            : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
+                        // ordered nameless parameters
+                        for (int m = 0; m < signatureParameters.Count; m++) {
+                            var signatureParameter = signatureParameters[m];
+                            shorthandNode.Attributes.Add(m < expression.Parameters.Count
+                                ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
+                                : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
+                        }
                     }
 
                     if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
