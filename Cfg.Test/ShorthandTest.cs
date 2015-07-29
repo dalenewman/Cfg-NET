@@ -126,7 +126,28 @@ namespace Cfg.Test {
             Assert.AreEqual("x === y ? x : ,", transform.Script);
         }
 
-        [Test]
+      [Test]
+      public void TestSingleParameterThatEndsWithParenthesis() {
+         const string xml = @"
+                <cfg>
+                    <fields>
+                        <add name='javascript' t='javascript(OrderDetailsQuantity * (OrderDetailsUnitPrice * (1-OrderDetailsDiscount)))' />
+                    </fields>
+                </cfg>";
+
+         var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+
+         foreach (var error in sample.Errors()) {
+            Console.WriteLine(error);
+         }
+
+         Assert.AreEqual(0, sample.Errors().Count());
+         var transform = sample.Fields[0].Transforms[0];
+         Assert.AreEqual("javascript", transform.Method);
+         Assert.AreEqual("OrderDetailsQuantity * (OrderDetailsUnitPrice * (1-OrderDetailsDiscount))", transform.Script);
+      }
+
+      [Test]
         public void TestMixedParameters() {
             const string xml = @"
                 <cfg>

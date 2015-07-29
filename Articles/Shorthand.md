@@ -77,11 +77,11 @@ So, when Cfg-NET encounters an shorthand expression like `replace(-,)`:
 
 * `replace` matches the method _name_ which reveals the _signature_ and _target_
 * per the signature
- * `-` becomes the _old-value_
- * `string.Empty` becomes the _new-value_
+  * `-` is assigned to the _old-value_ property.
+  * `string.Empty` is assigned to the _new-value_ property.
 * per the target
- * the method's name becomes the _method_
- * a new entry with _method_, _old-value_, and _new-value_ is placed in the nearest _transforms_ collection
+  * the method's name is assigned to the _method_ property.
+  * a new entry with _method_, _old-value_, and _new-value_ is placed in the nearest _transforms_ collection
 
 ###Using Shorthand
 
@@ -99,7 +99,7 @@ this:
             Load(cfg);
         }
 
-        //...
+        // ...snip...
     }
 </pre>
 
