@@ -15,6 +15,7 @@ namespace Transformalize.Libs.Cfg.Net {
    public abstract class CfgNode {
 
       internal static string ControlString = ((char)31).ToString();
+      internal static char ControlChar = (char)31;
       internal static char NamedParameterSplitter = ':';
       readonly IParser _parser;
       readonly ILogger _logger;
@@ -151,7 +152,7 @@ namespace Transformalize.Libs.Cfg.Net {
          INode node;
          try {
             cfg = cfg.Trim();
-            var parser = _parser ?? (cfg.StartsWith("{") ? (IParser)new FastJsonParser() : (IParser)new NanoXmlParser());
+            var parser = _parser ?? (cfg.StartsWith("{", StringComparison.Ordinal) ? (IParser)new FastJsonParser() : (IParser)new NanoXmlParser());
             node = parser.Parse(cfg);
 
             var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
@@ -1074,7 +1075,7 @@ namespace Transformalize.Libs.Cfg.Net {
             return new string[0];
 
          var split = arg.Replace("\\" + splitter, ControlString).Split(splitter);
-         return split.Select(s => s.Replace(ControlString, "\\" + splitter)).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
+         return split.Select(s => s.Replace(ControlChar, splitter)).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
       }
 
       internal static string[] Split(string arg, string[] splitter, int skip = 0) {

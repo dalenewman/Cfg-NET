@@ -58,7 +58,7 @@ namespace Cfg.Test {
             var first = sample.Fields[3].Transforms.First();
             Assert.AreEqual("padright", first.Method);
             Assert.AreEqual(10, first.TotalWidth);
-            Assert.AreEqual('0', first.PaddingChar);
+            Assert.AreEqual("0", first.PaddingChar);
 
             var last = sample.Fields[3].Transforms.Last();
             Assert.AreEqual("left", last.Method);
@@ -98,7 +98,7 @@ namespace Cfg.Test {
             var first = sample.Fields[3].Transforms.First();
             Assert.AreEqual("padright", first.Method);
             Assert.AreEqual(10, first.TotalWidth);
-            Assert.AreEqual('0', first.PaddingChar);
+            Assert.AreEqual("0", first.PaddingChar);
 
             var last = sample.Fields[3].Transforms.Last();
             Assert.AreEqual("left", last.Method);
@@ -125,6 +125,29 @@ namespace Cfg.Test {
             Assert.AreEqual("javascript", transform.Method);
             Assert.AreEqual("x === y ? x : ,", transform.Script);
         }
+
+      [Test]
+      public void TestEscapedComma() {
+         const string xml = @"
+                <cfg>
+                    <fields>
+                        <add name='name' 
+                             t='padleft(10,\,)' />
+                    </fields>
+                </cfg>";
+
+         var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+
+         foreach (var error in sample.Errors()) {
+            Console.WriteLine(error);
+         }
+
+         Assert.AreEqual(0, sample.Errors().Count());
+         var transform = sample.Fields[0].Transforms[0];
+         Assert.AreEqual("padleft", transform.Method);
+         Assert.AreEqual(10, transform.TotalWidth);
+         Assert.AreEqual(",", transform.PaddingChar);
+      }
 
       [Test]
       public void TestSingleParameterThatEndsWithParenthesis() {
@@ -174,7 +197,7 @@ namespace Cfg.Test {
             Assert.AreEqual(2, first.Transforms.Count);
             Assert.AreEqual("padleft", first.Transforms.First().Method);
             Assert.AreEqual(10, first.Transforms.First().TotalWidth);
-            Assert.AreEqual('0', first.Transforms.First().PaddingChar);
+            Assert.AreEqual("0", first.Transforms.First().PaddingChar);
 
             var second = sample.Fields.Skip(1).First();
 
@@ -182,7 +205,7 @@ namespace Cfg.Test {
             Assert.AreEqual(1, second.Transforms.Count);
             Assert.AreEqual("padright", second.Transforms.First().Method);
             Assert.AreEqual(10, second.Transforms.First().TotalWidth);
-            Assert.AreEqual(' ', second.Transforms.First().PaddingChar);
+            Assert.AreEqual(" ", second.Transforms.First().PaddingChar);
 
             var third = sample.Fields.Last();
 
@@ -192,7 +215,7 @@ namespace Cfg.Test {
             Assert.AreEqual(5, third.Transforms.First().Length);
 
             Assert.AreEqual(10, third.Transforms.Last().TotalWidth);
-            Assert.AreEqual('0', third.Transforms.Last().PaddingChar);
+            Assert.AreEqual("0", third.Transforms.Last().PaddingChar);
 
         }
 
@@ -227,7 +250,7 @@ namespace Cfg.Test {
         [Cfg]
         public int TotalWidth { get; set; }
         [Cfg]
-        public char PaddingChar { get; set; }
+        public string PaddingChar { get; set; }
         [Cfg]
         public int Length { get; set; }
 
