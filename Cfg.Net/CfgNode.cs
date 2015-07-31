@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -57,21 +56,21 @@ namespace Transformalize.Libs.Cfg.Net {
          _elementCache = new Dictionary<Type, List<string>>();
          _nameCache = new Dictionary<Type, Dictionary<string, string>>();
          _converter = new Dictionary<Type, Func<string, object>> {
-                {typeof (String), (x => x)},
+                {typeof (string), (x => x)},
                 {typeof (Guid), (x => Guid.Parse(x))},
-                {typeof (Int16), (x => Convert.ToInt16(x))},
-                {typeof (Int32), (x => Convert.ToInt32(x))},
-                {typeof (Int64), (x => Convert.ToInt64(x))},
-                {typeof (UInt16), (x => Convert.ToUInt16(x))},
-                {typeof (UInt32), (x => Convert.ToUInt32(x))},
-                {typeof (UInt64), (x => Convert.ToUInt64(x))},
-                {typeof (Double), (x => Convert.ToDouble(x))},
-                {typeof (Decimal), (x => Decimal.Parse(x, NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol, (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo)))) },
-                {typeof (Char), (x => Convert.ToChar(x))},
+                {typeof (short), (x => Convert.ToInt16(x))},
+                {typeof (int), (x => Convert.ToInt32(x))},
+                {typeof (long), (x => Convert.ToInt64(x))},
+                {typeof (ushort), (x => Convert.ToUInt16(x))},
+                {typeof (uint), (x => Convert.ToUInt32(x))},
+                {typeof (ulong), (x => Convert.ToUInt64(x))},
+                {typeof (double), (x => Convert.ToDouble(x))},
+                {typeof (decimal), (x => Decimal.Parse(x, NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol, (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo)))) },
+                {typeof (char), (x => Convert.ToChar(x))},
                 {typeof (DateTime), (x => Convert.ToDateTime(x))},
-                {typeof (Boolean), (x => Convert.ToBoolean(x))},
-                {typeof (Single), (x => Convert.ToSingle(x))},
-                {typeof (Byte), (x => Convert.ToByte(x))}
+                {typeof (bool), (x => Convert.ToBoolean(x))},
+                {typeof (float), (x => Convert.ToSingle(x))},
+                {typeof (byte), (x => Convert.ToByte(x))}
             };
       }
 
@@ -84,7 +83,7 @@ namespace Transformalize.Libs.Cfg.Net {
       public T GetDefaultOf<T>(Action<T> setter = null) {
          var obj = Activator.CreateInstance(typeof(T));
 
-         SetDefaults(obj, GetMetadata(typeof(T), _events, _builder));
+         SetDefaults(obj, GetMetadata(typeof(T), Events, _builder));
 
          if (setter != null) {
             setter((T)obj);
@@ -109,32 +108,30 @@ namespace Transformalize.Libs.Cfg.Net {
 
       [Obsolete("AddProblem is deprecated, please use Error or Warn instead.")]
       protected void AddProblem(string problem, params object[] args) {
-         _events.AddCustomProblem(problem, args);
+         Events.AddCustomProblem(problem, args);
       }
 
       protected void Error(string message, params object[] args) {
-         _events.Error(message, args);
+         Events.Error(message, args);
       }
 
       protected void Warn(string message, params object[] args) {
-         _events.Warning(message, args);
+         Events.Warning(message, args);
       }
 
       protected void LoadShorthand(string cfg) {
-
-         _events = _events ?? new CfgEvents(new CfgLogger(new MemoryLogger(), _logger));
 
          _shorthand = new ShorthandRoot(cfg);
 
          if (_shorthand.Warnings().Any()) {
             foreach (var warning in _shorthand.Warnings()) {
-               _events.Warning(warning);
+               Events.Warning(warning);
             }
          }
 
          if (_shorthand.Errors().Any()) {
             foreach (var error in _shorthand.Errors()) {
-               _events.Error(error);
+               Events.Error(error);
             }
             return;
          }
@@ -144,9 +141,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
       public void Load(string cfg, Dictionary<string, string> parameters = null) {
 
-         _events = _events ?? new CfgEvents(new CfgLogger(new MemoryLogger(), _logger));
-
-         _metadata = GetMetadata(_type, _events, _builder);
+         _metadata = GetMetadata(_type, Events, _builder);
          SetDefaults(this, _metadata);
 
          INode node;
@@ -167,7 +162,7 @@ namespace Transformalize.Libs.Cfg.Net {
                }
             }
          } catch (Exception ex) {
-            _events.ParseException(ex.Message);
+            Events.ParseException(ex.Message);
             return;
          }
 
@@ -252,7 +247,7 @@ namespace Transformalize.Libs.Cfg.Net {
       }
 
       CfgNode Load(INode node, string parentName, CfgEvents events, ShorthandRoot shorthand, Dictionary<string, string> parameters) {
-         _events = events;
+         Events = events;
          _shorthand = shorthand;
          _metadata = GetMetadata(_type, events, _builder);
          SetDefaults(this, _metadata);
@@ -297,11 +292,11 @@ namespace Transformalize.Libs.Cfg.Net {
                CfgMetadata sharedCfg = null;
 
                if (item.SharedProperty != null) {
-                  var sharedMetadata = GetMetadata(item.ListType, _events, _builder);
+                  var sharedMetadata = GetMetadata(item.ListType, Events, _builder);
                   if (sharedMetadata.ContainsKey(item.SharedProperty)) {
                      sharedCfg = sharedMetadata[item.SharedProperty];
                   } else {
-                     _events.SharedPropertyMissing(subNode.Name, item.SharedProperty, item.ListType.ToString());
+                     Events.SharedPropertyMissing(subNode.Name, item.SharedProperty, item.ListType.ToString());
                   }
                   IAttribute sharedAttribute;
                   if (subNode.TryAttribute(item.SharedProperty, out sharedAttribute)) {
@@ -331,15 +326,15 @@ namespace Transformalize.Libs.Cfg.Net {
                                  try {
                                     elements[addKey].Add(_converter[item.ListType](attrValue));
                                  } catch (Exception ex) {
-                                    _events.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
+                                    Events.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
                                  }
                               }
                            } else {
-                              _events.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
+                              Events.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
                            }
                         }
                      } else {
-                        var loaded = item.Loader().Load(add, subNode.Name, _events, _shorthand, parameters);
+                        var loaded = item.Loader().Load(add, subNode.Name, Events, _shorthand, parameters);
                         if (sharedCfg != null) {
                            var sharedValue = sharedCfg.Getter(loaded);
                            if (sharedValue == null) {
@@ -349,14 +344,14 @@ namespace Transformalize.Libs.Cfg.Net {
                         elements[addKey].Add(loaded);
                      }
                   } else {
-                     _events.UnexpectedElement(add.Name, subNode.Name);
+                     Events.UnexpectedElement(add.Name, subNode.Name);
                   }
                }
             } else {
                if (parentName == null) {
-                  _events.InvalidElement(node.Name, subNode.Name);
+                  Events.InvalidElement(node.Name, subNode.Name);
                } else {
-                  _events.InvalidNestedElement(parentName, node.Name, subNode.Name);
+                  Events.InvalidNestedElement(parentName, node.Name, subNode.Name);
                }
             }
          }
@@ -371,7 +366,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
                lock (Locker) {
                   if (item.UniquePropertiesInList == null) {
-                     item.UniquePropertiesInList = GetMetadata(item.ListType, _events, _builder)
+                     item.UniquePropertiesInList = GetMetadata(item.ListType, Events, _builder)
                          .Where(p => p.Value.Attribute.unique)
                          .Select(p => p.Key)
                          .ToArray();
@@ -393,17 +388,17 @@ namespace Transformalize.Libs.Cfg.Net {
                       .ToArray();
 
                   for (var l = 0; l < duplicates.Length; l++) {
-                     _events.DuplicateSet(unique, duplicates[l], key);
+                     Events.DuplicateSet(unique, duplicates[l], key);
                   }
                }
             } else if (list.Count == 0 && item.Attribute.required) {
                if (elementHits.Contains(key) && !addHits.Contains(key)) {
-                  _events.MissingAddElement(key);
+                  Events.MissingAddElement(key);
                } else {
                   if (parentName == null) {
-                     _events.MissingElement(node.Name, key);
+                     Events.MissingElement(node.Name, key);
                   } else {
-                     _events.MissingNestedElement(parentName, node.Name, key);
+                     Events.MissingNestedElement(parentName, node.Name, key);
                   }
                }
             }
@@ -468,7 +463,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
                if (item.Attribute.shorthand) {
                   if (_shorthand == null || _shorthand.MethodDataLookup == null) {
-                     _events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
+                     Events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
                   } else {
                      TranslateShorthand(node, attribute);
                   }
@@ -482,7 +477,7 @@ namespace Transformalize.Libs.Cfg.Net {
                      item.Setter(this, _converter[item.PropertyInfo.PropertyType](attribute.Value));
                      keyHits.Add(attributeKey);
                   } catch (Exception ex) {
-                     _events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
+                     Events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
                   }
                }
 
@@ -496,9 +491,9 @@ namespace Transformalize.Libs.Cfg.Net {
                   if (item.Attribute.DomainSet) {
                      if (!item.IsInDomain(stringValue)) {
                         if (parentName == null) {
-                           _events.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                           Events.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
                         } else {
-                           _events.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                           Events.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
                         }
                      }
                   }
@@ -511,7 +506,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
                attribute.Value = decoded ? Encode(value.ToString(), _builder) : value.ToString();
             } else {
-               _events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
+               Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
             }
          }
 
@@ -519,7 +514,7 @@ namespace Transformalize.Libs.Cfg.Net {
          foreach (var key in keys.Except(keyHits)) {
             var item = _metadata[key];
             if (item.Attribute.required) {
-               _events.MissingAttribute(parentName, node.Name, key);
+               Events.MissingAttribute(parentName, node.Name, key);
             }
          }
 
@@ -591,7 +586,7 @@ namespace Transformalize.Libs.Cfg.Net {
 
          if (itemAttributes.MinLengthSet) {
             if (value.Length < itemAttributes.minLength) {
-               _events.ValueTooShort(name, value, itemAttributes.minLength);
+               Events.ValueTooShort(name, value, itemAttributes.minLength);
             }
          }
 
@@ -599,7 +594,7 @@ namespace Transformalize.Libs.Cfg.Net {
             return;
 
          if (value.Length > itemAttributes.maxLength) {
-            _events.ValueTooLong(name, value, itemAttributes.maxLength);
+            Events.ValueTooLong(name, value, itemAttributes.maxLength);
          }
       }
 
@@ -610,11 +605,11 @@ namespace Transformalize.Libs.Cfg.Net {
 
          var comparable = value as IComparable;
          if (comparable == null) {
-            _events.ValueIsNotComparable(name, value);
+            Events.ValueIsNotComparable(name, value);
          } else {
             if (itemAttributes.MinValueSet) {
                if (comparable.CompareTo(itemAttributes.minValue) < 0) {
-                  _events.ValueTooSmall(name, value, itemAttributes.minValue);
+                  Events.ValueTooSmall(name, value, itemAttributes.minValue);
                }
             }
 
@@ -622,7 +617,7 @@ namespace Transformalize.Libs.Cfg.Net {
                return;
 
             if (comparable.CompareTo(itemAttributes.maxValue) > 0) {
-               _events.ValueTooBig(name, value, itemAttributes.maxValue);
+               Events.ValueTooBig(name, value, itemAttributes.maxValue);
             }
          }
       }
@@ -632,7 +627,7 @@ namespace Transformalize.Libs.Cfg.Net {
             return input;
          var response = ReplaceParameters(input, parameters, _builder);
          if (response.Item2.Length > 1) {
-            _events.MissingPlaceHolderValues(response.Item2);
+            Events.MissingPlaceHolderValues(response.Item2);
          }
          return response.Item1;
       }
@@ -934,6 +929,15 @@ namespace Transformalize.Libs.Cfg.Net {
          }
       }
 
+      internal CfgEvents Events {
+         get {
+            return _events ?? (_events = new CfgEvents(new CfgLogger(new MemoryLogger(), _logger)));
+         }
+         set {
+            _events = value;
+         }
+      }
+
       [Obsolete("Problems method is obsolete. Use Errors(), Warnings(), or Logs()")]
       public List<string> Problems() {
          return Errors().ToList();
@@ -946,11 +950,11 @@ namespace Transformalize.Libs.Cfg.Net {
       }
 
       public string[] Errors() {
-         return _events.Errors();
+         return Events.Errors();
       }
 
       public string[] Warnings() {
-         return _events.Warnings();
+         return Events.Warnings();
       }
 
       static Dictionary<string, CfgMetadata> GetMetadata(Type type, CfgEvents events, StringBuilder sb) {

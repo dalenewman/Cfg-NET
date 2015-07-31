@@ -6,13 +6,13 @@ using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
-    [TestFixture]
-    public class CustomProblems {
+   [TestFixture]
+   public class CustomProblems {
 
-        [Test]
-        public void TestXml() {
+      [Test]
+      public void TestXml() {
 
-            var xml = @"
+         var xml = @"
     <cfg>
         <connections>
             <add provider='file' file='good.txt' />
@@ -23,21 +23,18 @@ namespace Cfg.Test {
     </cfg>
 ".Replace("'", "\"");
 
-            var cfg = new CustomProblemCfg(xml);
-            var problems = cfg.Errors();
+         var cfg = new CustomProblemCfg(xml, new TraceLogger());
+         var problems = cfg.Errors();
 
-            foreach (var problem in problems) {
-                Console.WriteLine(problem);
-            }
+         Assert.AreEqual(3, problems.Length);
+         Assert.IsTrue(problems[0] == "file provider needs file attribute.");
+         Assert.IsTrue(problems[1] == "I don't like c:\\good.");
+         Assert.IsTrue(problems[2] == "folder provider needs folder attribute.");
+      }
 
-            Assert.AreEqual(2, problems.Length);
-            Assert.IsTrue(problems[0] == "file provider needs file attribute.");
-            Assert.IsTrue(problems[1] == "folder provider needs folder attribute.");
-        }
-
-        [Test]
-        public void TestJson() {
-            var json = @"{
+      [Test]
+      public void TestJson() {
+         var json = @"{
   'connections': [
       { 'provider': 'file', 'file': 'good.txt' },
       { 'provider': 'file' },
@@ -47,51 +44,60 @@ namespace Cfg.Test {
 }
 ".Replace("'", "\"");
 
-            var cfg = new CustomProblemCfg(json);
-            var problems = cfg.Errors();
+         var cfg = new CustomProblemCfg(json, new TraceLogger());
+         var problems = cfg.Errors();
 
-            foreach (var problem in problems) {
-                Console.WriteLine(problem);
+         Assert.AreEqual(3, problems.Length);
+         Assert.IsTrue(problems[0] == "file provider needs file attribute.");
+         Assert.IsTrue(problems[1] == "I don't like c:\\good.");
+         Assert.IsTrue(problems[2] == "folder provider needs folder attribute.");
+      }
+
+
+   }
+
+   public class CustomProblemCfg : CfgNode {
+      public CustomProblemCfg(string xml, ILogger anotherLogger) : base(null, anotherLogger) {
+         Load(xml);
+      }
+
+      [Cfg(required = true)]
+      public List<CustomProblemConnection> Connections { get; set; }
+
+   }
+
+   public class CustomProblemConnection : CfgNode {
+
+      [Cfg(required = true, domain = "file,folder,other")]
+      public string Provider { get; set; }
+
+      [Cfg]
+      public string File { get; set; }
+      string folder;
+
+      [Cfg]
+      public string Folder {
+         get {
+            return folder;
+         }
+
+         set {
+            if (value != null) {
+               Error("I don't like {0}.", value);
             }
+            folder = value;
+         }
+      }
 
-            Assert.AreEqual(2, problems.Length);
-            Assert.IsTrue(problems[0] == "file provider needs file attribute.");
-            Assert.IsTrue(problems[1] == "folder provider needs folder attribute.");
-        }
+      // custom validation
+      protected override void Validate() {
+         if (Provider == "file" && string.IsNullOrEmpty(File)) {
+            Error("file provider needs file attribute.");
+         } else if (Provider == "folder" && string.IsNullOrEmpty(Folder)) {
+            Error("folder provider needs folder attribute.");
+         }
+      }
 
-
-    }
-
-    public class CustomProblemCfg : CfgNode {
-        public CustomProblemCfg(string xml) {
-            Load(xml);
-        }
-
-        [Cfg(required = true)]
-        public List<CustomProblemConnection> Connections { get; set; }
-
-    }
-
-    public class CustomProblemConnection : CfgNode {
-
-        [Cfg(required = true, domain = "file,folder,other")]
-        public string Provider { get; set; }
-
-        [Cfg()]
-        public string File { get; set; }
-
-        [Cfg()]
-        public string Folder { get; set; }
-
-        // custom validation
-        protected override void Validate() {
-            if (Provider == "file" && string.IsNullOrEmpty(File)) {
-                Error("file provider needs file attribute.");
-            } else if (Provider == "folder" && string.IsNullOrEmpty(Folder)) {
-                Error("folder provider needs folder attribute.");
-            }
-        }
-
-    }
+   }
 
 }
