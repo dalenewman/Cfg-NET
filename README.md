@@ -46,11 +46,11 @@ using System.Collections.Generic;
 <strong>using Transformalize.Libs.Cfg.Net;</strong>
 namespace Cfg.Test {
     public class Cfg : <strong>CfgNode</strong> {
-<strong>[Cfg(required = true)]</strong>
+    <strong>[Cfg(required = true)]</strong>
         public List&lt;CfgServer&gt; Servers { get; set; }
     }
     public class CfgServer : <strong>CfgNode</strong> {
-<strong>[Cfg(required = true, unique = true)]</strong>
+    <strong>[Cfg(required = true, unique = true)]</strong>
         public string Name { get; set; }
     }
 }
@@ -133,7 +133,7 @@ I suggest adding a constructor to the `Cfg` class:
         [Cfg(required = true)]
         public List&lt;CfgServer&gt; Servers { get; set; }
         //constructor
-<strong>public Cfg(string cfg) {
+        <strong>public Cfg(string cfg) {
             this.Load(cfg);
         }</strong>
     }
@@ -213,10 +213,10 @@ namespace Cfg.Test {
     public class CfgServer : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
-<strong>[Cfg(required = true)]
+        <strong>[Cfg(required = true)]
         public List&lt;CfgDatabase&gt; Databases { get; set; }</strong>
     }
-<strong>public class CfgDatabase : CfgNode {
+        <strong>public class CfgDatabase : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
         [Cfg(required = true, unique = true)]
