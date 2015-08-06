@@ -249,30 +249,6 @@ Now let's update *BackupManager.xml* or *BackupManager.json*:
         &lt;/servers&gt;
     &lt;/backup-manager&gt;
 </pre>
-_or_
-<pre class="prettyprint" lang="js">
-{
-	&quot;servers&quot; : [{
-			&quot;name&quot; : &quot;Gandalf&quot;,
-			&quot;databases&quot; : [{
-					&quot;name&quot; : &quot;master&quot;,
-					&quot;backup-folder&quot; : &quot;\\\\san\\sql-backups\\gandalf\\master&quot;
-				}
-			]
-		}, {
-			&quot;name&quot; : &quot;Saruman&quot;,
-			&quot;databases&quot; : [{
-					&quot;name&quot; : &quot;master&quot;,
-					&quot;backup-folder&quot; : &quot;\\\\san\\sql-backups\\saruman\\master&quot;
-				}, {
-					&quot;name&quot; : &quot;model&quot;,
-					&quot;backup-folder&quot; : &quot;\\\\san\\sql-backups\\saruman\\model&quot;
-				}
-			]
-		}
-	]
-}
-</pre>
 
 Now we have a collection of servers, and each
 server holds a collection of databases.
