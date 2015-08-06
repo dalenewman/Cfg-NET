@@ -39,7 +39,7 @@ namespace Cfg.Test {
     }
 
     public sealed class TestDifferentXmlParser : CfgNode {
-        [Cfg()]
+        [Cfg]
         public List<TestDifferentXmlParserParameter> Parameters { get; set; }
 
         public TestDifferentXmlParser(string xml, IParser parser):base(parser) {
@@ -52,6 +52,6 @@ namespace Cfg.Test {
         public string Name { get; set; }
 
         [Cfg(value = false)]
-        public bool Value { get; set; }
+        public bool Value { get; private set; }
     }
 }

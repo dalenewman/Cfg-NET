@@ -74,7 +74,7 @@ namespace Cfg.Test {
     public class ValueThing : CfgNode {
 
         [Cfg(minValue = 6, maxValue = 15)]
-        public int Value { get; set; }
+        public int Value { get; private set; }
 
         [Cfg(minValue = 6, maxValue = 15)]
         public long LongValue { get; set; }

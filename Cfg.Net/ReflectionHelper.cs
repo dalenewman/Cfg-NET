@@ -7,7 +7,7 @@ namespace Transformalize.Libs.Cfg.Net {
     public static class ReflectionHelper {
 
         public static Func<object, object> CreateGetter(PropertyInfo property) {
-            var getter = property.GetGetMethod();
+            var getter = property.GetGetMethod() ?? property.GetGetMethod(true);
             var genericMethod = typeof(ReflectionHelper).GetMethod("CreateGetterGeneric");
             var genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Func<object, object>)genericHelper.Invoke(null, new object[] { getter });
@@ -20,7 +20,7 @@ namespace Transformalize.Libs.Cfg.Net {
         }
 
         public static Action<object, object> CreateSetter(PropertyInfo property) {
-            var setter = property.GetSetMethod();
+            var setter = property.GetSetMethod() ?? property.GetSetMethod(true);
             var genericMethod = typeof(ReflectionHelper).GetMethod("CreateSetterGeneric");
             var genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Action<object, object>)genericHelper.Invoke(null, new object[] { setter });

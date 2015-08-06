@@ -11,51 +11,51 @@ using Transformalize.Libs.Cfg.Net.Shorthand;
 
 namespace Transformalize.Libs.Cfg.Net {
 
-   public abstract class CfgNode {
+    public abstract class CfgNode {
 
-      internal static string ControlString = ((char)31).ToString();
-      internal static char ControlChar = (char)31;
-      internal static char NamedParameterSplitter = ':';
-      readonly IParser _parser;
-      readonly ILogger _logger;
-      ShorthandRoot _shorthand;
+        internal static string ControlString = ((char)31).ToString();
+        internal static char ControlChar = (char)31;
+        internal static char NamedParameterSplitter = ':';
+        readonly IParser _parser;
+        readonly ILogger _logger;
+        ShorthandRoot _shorthand;
 
-      //shared cache
-      static bool _initialized;
-      static readonly object Locker = new object();
-      static Dictionary<Type, Dictionary<string, CfgMetadata>> _metadataCache;
-      static Dictionary<Type, List<string>> _propertyCache;
-      static Dictionary<Type, List<string>> _elementCache;
-      static Dictionary<Type, Dictionary<string, string>> _nameCache;
-      static Dictionary<Type, Func<string, object>> _converter;
+        //shared cache
+        static bool _initialized;
+        static readonly object Locker = new object();
+        static Dictionary<Type, Dictionary<string, CfgMetadata>> _metadataCache;
+        static Dictionary<Type, List<string>> _propertyCache;
+        static Dictionary<Type, List<string>> _elementCache;
+        static Dictionary<Type, Dictionary<string, string>> _nameCache;
+        static Dictionary<Type, Func<string, object>> _converter;
 
-      readonly Dictionary<string, string> _uniqueProperties = new Dictionary<string, string>();
-      readonly StringBuilder _builder = new StringBuilder();
-      readonly Type _type;
-      Dictionary<string, CfgMetadata> _metadata;
-      CfgEvents _events;
-      static Dictionary<string, char> _entities;
+        readonly Dictionary<string, string> _uniqueProperties = new Dictionary<string, string>();
+        readonly StringBuilder _builder = new StringBuilder();
+        readonly Type _type;
+        Dictionary<string, CfgMetadata> _metadata;
+        CfgEvents _events;
+        static Dictionary<string, char> _entities;
 
-      protected CfgNode(IParser parser = null, ILogger logger = null) {
-         _parser = parser;
-         _logger = logger;
-         _type = GetType();
+        protected CfgNode(IParser parser = null, ILogger logger = null) {
+            _parser = parser;
+            _logger = logger;
+            _type = GetType();
 
-         lock (Locker) {
-            if (_initialized)
-               return;
-            Initialize();
-            _initialized = true;
-         }
+            lock (Locker) {
+                if (_initialized)
+                    return;
+                Initialize();
+                _initialized = true;
+            }
 
-      }
+        }
 
-      static void Initialize() {
-         _metadataCache = new Dictionary<Type, Dictionary<string, CfgMetadata>>();
-         _propertyCache = new Dictionary<Type, List<string>>();
-         _elementCache = new Dictionary<Type, List<string>>();
-         _nameCache = new Dictionary<Type, Dictionary<string, string>>();
-         _converter = new Dictionary<Type, Func<string, object>> {
+        static void Initialize() {
+            _metadataCache = new Dictionary<Type, Dictionary<string, CfgMetadata>>();
+            _propertyCache = new Dictionary<Type, List<string>>();
+            _elementCache = new Dictionary<Type, List<string>>();
+            _nameCache = new Dictionary<Type, Dictionary<string, string>>();
+            _converter = new Dictionary<Type, Func<string, object>> {
                 {typeof (string), (x => x)},
                 {typeof (Guid), (x => Guid.Parse(x))},
                 {typeof (short), (x => Convert.ToInt16(x))},
@@ -72,606 +72,618 @@ namespace Transformalize.Libs.Cfg.Net {
                 {typeof (float), (x => Convert.ToSingle(x))},
                 {typeof (byte), (x => Convert.ToByte(x))}
             };
-      }
+        }
 
-      /// <summary>
-      /// Get any type that inherits from CfgNode with default values
-      /// </summary>
-      /// <typeparam name="T"></typeparam>
-      /// <param name="setter"></param>
-      /// <returns></returns>
-      public T GetDefaultOf<T>(Action<T> setter = null) {
-         var obj = Activator.CreateInstance(typeof(T));
+        /// <summary>
+        /// Get any type that inherits from CfgNode with default values
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="setter"></param>
+        /// <returns></returns>
+        public T GetDefaultOf<T>(Action<T> setter = null) {
+            var obj = Activator.CreateInstance(typeof(T));
 
-         SetDefaults(obj, GetMetadata(typeof(T), Events, _builder));
+            SetDefaults(obj, GetMetadata(typeof(T), Events, _builder));
 
-         if (setter != null) {
-            setter((T)obj);
-         }
-
-          ((CfgNode)obj).Modify();
-
-         return (T)obj;
-      }
-
-      static void SetDefaults(object node, Dictionary<string, CfgMetadata> metadata) {
-         foreach (var pair in metadata) {
-            if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
-               pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
-            } else {
-               if (!pair.Value.TypeMismatch) {
-                  pair.Value.Setter(node, pair.Value.Attribute.value);
-               }
-            }
-         }
-      }
-
-      [Obsolete("AddProblem is deprecated, please use Error or Warn instead.")]
-      protected void AddProblem(string problem, params object[] args) {
-         Events.AddCustomProblem(problem, args);
-      }
-
-      protected void Error(string message, params object[] args) {
-         Events.Error(message, args);
-      }
-
-      protected void Warn(string message, params object[] args) {
-         Events.Warning(message, args);
-      }
-
-      protected void LoadShorthand(string cfg) {
-
-         _shorthand = new ShorthandRoot(cfg);
-
-         if (_shorthand.Warnings().Any()) {
-            foreach (var warning in _shorthand.Warnings()) {
-               Events.Warning(warning);
-            }
-         }
-
-         if (_shorthand.Errors().Any()) {
-            foreach (var error in _shorthand.Errors()) {
-               Events.Error(error);
-            }
-            return;
-         }
-
-         _shorthand.InitializeMethodDataLookup();
-      }
-
-      public void Load(string cfg, Dictionary<string, string> parameters = null) {
-
-         _metadata = GetMetadata(_type, Events, _builder);
-         SetDefaults(this, _metadata);
-
-         INode node;
-         try {
-            cfg = cfg.Trim();
-            var parser = _parser ?? (cfg.StartsWith("{", StringComparison.Ordinal) ? (IParser)new FastJsonParser() : (IParser)new NanoXmlParser());
-            node = parser.Parse(cfg);
-
-            var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
-            if (environmentDefaults.Length > 0) {
-               if (parameters == null) {
-                  parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-               }
-               for (var i = 0; i < environmentDefaults.Length; i++) {
-                  if (!parameters.ContainsKey(environmentDefaults[i][0])) {
-                     parameters[environmentDefaults[i][0]] = environmentDefaults[i][1];
-                  }
-               }
-            }
-         } catch (Exception ex) {
-            Events.ParseException(ex.Message);
-            return;
-         }
-
-         LoadProperties(node, null, parameters);
-         LoadCollections(node, null, parameters);
-         Modify();
-         Validate();
-      }
-
-      protected IEnumerable<string[]> LoadEnvironment(INode node, Dictionary<string, string> parameters) {
-
-         for (var i = 0; i < node.SubNodes.Count; i++) {
-            var environmentsNode = node.SubNodes[i];
-            if (environmentsNode.Name != CfgConstants.ENVIRONMENTS_ELEMENT_NAME)
-               continue;
-
-            if (environmentsNode.SubNodes.Count == 0)
-               break;
-
-            INode environmentNode;
-
-            if (environmentsNode.SubNodes.Count > 1) {
-               IAttribute defaultEnvironment;
-               if (!environmentsNode.TryAttribute(CfgConstants.ENVIRONMENTS_DEFAULT_NAME, out defaultEnvironment))
-                  continue;
-
-               for (var j = 0; j < environmentsNode.SubNodes.Count; j++) {
-                  environmentNode = environmentsNode.SubNodes[j];
-
-                  IAttribute environmentName;
-                  if (!environmentNode.TryAttribute("name", out environmentName))
-                     continue;
-
-                  var value = CheckParameters(parameters, defaultEnvironment.Value);
-
-                  if (!value.Equals(environmentName.Value) || environmentNode.SubNodes.Count == 0)
-                     continue;
-
-                  return GetParameters(environmentNode.SubNodes[0]);
-               }
+            if (setter != null) {
+                setter((T)obj);
             }
 
-            environmentNode = environmentsNode.SubNodes[0];
-            if (environmentNode.SubNodes.Count == 0)
-               break;
+            ((CfgNode)obj).Modify();
+            ((CfgNode)obj).PreValidate();
 
-            var parametersNode = environmentNode.SubNodes[0];
+            return (T)obj;
+        }
 
-            if (parametersNode.Name != CfgConstants.PARAMETERS_ELEMENT_NAME || environmentNode.SubNodes.Count == 0)
-               break;
-
-            return GetParameters(parametersNode);
-
-         }
-
-         return Enumerable.Empty<string[]>();
-      }
-
-      static IEnumerable<string[]> GetParameters(INode parametersNode) {
-         var parameters = new List<string[]>();
-
-         for (var j = 0; j < parametersNode.SubNodes.Count; j++) {
-            var parameter = parametersNode.SubNodes[j];
-            string name = null;
-            string value = null;
-            for (var k = 0; k < parameter.Attributes.Count; k++) {
-               var attribute = parameter.Attributes[k];
-               switch (attribute.Name) {
-                  case "name":
-                     name = attribute.Value;
-                     break;
-                  case "value":
-                     value = attribute.Value;
-                     break;
-               }
+        static void SetDefaults(object node, Dictionary<string, CfgMetadata> metadata) {
+            foreach (var pair in metadata) {
+                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
+                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                } else {
+                    if (!pair.Value.TypeMismatch) {
+                        pair.Value.Setter(node, pair.Value.Attribute.value);
+                    }
+                }
             }
-            if (name != null && value != null) {
-               parameters.Add(new[] { name, value });
+        }
+
+        protected void Error(string message, params object[] args) {
+            Events.Error(message, args);
+        }
+
+        protected void Warn(string message, params object[] args) {
+            Events.Warning(message, args);
+        }
+
+        protected void LoadShorthand(string cfg) {
+
+            _shorthand = new ShorthandRoot(cfg);
+
+            if (_shorthand.Warnings().Any()) {
+                foreach (var warning in _shorthand.Warnings()) {
+                    Events.Warning(warning);
+                }
             }
-         }
-         return parameters;
-      }
 
-      CfgNode Load(INode node, string parentName, CfgEvents events, ShorthandRoot shorthand, Dictionary<string, string> parameters) {
-         Events = events;
-         _shorthand = shorthand;
-         _metadata = GetMetadata(_type, events, _builder);
-         SetDefaults(this, _metadata);
-         LoadProperties(node, parentName, parameters);
-         LoadCollections(node, parentName, parameters);
-         Modify();
-         Validate();
-         return this;
-      }
+            if (_shorthand.Errors().Any()) {
+                foreach (var error in _shorthand.Errors()) {
+                    Events.Error(error);
+                }
+                return;
+            }
 
-      /// <summary>
-      /// Override to add custom validation.  Use `AddProblem()` to add problems.
-      /// </summary>
-      protected virtual void Validate() { }
+            _shorthand.InitializeMethodDataLookup();
+        }
 
-      /// <summary>
-      /// Override for custom modifications.
-      /// </summary>
-      protected virtual void Modify() { }
+        public void Load(string cfg, Dictionary<string, string> parameters = null) {
 
-      void LoadCollections(INode node, string parentName, Dictionary<string, string> parameters = null) {
+            _metadata = GetMetadata(_type, Events, _builder);
+            SetDefaults(this, _metadata);
 
-         var keys = _elementCache[_type];
-         var elements = new Dictionary<string, IList>();
-         var elementHits = new HashSet<string>();
-         var addHits = new HashSet<string>();
+            INode node;
+            try {
+                cfg = cfg.Trim();
+                var parser = _parser ?? (cfg.StartsWith("{", StringComparison.Ordinal) ? (IParser)new FastJsonParser() : (IParser)new NanoXmlParser());
+                node = parser.Parse(cfg);
 
-         //initialize all the lists
-         for (var i = 0; i < keys.Count; i++) {
-            var key = keys[i];
-            elements.Add(key, (IList)_metadata[key].Getter(this));
-         }
+                var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
+                if (environmentDefaults.Length > 0) {
+                    if (parameters == null) {
+                        parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    }
+                    for (var i = 0; i < environmentDefaults.Length; i++) {
+                        if (!parameters.ContainsKey(environmentDefaults[i][0])) {
+                            parameters[environmentDefaults[i][0]] = environmentDefaults[i][1];
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                Events.ParseException(ex.Message);
+                return;
+            }
 
-         for (var i = 0; i < node.SubNodes.Count; i++) {
-            var subNode = node.SubNodes[i];
-            var subNodeKey = NormalizeName(_type, subNode.Name, _builder);
-            if (_metadata.ContainsKey(subNodeKey)) {
-               elementHits.Add(subNodeKey);
-               var item = _metadata[subNodeKey];
+            LoadProperties(node, null, parameters);
+            LoadCollections(node, null, parameters);
+            Modify();
+            PreValidate();
+            Validate();
+            PostValidate();
+        }
 
-               object value = null;
-               CfgMetadata sharedCfg = null;
+        protected IEnumerable<string[]> LoadEnvironment(INode node, Dictionary<string, string> parameters) {
 
-               if (item.SharedProperty != null) {
-                  var sharedMetadata = GetMetadata(item.ListType, Events, _builder);
-                  if (sharedMetadata.ContainsKey(item.SharedProperty)) {
-                     sharedCfg = sharedMetadata[item.SharedProperty];
-                  } else {
-                     Events.SharedPropertyMissing(subNode.Name, item.SharedProperty, item.ListType.ToString());
-                  }
-                  IAttribute sharedAttribute;
-                  if (subNode.TryAttribute(item.SharedProperty, out sharedAttribute)) {
-                     value = sharedAttribute.Value ?? item.SharedValue;
-                  }
-               }
+            for (var i = 0; i < node.SubNodes.Count; i++) {
+                var environmentsNode = node.SubNodes[i];
+                if (environmentsNode.Name != CfgConstants.ENVIRONMENTS_ELEMENT_NAME)
+                    continue;
 
-               for (var j = 0; j < subNode.SubNodes.Count; j++) {
-                  var add = subNode.SubNodes[j];
-                  if (add.Name.Equals("add", StringComparison.Ordinal)) {
-                     var addKey = NormalizeName(_type, subNode.Name, _builder);
-                     addHits.Add(addKey);
-                     if (item.Loader == null) {
-                        if (item.ListType == typeof(Dictionary<string, string>)) {
-                           var dict = new Dictionary<string, string>();
-                           for (var k = 0; k < add.Attributes.Count; k++) {
-                              var attribute = add.Attributes[k];
-                              dict[attribute.Name] = attribute.Value;
-                           }
-                           elements[addKey].Add(dict);
+                if (environmentsNode.SubNodes.Count == 0)
+                    break;
+
+                INode environmentNode;
+
+                if (environmentsNode.SubNodes.Count > 1) {
+                    IAttribute defaultEnvironment;
+                    if (!environmentsNode.TryAttribute(CfgConstants.ENVIRONMENTS_DEFAULT_NAME, out defaultEnvironment))
+                        continue;
+
+                    for (var j = 0; j < environmentsNode.SubNodes.Count; j++) {
+                        environmentNode = environmentsNode.SubNodes[j];
+
+                        IAttribute environmentName;
+                        if (!environmentNode.TryAttribute("name", out environmentName))
+                            continue;
+
+                        var value = CheckParameters(parameters, defaultEnvironment.Value);
+
+                        if (!value.Equals(environmentName.Value) || environmentNode.SubNodes.Count == 0)
+                            continue;
+
+                        return GetParameters(environmentNode.SubNodes[0]);
+                    }
+                }
+
+                environmentNode = environmentsNode.SubNodes[0];
+                if (environmentNode.SubNodes.Count == 0)
+                    break;
+
+                var parametersNode = environmentNode.SubNodes[0];
+
+                if (parametersNode.Name != CfgConstants.PARAMETERS_ELEMENT_NAME || environmentNode.SubNodes.Count == 0)
+                    break;
+
+                return GetParameters(parametersNode);
+
+            }
+
+            return Enumerable.Empty<string[]>();
+        }
+
+        static IEnumerable<string[]> GetParameters(INode parametersNode) {
+            var parameters = new List<string[]>();
+
+            for (var j = 0; j < parametersNode.SubNodes.Count; j++) {
+                var parameter = parametersNode.SubNodes[j];
+                string name = null;
+                string value = null;
+                for (var k = 0; k < parameter.Attributes.Count; k++) {
+                    var attribute = parameter.Attributes[k];
+                    switch (attribute.Name) {
+                        case "name":
+                            name = attribute.Value;
+                            break;
+                        case "value":
+                            value = attribute.Value;
+                            break;
+                    }
+                }
+                if (name != null && value != null) {
+                    parameters.Add(new[] { name, value });
+                }
+            }
+            return parameters;
+        }
+
+        CfgNode Load(INode node, string parentName, CfgEvents events, ShorthandRoot shorthand, Dictionary<string, string> parameters) {
+            Events = events;
+            _shorthand = shorthand;
+            _metadata = GetMetadata(_type, events, _builder);
+            SetDefaults(this, _metadata);
+            LoadProperties(node, parentName, parameters);
+            LoadCollections(node, parentName, parameters);
+            Modify();
+            PreValidate();
+            Validate();
+            PostValidate();
+            return this;
+        }
+
+        /// <summary>
+        /// Override to add custom validation.  Use `Error()` or `Warn()` to record issues.
+        /// </summary>
+        protected virtual void Validate() { }
+
+        /// <summary>
+        /// Override for custom modifications.
+        /// </summary>
+        [Obsolete("Use PreValidate instead of Modify.  Modify has been replaced by PreValidate, and PostValidate.  PreValidate runs before Validate, and PostValidate runs after Validate.")]
+        protected virtual void Modify() { }
+
+        /// <summary>
+        /// Allows for modification of configuration before validation.
+        /// Note: You are not protected from `null` here.
+        /// </summary>
+        protected virtual void PreValidate() { }
+        /// <summary>
+        /// Allows for modification of configuration after validation.
+        /// Note: You can check for Errors() here and modify accordingly.
+        /// </summary>
+        protected virtual void PostValidate() { }
+
+        void LoadCollections(INode node, string parentName, Dictionary<string, string> parameters = null) {
+
+            var keys = _elementCache[_type];
+            var elements = new Dictionary<string, IList>();
+            var elementHits = new HashSet<string>();
+            var addHits = new HashSet<string>();
+
+            //initialize all the lists
+            for (var i = 0; i < keys.Count; i++) {
+                var key = keys[i];
+                elements.Add(key, (IList)_metadata[key].Getter(this));
+            }
+
+            for (var i = 0; i < node.SubNodes.Count; i++) {
+                var subNode = node.SubNodes[i];
+                var subNodeKey = NormalizeName(_type, subNode.Name, _builder);
+                if (_metadata.ContainsKey(subNodeKey)) {
+                    elementHits.Add(subNodeKey);
+                    var item = _metadata[subNodeKey];
+
+                    object value = null;
+                    CfgMetadata sharedCfg = null;
+
+                    if (item.SharedProperty != null) {
+                        var sharedMetadata = GetMetadata(item.ListType, Events, _builder);
+                        if (sharedMetadata.ContainsKey(item.SharedProperty)) {
+                            sharedCfg = sharedMetadata[item.SharedProperty];
                         } else {
-                           if (add.Attributes.Count == 1) {
-                              var attrValue = add.Attributes[0].Value;
-                              if (item.ListType == typeof(string) || item.ListType == typeof(object)) {
-                                 elements[addKey].Add(attrValue);
-                              } else {
-                                 try {
-                                    elements[addKey].Add(_converter[item.ListType](attrValue));
-                                 } catch (Exception ex) {
-                                    Events.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
-                                 }
-                              }
-                           } else {
-                              Events.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
-                           }
+                            Events.SharedPropertyMissing(subNode.Name, item.SharedProperty, item.ListType.ToString());
                         }
-                     } else {
-                        var loaded = item.Loader().Load(add, subNode.Name, Events, _shorthand, parameters);
-                        if (sharedCfg != null) {
-                           var sharedValue = sharedCfg.Getter(loaded);
-                           if (sharedValue == null) {
-                              sharedCfg.Setter(loaded, value ?? item.SharedValue);
-                           }
+                        IAttribute sharedAttribute;
+                        if (subNode.TryAttribute(item.SharedProperty, out sharedAttribute)) {
+                            value = sharedAttribute.Value ?? item.SharedValue;
                         }
-                        elements[addKey].Add(loaded);
-                     }
-                  } else {
-                     Events.UnexpectedElement(add.Name, subNode.Name);
-                  }
-               }
-            } else {
-               if (parentName == null) {
-                  Events.InvalidElement(node.Name, subNode.Name);
-               } else {
-                  Events.InvalidNestedElement(parentName, node.Name, subNode.Name);
-               }
-            }
-         }
+                    }
 
-         // check for duplicates of unique properties required to be unique in collections
-         for (var i = 0; i < keys.Count; i++) {
-            var key = keys[i];
-            var item = _metadata[key];
-            var list = elements[key];
-
-            if (list.Count > 1) {
-
-               lock (Locker) {
-                  if (item.UniquePropertiesInList == null) {
-                     item.UniquePropertiesInList = GetMetadata(item.ListType, Events, _builder)
-                         .Where(p => p.Value.Attribute.unique)
-                         .Select(p => p.Key)
-                         .ToArray();
-                  }
-               }
-
-               if (item.UniquePropertiesInList.Length <= 0)
-                  continue;
-
-               for (var j = 0; j < item.UniquePropertiesInList.Length; j++) {
-                  var unique = item.UniquePropertiesInList[j];
-                  var duplicates = list
-                      .Cast<CfgNode>()
-                      .Where(n => n.UniqueProperties.ContainsKey(unique))
-                      .Select(n => n.UniqueProperties[unique])
-                      .GroupBy(n => n)
-                      .Where(group => @group.Count() > 1)
-                      .Select(group => @group.Key)
-                      .ToArray();
-
-                  for (var l = 0; l < duplicates.Length; l++) {
-                     Events.DuplicateSet(unique, duplicates[l], key);
-                  }
-               }
-            } else if (list.Count == 0 && item.Attribute.required) {
-               if (elementHits.Contains(key) && !addHits.Contains(key)) {
-                  Events.MissingAddElement(key);
-               } else {
-                  if (parentName == null) {
-                     Events.MissingElement(node.Name, key);
-                  } else {
-                     Events.MissingNestedElement(parentName, node.Name, key);
-                  }
-               }
+                    for (var j = 0; j < subNode.SubNodes.Count; j++) {
+                        var add = subNode.SubNodes[j];
+                        if (add.Name.Equals("add", StringComparison.Ordinal)) {
+                            var addKey = NormalizeName(_type, subNode.Name, _builder);
+                            addHits.Add(addKey);
+                            if (item.Loader == null) {
+                                if (item.ListType == typeof(Dictionary<string, string>)) {
+                                    var dict = new Dictionary<string, string>();
+                                    for (var k = 0; k < add.Attributes.Count; k++) {
+                                        var attribute = add.Attributes[k];
+                                        dict[attribute.Name] = attribute.Value;
+                                    }
+                                    elements[addKey].Add(dict);
+                                } else {
+                                    if (add.Attributes.Count == 1) {
+                                        var attrValue = add.Attributes[0].Value;
+                                        if (item.ListType == typeof(string) || item.ListType == typeof(object)) {
+                                            elements[addKey].Add(attrValue);
+                                        } else {
+                                            try {
+                                                elements[addKey].Add(_converter[item.ListType](attrValue));
+                                            } catch (Exception ex) {
+                                                Events.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
+                                            }
+                                        }
+                                    } else {
+                                        Events.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
+                                    }
+                                }
+                            } else {
+                                var loaded = item.Loader().Load(add, subNode.Name, Events, _shorthand, parameters);
+                                if (sharedCfg != null) {
+                                    var sharedValue = sharedCfg.Getter(loaded);
+                                    if (sharedValue == null) {
+                                        sharedCfg.Setter(loaded, value ?? item.SharedValue);
+                                    }
+                                }
+                                elements[addKey].Add(loaded);
+                            }
+                        } else {
+                            Events.UnexpectedElement(add.Name, subNode.Name);
+                        }
+                    }
+                } else {
+                    if (parentName == null) {
+                        Events.InvalidElement(node.Name, subNode.Name);
+                    } else {
+                        Events.InvalidNestedElement(parentName, node.Name, subNode.Name);
+                    }
+                }
             }
 
-         }
-      }
+            // check for duplicates of unique properties required to be unique in collections
+            for (var i = 0; i < keys.Count; i++) {
+                var key = keys[i];
+                var item = _metadata[key];
+                var list = elements[key];
 
-      static string NormalizeName(Type type, string name, StringBuilder builder) {
-         var cache = _nameCache[type];
-         if (cache.ContainsKey(name)) {
-            return cache[name];
-         }
-         builder.Clear();
-         for (var i = 0; i < name.Length; i++) {
-            var character = name[i];
-            if (char.IsLetterOrDigit(character)) {
-               builder.Append(char.IsUpper(character) ? char.ToLowerInvariant(character) : character);
-            }
-         }
-         var result = builder.ToString();
-         cache[name] = result;
-         return result;
-      }
+                if (list.Count > 1) {
 
-      void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
+                    lock (Locker) {
+                        if (item.UniquePropertiesInList == null) {
+                            item.UniquePropertiesInList = GetMetadata(item.ListType, Events, _builder)
+                                .Where(p => p.Value.Attribute.unique)
+                                .Select(p => p.Key)
+                                .ToArray();
+                        }
+                    }
 
-         var keys = _propertyCache[_type];
+                    if (item.UniquePropertiesInList.Length <= 0)
+                        continue;
 
-         if (keys.Count == 0)
-            return;
+                    for (var j = 0; j < item.UniquePropertiesInList.Length; j++) {
+                        var unique = item.UniquePropertiesInList[j];
+                        var duplicates = list
+                            .Cast<CfgNode>()
+                            .Where(n => n.UniqueProperties.ContainsKey(unique))
+                            .Select(n => n.UniqueProperties[unique])
+                            .GroupBy(n => n)
+                            .Where(group => @group.Count() > 1)
+                            .Select(group => @group.Key)
+                            .ToArray();
 
-         var keyHits = new HashSet<string>();
-
-         for (var i = 0; i < node.Attributes.Count; i++) {
-
-            var attribute = node.Attributes[i];
-            var attributeKey = NormalizeName(_type, attribute.Name, _builder);
-            if (_metadata.ContainsKey(attributeKey)) {
-
-               if (attribute.Value == null)
-                  continue;
-
-               var decoded = false;
-               attribute.Value = CheckParameters(parameters, attribute.Value);
-
-               if (attribute.Value.IndexOf(CfgConstants.ENTITY_START) > -1) {
-                  attribute.Value = Decode(attribute.Value, _builder);
-                  decoded = true;
-               }
-
-               var item = _metadata[attributeKey];
-
-               if (item.Attribute.toLower) {
-                  attribute.Value = attribute.Value.ToLower();
-               } else if (item.Attribute.toUpper) {
-                  attribute.Value = attribute.Value.ToUpper();
-               }
-
-               if (item.Attribute.unique) {
-                  UniqueProperties[attributeKey] = attribute.Value;
-               }
-
-               if (item.Attribute.shorthand) {
-                  if (_shorthand == null || _shorthand.MethodDataLookup == null) {
-                     Events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
-                  } else {
-                     TranslateShorthand(node, attribute);
-                  }
-               }
-
-               if (item.PropertyInfo.PropertyType == typeof(string) || item.PropertyInfo.PropertyType == typeof(object)) {
-                  item.Setter(this, attribute.Value);
-                  keyHits.Add(attributeKey);
-               } else {
-                  try {
-                     item.Setter(this, _converter[item.PropertyInfo.PropertyType](attribute.Value));
-                     keyHits.Add(attributeKey);
-                  } catch (Exception ex) {
-                     Events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
-                  }
-               }
-
-               // Setter has been called and may have changed the value
-               var value = item.Getter(this);
-
-               if (item.Attribute.NeedString) {
-
-                  var stringValue = item.PropertyInfo.PropertyType == typeof(string) ? (string)value : value.ToString();
-
-                  if (item.Attribute.DomainSet) {
-                     if (!item.IsInDomain(stringValue)) {
+                        for (var l = 0; l < duplicates.Length; l++) {
+                            Events.DuplicateSet(unique, duplicates[l], key);
+                        }
+                    }
+                } else if (list.Count == 0 && item.Attribute.required) {
+                    if (elementHits.Contains(key) && !addHits.Contains(key)) {
+                        Events.MissingAddElement(key);
+                    } else {
                         if (parentName == null) {
-                           Events.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                            Events.MissingElement(node.Name, key);
                         } else {
-                           Events.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                            Events.MissingNestedElement(parentName, node.Name, key);
                         }
-                     }
-                  }
+                    }
+                }
 
-                  CheckValueLength(item.Attribute, attribute.Name, stringValue);
+            }
+        }
 
-               }
+        static string NormalizeName(Type type, string name, StringBuilder builder) {
+            var cache = _nameCache[type];
+            if (cache.ContainsKey(name)) {
+                return cache[name];
+            }
+            builder.Clear();
+            for (var i = 0; i < name.Length; i++) {
+                var character = name[i];
+                if (char.IsLetterOrDigit(character)) {
+                    builder.Append(char.IsUpper(character) ? char.ToLowerInvariant(character) : character);
+                }
+            }
+            var result = builder.ToString();
+            cache[name] = result;
+            return result;
+        }
 
-               CheckValueBoundaries(item.Attribute, attribute.Name, value);
+        void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
 
-               attribute.Value = decoded ? Encode(value.ToString(), _builder) : value.ToString();
+            var keys = _propertyCache[_type];
+
+            if (keys.Count == 0)
+                return;
+
+            var keyHits = new HashSet<string>();
+
+            for (var i = 0; i < node.Attributes.Count; i++) {
+
+                var attribute = node.Attributes[i];
+                var attributeKey = NormalizeName(_type, attribute.Name, _builder);
+                if (_metadata.ContainsKey(attributeKey)) {
+
+                    if (attribute.Value == null)
+                        continue;
+
+                    var decoded = false;
+                    attribute.Value = CheckParameters(parameters, attribute.Value);
+
+                    if (attribute.Value.IndexOf(CfgConstants.ENTITY_START) > -1) {
+                        attribute.Value = Decode(attribute.Value, _builder);
+                        decoded = true;
+                    }
+
+                    var item = _metadata[attributeKey];
+
+                    if (item.Attribute.toLower) {
+                        attribute.Value = attribute.Value.ToLower();
+                    } else if (item.Attribute.toUpper) {
+                        attribute.Value = attribute.Value.ToUpper();
+                    }
+
+                    if (item.Attribute.unique) {
+                        UniqueProperties[attributeKey] = attribute.Value;
+                    }
+
+                    if (item.Attribute.shorthand) {
+                        if (_shorthand == null || _shorthand.MethodDataLookup == null) {
+                            Events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
+                        } else {
+                            TranslateShorthand(node, attribute);
+                        }
+                    }
+
+                    if (item.PropertyInfo.PropertyType == typeof(string) || item.PropertyInfo.PropertyType == typeof(object)) {
+                        item.Setter(this, attribute.Value);
+                        keyHits.Add(attributeKey);
+                    } else {
+                        try {
+                            item.Setter(this, _converter[item.PropertyInfo.PropertyType](attribute.Value));
+                            keyHits.Add(attributeKey);
+                        } catch (Exception ex) {
+                            Events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
+                        }
+                    }
+
+                    // Setter has been called and may have changed the value
+                    var value = item.Getter(this);
+
+                    if (item.Attribute.NeedString) {
+
+                        var stringValue = item.PropertyInfo.PropertyType == typeof(string) ? (string)value : value.ToString();
+
+                        if (item.Attribute.DomainSet) {
+                            if (!item.IsInDomain(stringValue)) {
+                                if (parentName == null) {
+                                    Events.RootValueNotInDomain(value, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                                } else {
+                                    Events.ValueNotInDomain(parentName, node.Name, attribute.Name, value, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                                }
+                            }
+                        }
+
+                        CheckValueLength(item.Attribute, attribute.Name, stringValue);
+
+                    }
+
+                    CheckValueBoundaries(item.Attribute, attribute.Name, value);
+
+                    attribute.Value = decoded ? Encode(value.ToString(), _builder) : value.ToString();
+                } else {
+                    Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
+                }
+            }
+
+            // missing any required attributes?
+            foreach (var key in keys.Except(keyHits)) {
+                var item = _metadata[key];
+                if (item.Attribute.required) {
+                    Events.MissingAttribute(parentName, node.Name, key);
+                }
+            }
+
+        }
+
+        void TranslateShorthand(INode node, IAttribute attribute) {
+
+            var expressions = new Expressions(attribute.Value);
+            var shorthandNodes = new Dictionary<string, List<INode>>();
+
+            for (var j = 0; j < expressions.Count; j++) {
+                var expression = expressions[j];
+                if (_shorthand.MethodDataLookup.ContainsKey(expression.Method)) {
+                    var methodData = _shorthand.MethodDataLookup[expression.Method];
+                    var shorthandNode = new ShorthandNode("add");
+                    shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
+
+                    var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
+                    var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
+
+                    // single parameters
+                    if (methodData.Signature.Parameters.Count == 1 && expression.SingleParameter != string.Empty) {
+                        var name = methodData.Signature.Parameters[0].Name;
+                        var value = expression.SingleParameter.StartsWith(name + ":", StringComparison.OrdinalIgnoreCase) ? expression.SingleParameter.Remove(0, name.Length + 1) : expression.SingleParameter;
+                        shorthandNode.Attributes.Add(new ShorthandAttribute(name, value));
+                    } else {
+                        // named parameters
+                        for (int i = 0; i < passedParameters.Length; i++) {
+                            var parameter = passedParameters[i];
+                            var split = Split(parameter, NamedParameterSplitter);
+                            if (split.Length == 2) {
+                                var name = NormalizeName(typeof(Parameter), split[0], _builder);
+                                shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
+                                signatureParameters.RemoveAll(p => NormalizeName(typeof(Parameter), p.Name, _builder) == name);
+                                expression.Parameters.RemoveAll(p => p == parameter);
+                            }
+                        }
+
+                        // ordered nameless parameters
+                        for (int m = 0; m < signatureParameters.Count; m++) {
+                            var signatureParameter = signatureParameters[m];
+                            shorthandNode.Attributes.Add(m < expression.Parameters.Count
+                                ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
+                                : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
+                        }
+                    }
+
+                    if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
+                        shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
+                    } else {
+                        shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
+                    }
+                }
+            }
+
+            foreach (var pair in shorthandNodes) {
+                var shorthandCollection = node.SubNodes.FirstOrDefault(sn => sn.Name == pair.Key);
+                if (shorthandCollection == null) {
+                    shorthandCollection = new ShorthandNode(pair.Key);
+                    shorthandCollection.SubNodes.AddRange(pair.Value);
+                    node.SubNodes.Add(shorthandCollection);
+                } else {
+                    shorthandCollection.SubNodes.InsertRange(0, pair.Value);
+                }
+            }
+        }
+
+        void CheckValueLength(CfgAttribute itemAttributes, string name, string value) {
+
+            if (itemAttributes.MinLengthSet) {
+                if (value.Length < itemAttributes.minLength) {
+                    Events.ValueTooShort(name, value, itemAttributes.minLength);
+                }
+            }
+
+            if (!itemAttributes.MaxLengthSet)
+                return;
+
+            if (value.Length > itemAttributes.maxLength) {
+                Events.ValueTooLong(name, value, itemAttributes.maxLength);
+            }
+        }
+
+        void CheckValueBoundaries(CfgAttribute itemAttributes, string name, object value) {
+
+            if (!itemAttributes.MinValueSet && !itemAttributes.MaxValueSet)
+                return;
+
+            var comparable = value as IComparable;
+            if (comparable == null) {
+                Events.ValueIsNotComparable(name, value);
             } else {
-               Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
+                if (itemAttributes.MinValueSet) {
+                    if (comparable.CompareTo(itemAttributes.minValue) < 0) {
+                        Events.ValueTooSmall(name, value, itemAttributes.minValue);
+                    }
+                }
+
+                if (!itemAttributes.MaxValueSet)
+                    return;
+
+                if (comparable.CompareTo(itemAttributes.maxValue) > 0) {
+                    Events.ValueTooBig(name, value, itemAttributes.maxValue);
+                }
             }
-         }
+        }
 
-         // missing any required attributes?
-         foreach (var key in keys.Except(keyHits)) {
-            var item = _metadata[key];
-            if (item.Attribute.required) {
-               Events.MissingAttribute(parentName, node.Name, key);
+        string CheckParameters(IDictionary<string, string> parameters, string input) {
+            if (parameters == null || input.IndexOf('@') < 0)
+                return input;
+            var response = ReplaceParameters(input, parameters, _builder);
+            if (response.Item2.Length > 1) {
+                Events.MissingPlaceHolderValues(response.Item2);
             }
-         }
+            return response.Item1;
+        }
 
-      }
-
-      void TranslateShorthand(INode node, IAttribute attribute) {
-
-         var expressions = new Expressions(attribute.Value);
-         var shorthandNodes = new Dictionary<string, List<INode>>();
-
-         for (var j = 0; j < expressions.Count; j++) {
-            var expression = expressions[j];
-            if (_shorthand.MethodDataLookup.ContainsKey(expression.Method)) {
-               var methodData = _shorthand.MethodDataLookup[expression.Method];
-               var shorthandNode = new ShorthandNode("add");
-               shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
-
-               var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
-               var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
-
-               // single parameters
-               if (methodData.Signature.Parameters.Count == 1 && expression.SingleParameter != string.Empty) {
-                  var name = methodData.Signature.Parameters[0].Name;
-                  var value = expression.SingleParameter.StartsWith(name + ":", StringComparison.OrdinalIgnoreCase) ? expression.SingleParameter.Remove(0, name.Length + 1) : expression.SingleParameter;
-                  shorthandNode.Attributes.Add(new ShorthandAttribute(name, value));
-               } else {
-                  // named parameters
-                  for (int i = 0; i < passedParameters.Length; i++) {
-                     var parameter = passedParameters[i];
-                     var split = Split(parameter, NamedParameterSplitter);
-                     if (split.Length == 2) {
-                        var name = NormalizeName(typeof(Parameter), split[0], _builder);
-                        shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
-                        signatureParameters.RemoveAll(p => NormalizeName(typeof(Parameter), p.Name, _builder) == name);
-                        expression.Parameters.RemoveAll(p => p == parameter);
-                     }
-                  }
-
-                  // ordered nameless parameters
-                  for (int m = 0; m < signatureParameters.Count; m++) {
-                     var signatureParameter = signatureParameters[m];
-                     shorthandNode.Attributes.Add(m < expression.Parameters.Count
-                         ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
-                         : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
-                  }
-               }
-
-               if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
-                  shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
-               } else {
-                  shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
-               }
+        static Tuple<string, string[]> ReplaceParameters(string value, IDictionary<string, string> parameters, StringBuilder builder) {
+            builder.Clear();
+            List<string> badKeys = null;
+            for (var j = 0; j < value.Length; j++) {
+                if (value[j] == CfgConstants.PLACE_HOLDER_FIRST &&
+                    value.Length > j + 1 &&
+                    value[j + 1] == CfgConstants.PLACE_HOLDER_SECOND) {
+                    var length = 2;
+                    while (value.Length > j + length && value[j + length] != CfgConstants.PLACE_HOLDER_LAST) {
+                        length++;
+                    }
+                    if (length > 2) {
+                        var key = value.Substring(j + 2, length - 2);
+                        if (parameters.ContainsKey(key)) {
+                            builder.Append(parameters[key]);
+                        } else {
+                            if (badKeys == null) {
+                                badKeys = new List<string> { key };
+                            } else {
+                                badKeys.Add(key);
+                            }
+                            builder.AppendFormat("@({0})", key);
+                        }
+                    }
+                    j = j + length;
+                } else {
+                    builder.Append(value[j]);
+                }
             }
-         }
+            return new Tuple<string, string[]>(builder.ToString(), badKeys == null ? new string[0] : badKeys.ToArray());
+        }
 
-         foreach (var pair in shorthandNodes) {
-            var shorthandCollection = node.SubNodes.FirstOrDefault(sn => sn.Name == pair.Key);
-            if (shorthandCollection == null) {
-               shorthandCollection = new ShorthandNode(pair.Key);
-               shorthandCollection.SubNodes.AddRange(pair.Value);
-               node.SubNodes.Add(shorthandCollection);
-            } else {
-               shorthandCollection.SubNodes.InsertRange(0, pair.Value);
-            }
-         }
-      }
+        protected Dictionary<string, string> UniqueProperties {
+            get { return _uniqueProperties; }
+        }
 
-      void CheckValueLength(CfgAttribute itemAttributes, string name, string value) {
-
-         if (itemAttributes.MinLengthSet) {
-            if (value.Length < itemAttributes.minLength) {
-               Events.ValueTooShort(name, value, itemAttributes.minLength);
-            }
-         }
-
-         if (!itemAttributes.MaxLengthSet)
-            return;
-
-         if (value.Length > itemAttributes.maxLength) {
-            Events.ValueTooLong(name, value, itemAttributes.maxLength);
-         }
-      }
-
-      void CheckValueBoundaries(CfgAttribute itemAttributes, string name, object value) {
-
-         if (!itemAttributes.MinValueSet && !itemAttributes.MaxValueSet)
-            return;
-
-         var comparable = value as IComparable;
-         if (comparable == null) {
-            Events.ValueIsNotComparable(name, value);
-         } else {
-            if (itemAttributes.MinValueSet) {
-               if (comparable.CompareTo(itemAttributes.minValue) < 0) {
-                  Events.ValueTooSmall(name, value, itemAttributes.minValue);
-               }
-            }
-
-            if (!itemAttributes.MaxValueSet)
-               return;
-
-            if (comparable.CompareTo(itemAttributes.maxValue) > 0) {
-               Events.ValueTooBig(name, value, itemAttributes.maxValue);
-            }
-         }
-      }
-
-      string CheckParameters(IDictionary<string, string> parameters, string input) {
-         if (parameters == null || input.IndexOf('@') < 0)
-            return input;
-         var response = ReplaceParameters(input, parameters, _builder);
-         if (response.Item2.Length > 1) {
-            Events.MissingPlaceHolderValues(response.Item2);
-         }
-         return response.Item1;
-      }
-
-      static Tuple<string, string[]> ReplaceParameters(string value, IDictionary<string, string> parameters, StringBuilder builder) {
-         builder.Clear();
-         List<string> badKeys = null;
-         for (var j = 0; j < value.Length; j++) {
-            if (value[j] == CfgConstants.PLACE_HOLDER_FIRST &&
-                value.Length > j + 1 &&
-                value[j + 1] == CfgConstants.PLACE_HOLDER_SECOND) {
-               var length = 2;
-               while (value.Length > j + length && value[j + length] != CfgConstants.PLACE_HOLDER_LAST) {
-                  length++;
-               }
-               if (length > 2) {
-                  var key = value.Substring(j + 2, length - 2);
-                  if (parameters.ContainsKey(key)) {
-                     builder.Append(parameters[key]);
-                  } else {
-                     if (badKeys == null) {
-                        badKeys = new List<string> { key };
-                     } else {
-                        badKeys.Add(key);
-                     }
-                     builder.AppendFormat("@({0})", key);
-                  }
-               }
-               j = j + length;
-            } else {
-               builder.Append(value[j]);
-            }
-         }
-         return new Tuple<string, string[]>(builder.ToString(), badKeys == null ? new string[0] : badKeys.ToArray());
-      }
-
-      protected Dictionary<string, string> UniqueProperties {
-         get { return _uniqueProperties; }
-      }
-
-      static Dictionary<string, char> Entities {
-         get {
-            return _entities ?? (_entities = new Dictionary<string, char>(StringComparer.Ordinal)
-            {
+        static Dictionary<string, char> Entities {
+            get {
+                return _entities ?? (_entities = new Dictionary<string, char>(StringComparer.Ordinal)
+                {
                     {"Aacute", "\x00c1"[0]},
                     {"aacute", "\x00e1"[0]},
                     {"Acirc", "\x00c2"[0]},
@@ -926,270 +938,265 @@ namespace Transformalize.Libs.Cfg.Net {
                     {"zwj", "\x200d"[0]},
                     {"zwnj", "\x200c"[0]}
                 });
-         }
-      }
-
-      internal CfgEvents Events {
-         get {
-            return _events ?? (_events = new CfgEvents(new CfgLogger(new MemoryLogger(), _logger)));
-         }
-         set {
-            _events = value;
-         }
-      }
-
-      [Obsolete("Problems method is obsolete. Use Errors(), Warnings(), or Logs()")]
-      public List<string> Problems() {
-         return Errors().ToList();
-      }
-
-      public List<string> Logs() {
-         var list = new List<string>(Errors());
-         list.AddRange(Warnings());
-         return list;
-      }
-
-      public string[] Errors() {
-         return Events.Errors();
-      }
-
-      public string[] Warnings() {
-         return Events.Warnings();
-      }
-
-      static Dictionary<string, CfgMetadata> GetMetadata(Type type, CfgEvents events, StringBuilder sb) {
-
-         Dictionary<string, CfgMetadata> metadata;
-
-         if (_metadataCache.TryGetValue(type, out metadata))
-            return metadata;
-
-         lock (Locker) {
-
-            _nameCache[type] = new Dictionary<string, string>();
-
-            var keyCache = new List<string>();
-            var listCache = new List<string>();
-            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            metadata = new Dictionary<string, CfgMetadata>(StringComparer.Ordinal);
-            for (var i = 0; i < propertyInfos.Length; i++) {
-               var propertyInfo = propertyInfos[i];
-
-               if (!propertyInfo.CanRead)
-                  continue;
-               if (!propertyInfo.CanWrite)
-                  continue;
-               var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
-               if (attribute == null)
-                  continue;
-
-               var key = NormalizeName(type, propertyInfo.Name, sb);
-               var item = new CfgMetadata(propertyInfo, attribute);
-
-               // check default value for type mismatch
-               if (attribute.ValueIsSet) {
-                  if (attribute.value.GetType() != propertyInfo.PropertyType) {
-                     var value = attribute.value;
-                     if (TryConvertValue(ref value, propertyInfo.PropertyType)) {
-                        attribute.value = value;
-                     } else {
-                        item.TypeMismatch = true;
-                        events.TypeMismatch(key, value, propertyInfo.PropertyType);
-                     }
-                  }
-               }
-
-               // type safety for value, min value, and max value
-               var defaultValue = attribute.value;
-               if (ResolveType(() => attribute.ValueIsSet, ref defaultValue, key, item, events)) {
-                  attribute.value = defaultValue;
-               }
-
-               var minValue = attribute.minValue;
-               if (ResolveType(() => attribute.MinValueSet, ref minValue, key, item, events)) {
-                  attribute.minValue = minValue;
-               }
-
-               var maxValue = attribute.maxValue;
-               if (ResolveType(() => attribute.MaxValueSet, ref maxValue, key, item, events)) {
-                  attribute.maxValue = maxValue;
-               }
-
-               if (propertyInfo.PropertyType.IsGenericType) {
-                  listCache.Add(key);
-                  item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                  if (item.ListType.IsSubclassOf(typeof(CfgNode))) {
-                     item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
-                  }
-                  if (attribute.sharedProperty != null) {
-                     item.SharedProperty = attribute.sharedProperty;
-                     item.SharedValue = attribute.sharedValue;
-                  }
-               } else {
-                  keyCache.Add(key);
-               }
-               item.Setter = ReflectionHelper.CreateSetter(propertyInfo);
-               item.Getter = ReflectionHelper.CreateGetter(propertyInfo);
-
-               metadata[key] = item;
             }
+        }
 
-            _propertyCache[type] = keyCache;
-            _elementCache[type] = listCache;
-            _metadataCache[type] = metadata;
-
-         }
-
-         return _metadataCache[type];
-
-      }
-
-      static bool ResolveType(Func<bool> isSet, ref object input, string key, CfgMetadata metadata, CfgEvents events) {
-         if (!isSet())
-            return true;
-
-         var type = metadata.PropertyInfo.PropertyType;
-
-         if (input.GetType() == type)
-            return true;
-
-         var value = input;
-         if (TryConvertValue(ref value, type)) {
-            input = value;
-            return true;
-         }
-
-         metadata.TypeMismatch = true;
-         events.TypeMismatch(key, value, type);
-         return false;
-      }
-
-      private static bool TryConvertValue(ref object value, Type conversionType) {
-         try {
-            value = Convert.ChangeType(value, conversionType, null);
-            return true;
-         } catch {
-            return false;
-         }
-      }
-
-      internal static string[] Split(string arg, char splitter, int skip = 0) {
-         if (arg.Equals(string.Empty))
-            return new string[0];
-
-         var split = arg.Replace("\\" + splitter, ControlString).Split(splitter);
-         return split.Select(s => s.Replace(ControlChar, splitter)).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
-      }
-
-      internal static string[] Split(string arg, string[] splitter, int skip = 0) {
-         if (arg.Equals(string.Empty))
-            return new string[0];
-
-         var split = arg.Replace("\\" + splitter[0], ControlString).Split(splitter, StringSplitOptions.None);
-         return split.Select(s => s.Replace(ControlString, splitter[0])).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
-      }
-
-      // a naive implementation for hand-written configurations
-      static string Encode(string value, StringBuilder builder) {
-
-         builder.Clear();
-         for (var i = 0; i < value.Length; i++) {
-            var ch = value[0];
-            if (ch <= '>') {
-               switch (ch) {
-                  case '<':
-                     builder.Append("&lt;");
-                     break;
-                  case '>':
-                     builder.Append("&gt;");
-                     break;
-                  case '"':
-                     builder.Append("&quot;");
-                     break;
-                  case '\'':
-                     builder.Append("&#39;");
-                     break;
-                  case '&':
-                     builder.Append("&amp;");
-                     break;
-                  default:
-                     builder.Append(ch);
-                     break;
-               }
-            } else {
-               builder.Append(ch);
+        internal CfgEvents Events {
+            get {
+                return _events ?? (_events = new CfgEvents(new CfgLogger(new MemoryLogger(), _logger)));
             }
-         }
-         return builder.ToString();
-      }
+            set {
+                _events = value;
+            }
+        }
 
-      public static string Decode(string input, StringBuilder builder) {
+        public List<string> Logs() {
+            var list = new List<string>(Errors());
+            list.AddRange(Warnings());
+            return list;
+        }
 
-         builder.Clear();
-         var htmlEntityEndingChars = new[] { CfgConstants.ENTITY_END, CfgConstants.ENTITY_START };
+        public string[] Errors() {
+            return Events.Errors();
+        }
 
-         for (var i = 0; i < input.Length; i++) {
-            var c = input[i];
+        public string[] Warnings() {
+            return Events.Warnings();
+        }
 
-            if (c == CfgConstants.ENTITY_START) {
-               // Found &. Look for the next ; or &. If & occurs before ;, then this is not entity, and next & may start another entity
-               var index = input.IndexOfAny(htmlEntityEndingChars, i + 1);
-               if (index > 0 && input[index] == CfgConstants.ENTITY_END) {
-                  var entity = input.Substring(i + 1, index - i - 1);
+        static Dictionary<string, CfgMetadata> GetMetadata(Type type, CfgEvents events, StringBuilder sb) {
 
-                  if (entity.Length > 1 && entity[0] == '#') {
+            Dictionary<string, CfgMetadata> metadata;
 
-                     bool parsedSuccessfully;
-                     uint parsedValue;
-                     if (entity[1] == 'x' || entity[1] == 'X') {
-                        parsedSuccessfully = UInt32.TryParse(entity.Substring(2), NumberStyles.AllowHexSpecifier, NumberFormatInfo.InvariantInfo, out parsedValue);
-                     } else {
-                        parsedSuccessfully = UInt32.TryParse(entity.Substring(1), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out parsedValue);
-                     }
+            if (_metadataCache.TryGetValue(type, out metadata))
+                return metadata;
 
-                     if (parsedSuccessfully) {
-                        parsedSuccessfully = (0 < parsedValue && parsedValue <= CfgConstants.UNICODE_00_END);
-                     }
+            lock (Locker) {
 
-                     if (parsedSuccessfully) {
-                        if (parsedValue <= CfgConstants.UNICODE_00_END) {
-                           // single character
-                           builder.Append((char)parsedValue);
-                        } else {
-                           // multi-character
-                           var utf32 = (int)(parsedValue - CfgConstants.UNICODE_01_START);
-                           var leadingSurrogate = (char)((utf32 / 0x400) + CfgConstants.HIGH_SURROGATE);
-                           var trailingSurrogate = (char)((utf32 % 0x400) + CfgConstants.LOW_SURROGATE);
+                _nameCache[type] = new Dictionary<string, string>();
 
-                           builder.Append(leadingSurrogate);
-                           builder.Append(trailingSurrogate);
+                var keyCache = new List<string>();
+                var listCache = new List<string>();
+                var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+                metadata = new Dictionary<string, CfgMetadata>(StringComparer.Ordinal);
+                for (var i = 0; i < propertyInfos.Length; i++) {
+                    var propertyInfo = propertyInfos[i];
+
+                    if (!propertyInfo.CanRead)
+                        continue;
+                    if (!propertyInfo.CanWrite)
+                        continue;
+                    var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
+                    if (attribute == null)
+                        continue;
+
+                    var key = NormalizeName(type, propertyInfo.Name, sb);
+                    var item = new CfgMetadata(propertyInfo, attribute);
+
+                    // check default value for type mismatch
+                    if (attribute.ValueIsSet) {
+                        if (attribute.value.GetType() != propertyInfo.PropertyType) {
+                            var value = attribute.value;
+                            if (TryConvertValue(ref value, propertyInfo.PropertyType)) {
+                                attribute.value = value;
+                            } else {
+                                item.TypeMismatch = true;
+                                events.TypeMismatch(key, value, propertyInfo.PropertyType);
+                            }
                         }
+                    }
 
-                        i = index;
-                        continue;
-                     }
-                  } else {
-                     i = index;
-                     char entityChar;
-                     Entities.TryGetValue(entity, out entityChar);
+                    // type safety for value, min value, and max value
+                    var defaultValue = attribute.value;
+                    if (ResolveType(() => attribute.ValueIsSet, ref defaultValue, key, item, events)) {
+                        attribute.value = defaultValue;
+                    }
 
-                     if (entityChar != (char)0) {
-                        c = entityChar;
-                     } else {
-                        builder.Append(CfgConstants.ENTITY_START);
-                        builder.Append(entity);
-                        builder.Append(CfgConstants.ENTITY_END);
-                        continue;
-                     }
-                  }
-               }
+                    var minValue = attribute.minValue;
+                    if (ResolveType(() => attribute.MinValueSet, ref minValue, key, item, events)) {
+                        attribute.minValue = minValue;
+                    }
+
+                    var maxValue = attribute.maxValue;
+                    if (ResolveType(() => attribute.MaxValueSet, ref maxValue, key, item, events)) {
+                        attribute.maxValue = maxValue;
+                    }
+
+                    if (propertyInfo.PropertyType.IsGenericType) {
+                        listCache.Add(key);
+                        item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
+                        if (item.ListType.IsSubclassOf(typeof(CfgNode))) {
+                            item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
+                        }
+                        if (attribute.sharedProperty != null) {
+                            item.SharedProperty = attribute.sharedProperty;
+                            item.SharedValue = attribute.sharedValue;
+                        }
+                    } else {
+                        keyCache.Add(key);
+                    }
+                    item.Setter = ReflectionHelper.CreateSetter(propertyInfo);
+                    item.Getter = ReflectionHelper.CreateGetter(propertyInfo);
+
+                    metadata[key] = item;
+                }
+
+                _propertyCache[type] = keyCache;
+                _elementCache[type] = listCache;
+                _metadataCache[type] = metadata;
+
             }
-            builder.Append(c);
-         }
-         return builder.ToString();
-      }
 
-   }
+            return _metadataCache[type];
+
+        }
+
+        static bool ResolveType(Func<bool> isSet, ref object input, string key, CfgMetadata metadata, CfgEvents events) {
+            if (!isSet())
+                return true;
+
+            var type = metadata.PropertyInfo.PropertyType;
+
+            if (input.GetType() == type)
+                return true;
+
+            var value = input;
+            if (TryConvertValue(ref value, type)) {
+                input = value;
+                return true;
+            }
+
+            metadata.TypeMismatch = true;
+            events.TypeMismatch(key, value, type);
+            return false;
+        }
+
+        private static bool TryConvertValue(ref object value, Type conversionType) {
+            try {
+                value = Convert.ChangeType(value, conversionType, null);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        internal static string[] Split(string arg, char splitter, int skip = 0) {
+            if (arg.Equals(string.Empty))
+                return new string[0];
+
+            var split = arg.Replace("\\" + splitter, ControlString).Split(splitter);
+            return split.Select(s => s.Replace(ControlChar, splitter)).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
+        }
+
+        internal static string[] Split(string arg, string[] splitter, int skip = 0) {
+            if (arg.Equals(string.Empty))
+                return new string[0];
+
+            var split = arg.Replace("\\" + splitter[0], ControlString).Split(splitter, StringSplitOptions.None);
+            return split.Select(s => s.Replace(ControlString, splitter[0])).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
+        }
+
+        // a naive implementation for hand-written configurations
+        static string Encode(string value, StringBuilder builder) {
+
+            builder.Clear();
+            for (var i = 0; i < value.Length; i++) {
+                var ch = value[0];
+                if (ch <= '>') {
+                    switch (ch) {
+                        case '<':
+                            builder.Append("&lt;");
+                            break;
+                        case '>':
+                            builder.Append("&gt;");
+                            break;
+                        case '"':
+                            builder.Append("&quot;");
+                            break;
+                        case '\'':
+                            builder.Append("&#39;");
+                            break;
+                        case '&':
+                            builder.Append("&amp;");
+                            break;
+                        default:
+                            builder.Append(ch);
+                            break;
+                    }
+                } else {
+                    builder.Append(ch);
+                }
+            }
+            return builder.ToString();
+        }
+
+        public static string Decode(string input, StringBuilder builder) {
+
+            builder.Clear();
+            var htmlEntityEndingChars = new[] { CfgConstants.ENTITY_END, CfgConstants.ENTITY_START };
+
+            for (var i = 0; i < input.Length; i++) {
+                var c = input[i];
+
+                if (c == CfgConstants.ENTITY_START) {
+                    // Found &. Look for the next ; or &. If & occurs before ;, then this is not entity, and next & may start another entity
+                    var index = input.IndexOfAny(htmlEntityEndingChars, i + 1);
+                    if (index > 0 && input[index] == CfgConstants.ENTITY_END) {
+                        var entity = input.Substring(i + 1, index - i - 1);
+
+                        if (entity.Length > 1 && entity[0] == '#') {
+
+                            bool parsedSuccessfully;
+                            uint parsedValue;
+                            if (entity[1] == 'x' || entity[1] == 'X') {
+                                parsedSuccessfully = UInt32.TryParse(entity.Substring(2), NumberStyles.AllowHexSpecifier, NumberFormatInfo.InvariantInfo, out parsedValue);
+                            } else {
+                                parsedSuccessfully = UInt32.TryParse(entity.Substring(1), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out parsedValue);
+                            }
+
+                            if (parsedSuccessfully) {
+                                parsedSuccessfully = (0 < parsedValue && parsedValue <= CfgConstants.UNICODE_00_END);
+                            }
+
+                            if (parsedSuccessfully) {
+                                if (parsedValue <= CfgConstants.UNICODE_00_END) {
+                                    // single character
+                                    builder.Append((char)parsedValue);
+                                } else {
+                                    // multi-character
+                                    var utf32 = (int)(parsedValue - CfgConstants.UNICODE_01_START);
+                                    var leadingSurrogate = (char)((utf32 / 0x400) + CfgConstants.HIGH_SURROGATE);
+                                    var trailingSurrogate = (char)((utf32 % 0x400) + CfgConstants.LOW_SURROGATE);
+
+                                    builder.Append(leadingSurrogate);
+                                    builder.Append(trailingSurrogate);
+                                }
+
+                                i = index;
+                                continue;
+                            }
+                        } else {
+                            i = index;
+                            char entityChar;
+                            Entities.TryGetValue(entity, out entityChar);
+
+                            if (entityChar != (char)0) {
+                                c = entityChar;
+                            } else {
+                                builder.Append(CfgConstants.ENTITY_START);
+                                builder.Append(entity);
+                                builder.Append(CfgConstants.ENTITY_END);
+                                continue;
+                            }
+                        }
+                    }
+                }
+                builder.Append(c);
+            }
+            return builder.ToString();
+        }
+
+    }
 
 }
