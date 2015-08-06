@@ -156,8 +156,8 @@ the `Errors()` and `Warnings()` method:
 <pre class="prettyprint" lang="cs">
     //LOAD CONFIGURATION
     var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-    //TEST FOR PROBLEMS
-    Assert.AreEqual(0, cfg.<strong>Problems()</strong>.Count);
+    //TEST FOR ERRORS
+    Assert.AreEqual(0, cfg.<strong>Errors()</strong>.Length);
 </pre>
 
 An error entry means the configuration is
