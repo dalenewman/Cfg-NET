@@ -273,7 +273,7 @@ initialized.
 
 ##Validation &amp; Modification
 The `Cfg` attribute properties offer validation.
-If it's not enough, you have three ways influence
+If it's not enough, you have three ways to influence
 things:
 
 1. Coding Inside Your Property's Setter
@@ -341,9 +341,9 @@ public class Connection : CfgNode {
     <strong>// custom validation
     protected override void Validate() {
         if (Provider == &quot;file&quot; &amp;&amp; string.IsNullOrEmpty(File)) {
-            AddProblem(&quot;file provider needs file attribute.&quot;);
+            Error(&quot;file provider needs file attribute.&quot;);
         } else if (Provider == &quot;folder&quot; &amp;&amp; string.IsNullOrEmpty(Folder)) {
-            AddProblem(&quot;folder provider needs folder attribute.&quot;);
+            Error(&quot;folder provider needs folder attribute.&quot;);
         }
     }</strong>
 }
@@ -351,7 +351,7 @@ public class Connection : CfgNode {
 
 The `Validate()` method has access
 to the `Provider`, `File`, and `Folder` properties.
-It runs _after_ they're set and _after_ `PreValidate`. 
+It runs _after_ they're set and _after_ `PreValidate()`. 
 So, it can perform more complex validation. 
 If you find errors, add them using
 the `Error()` method.  If you find things you think 
@@ -399,7 +399,7 @@ backup sets, point out the `backups-to-keep` attribute.
 ##About the Code:
 Cfg.Net is over-engineered to keep it independent. It has built in `XML` and `JSON`
 default parsers.  You can inject your own parser if you want. Examples using
-`XDocument` and `JSON.NET` are in the test app.  Cfg-NET is is a portable class
+`XDocument` and `JSON.NET` are in the test app.  Cfg-NET is a portable class
 library targeting:
 
 * .NET 4
