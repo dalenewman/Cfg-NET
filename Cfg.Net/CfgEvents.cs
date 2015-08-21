@@ -39,6 +39,14 @@ namespace Transformalize.Libs.Cfg.Net {
             _logger.Error(CfgConstants.PROBLEM_MISSING_ADD_ELEMENT, elementName, Suffix(elementName));
         }
 
+        public void MissingValidator(string parentName, string nodeName, string validatorName) {
+            _logger.Warn(CfgConstants.PROBLEM_MISSING_VALIDATOR, parentName, nodeName, validatorName);
+        }
+
+        public void ValidatorException(string validatorName, Exception ex, object value) {
+            _logger.Error(CfgConstants.PROBLEM_VALIDATOR_EXCEPTION, validatorName, ex.Message, value);
+        }
+
         public void MissingNestedElement(string parentName, string nodeName, string elementName) {
             _logger.Error(CfgConstants.PROBLEM_MISSING_NESTED_ELEMENT, parentName, nodeName, elementName, Suffix(parentName), Suffix(elementName));
         }

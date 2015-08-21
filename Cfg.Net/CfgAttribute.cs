@@ -11,6 +11,7 @@ namespace Transformalize.Libs.Cfg.Net {
         private object _maxValue;
         private string _domain;
         private object _value;
+        private string _validators;
 
         // ReSharper disable InconsistentNaming
         public object value {
@@ -39,7 +40,16 @@ namespace Transformalize.Libs.Cfg.Net {
             }
         }
 
+        public string validators {
+            get { return _validators; }
+            set {
+                _validators = value;
+                ValidatorsSet = true;
+            }
+        }
+
         public char domainDelimiter { get; set; }
+        public char validatorDelimiter { get; set; }
         public bool ignoreCase { get; set; }
 
         public int minLength {
@@ -83,6 +93,7 @@ namespace Transformalize.Libs.Cfg.Net {
         public bool MaxValueSet { get; private set; }
         public bool MinValueSet { get; private set; }
         public bool DomainSet { get; private set; }
+        public bool ValidatorsSet { get; private set; }
         public bool NeedString { get; private set; }
         public bool ValueIsSet { get; private set; }
 

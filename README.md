@@ -272,14 +272,14 @@ decorated with the `Cfg` attribute are
 initialized.
 
 ##Validation &amp; Modification
-The `Cfg` attribute properties offer validation.
-If it's not enough, you have three ways to influence
-things:
+The `Cfg` attribute properties offer *configurable* validation.
+If it's not enough, you have 5 ways to extend:
 
 1. Coding Inside Your Property's Setter
-2. Overriding `PreValidate()`
-3. Overriding `Validate()`
-4. Overriding `PostValidate()`
+1. Overriding `PreValidate()`
+1. Overriding `Validate()`
+1. Overriding `PostValidate()`
+1. Injecting `IValidator` into Model's Contructor
 
 ###Coding Inside the Property's Setter
 
@@ -372,6 +372,12 @@ everything it needs for a clean run.
         }
     }
 </pre>
+
+###Injecting IValidator into Model's Contructor
+You may want to inject a validator into Cfg-NET instead 
+of coding it up in one of the above methods.
+
+
 
 ##Finishing Up The Scenario
 

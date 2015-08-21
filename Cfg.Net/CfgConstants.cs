@@ -22,6 +22,8 @@ namespace Transformalize.Libs.Cfg.Net
         public static string PROBLEM_INVALID_ELEMENT = "A{2} '{0}' element has an invalid '{1}' element.  If you need a{2} '{1}' element, decorate it with the Cfg[()] attribute in your Cfg-NET model.";
         public static string PROBLEM_INVALID_NESTED_ELEMENT = "A{3} '{0}' '{1}' element has an invalid '{2}' element.";
         public static string PROBLEM_MISSING_ADD_ELEMENT = "A{1} '{0}' element is missing a child element.";
+        public static string PROBLEM_MISSING_VALIDATOR = "A '{1}' attribute in {0} can not find the {2} validator.  Please make it's passed in to your Cfg-Net root constructor.";
+        public static string PROBLEM_VALIDATOR_EXCEPTION = "The '{0}' validator threw an exception when validating the value '{2}'. {1}";
         public static string PROBLEM_MISSING_ATTRIBUTE = "A{3} '{0}' '{1}' element is missing a '{2}' attribute.";
         public static string PROBLEM_SHORTHAND_NOT_LOADED = "A{3} '{0}' '{1}' element's '{2}' attribute needs a shorthand configuration, but none was loaded.";
         public static string PROBLEM_MISSING_ELEMENT = "The {0} element is missing a{2} '{1}' element.";

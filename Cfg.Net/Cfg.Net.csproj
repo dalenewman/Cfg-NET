@@ -42,6 +42,8 @@
     <Compile Include="CfgMetadata.cs" />
     <Compile Include="CfgNode.cs" />
     <Compile Include="CfgEvents.cs" />
+    <Compile Include="CfgValidatorResult.cs" />
+    <Compile Include="IValidator.cs" />
     <Compile Include="Loggers\MemoryLogger.cs" />
     <Compile Include="Loggers\CfgLogger.cs" />
     <Compile Include="Loggers\ILogger.cs" />

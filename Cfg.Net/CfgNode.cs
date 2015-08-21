@@ -18,6 +18,7 @@ namespace Transformalize.Libs.Cfg.Net {
         internal static char NamedParameterSplitter = ':';
         readonly IParser _parser;
         readonly ILogger _logger;
+        IDictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
         ShorthandRoot _shorthand;
 
         //shared cache
@@ -36,10 +37,19 @@ namespace Transformalize.Libs.Cfg.Net {
         CfgEvents _events;
         static Dictionary<string, char> _entities;
 
-        protected CfgNode(IParser parser = null, ILogger logger = null) {
+        protected CfgNode(
+            IParser parser = null,
+            ILogger logger = null,
+            IDictionary<string, IValidator> validators = null
+        ) {
             _parser = parser;
             _logger = logger;
             _type = GetType();
+            if (validators != null) {
+                foreach (var pair in validators) {
+                    _validators[pair.Key] = pair.Value;
+                }
+            }
 
             lock (Locker) {
                 if (_initialized)
@@ -244,9 +254,10 @@ namespace Transformalize.Libs.Cfg.Net {
             return parameters;
         }
 
-        CfgNode Load(INode node, string parentName, CfgEvents events, ShorthandRoot shorthand, Dictionary<string, string> parameters) {
+        CfgNode Load(INode node, string parentName, CfgEvents events, IDictionary<string, IValidator> validators, ShorthandRoot shorthand, Dictionary<string, string> parameters) {
             Events = events;
             _shorthand = shorthand;
+            _validators = validators;
             _metadata = GetMetadata(_type, events, _builder);
             SetDefaults(this, _metadata);
             LoadProperties(node, parentName, parameters);
@@ -346,7 +357,7 @@ namespace Transformalize.Libs.Cfg.Net {
                                     }
                                 }
                             } else {
-                                var loaded = item.Loader().Load(add, subNode.Name, Events, _shorthand, parameters);
+                                var loaded = item.Loader().Load(add, subNode.Name, Events, _validators, _shorthand, parameters);
                                 if (sharedCfg != null) {
                                     var sharedValue = sharedCfg.Getter(loaded);
                                     if (sharedValue == null) {
@@ -516,6 +527,8 @@ namespace Transformalize.Libs.Cfg.Net {
 
                     CheckValueBoundaries(item.Attribute, attribute.Name, value);
 
+                    CheckValidators(item, attribute, parentName, value);
+
                     attribute.Value = decoded ? Encode(value.ToString(), _builder) : value.ToString();
                 } else {
                     Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
@@ -530,6 +543,36 @@ namespace Transformalize.Libs.Cfg.Net {
                 }
             }
 
+        }
+
+        private void CheckValidators(CfgMetadata item, IAttribute attribute, string parent, object value) {
+            if (!item.Attribute.ValidatorsSet)
+                return;
+
+            foreach (var validator in item.Validators()) {
+                if (_validators.ContainsKey(validator)) {
+                    try {
+                        var result = _validators[validator].Validate(parent, attribute.Name, value);
+                        if (result.Valid)
+                            continue;
+
+                        if (result.Warnings != null) {
+                            foreach (var warning in result.Warnings) {
+                                Warn(warning);
+                            }
+                        }
+                        if (result.Errors != null) {
+                            foreach (var error in result.Errors) {
+                                Error(error);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Events.ValidatorException(validator, ex, value);
+                    }
+                } else {
+                    Events.MissingValidator(parent, attribute.Name, validator);
+                }
+            }
         }
 
         void TranslateShorthand(INode node, IAttribute attribute) {
