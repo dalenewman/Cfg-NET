@@ -1,12 +1,14 @@
-namespace Transformalize.Libs.Cfg.Net.Parsers.nanoXML
+namespace Cfg.Net.Parsers.nanoXML
 {
     /// <summary>
     ///     XML element attribute
     /// </summary>
-    public class NanoXmlAttribute {
+    public class NanoXmlAttribute
+    {
         private readonly string _name;
 
-        internal NanoXmlAttribute(string name, string value) {
+        internal NanoXmlAttribute(string name, string value)
+        {
             _name = name;
             Value = value;
         }
@@ -14,7 +16,8 @@ namespace Transformalize.Libs.Cfg.Net.Parsers.nanoXML
         /// <summary>
         ///     Attribute name
         /// </summary>
-        public string Name {
+        public string Name
+        {
             get { return _name; }
         }
 

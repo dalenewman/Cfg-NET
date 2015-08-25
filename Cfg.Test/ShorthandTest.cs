@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Cfg.Net;
+using Cfg.Net.Shorthand;
 using NUnit.Framework;
-using Transformalize.Libs.Cfg.Net;
-using Transformalize.Libs.Cfg.Net.Shorthand;
 
 namespace Cfg.Test {
 

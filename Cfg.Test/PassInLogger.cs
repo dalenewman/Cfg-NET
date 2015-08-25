@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cfg.Test.Parsers;
+using Cfg.Net;
 using NUnit.Framework;
 using Serilog;
-using Transformalize.Libs.Cfg.Net;
-using Transformalize.Libs.Cfg.Net.Loggers;
-using ILogger = Transformalize.Libs.Cfg.Net.Loggers.ILogger;
+using ILogger = Cfg.Net.Contracts.ILogger;
 
 namespace Cfg.Test {
 
@@ -59,7 +57,7 @@ namespace Cfg.Test {
         public List<TestPassInLoggerParameter> Parameters { get; set; }
 
         public TestPassInLogger(string xml, ILogger externalLogger)
-            : base(null, externalLogger) {
+            : base(logger:externalLogger) {
             Load(xml);
         }
     }

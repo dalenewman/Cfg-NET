@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Transformalize.Libs.Cfg.Net;
-using Transformalize.Libs.Cfg.Net.Parsers;
+using Cfg.Net;
+using Cfg.Net.Contracts;
 
 namespace Cfg.Test.TestClasses {
 
@@ -9,9 +9,9 @@ namespace Cfg.Test.TestClasses {
         [Cfg(required = true)]
         public List<CfgServer> Servers { get; set; }
 
-        public Cfg(string cfg, IParser parser):base(parser) {
+        public Cfg(string cfg, IParser parser):base(parser:parser) {
             this.Load(cfg);
         }
 
-    }
+    } 
 }

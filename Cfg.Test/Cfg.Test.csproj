@@ -68,6 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DifferentJsonParser.cs" />
+    <Compile Include="PreValidateTest.cs" />
+    <Compile Include="QueryStringTest.cs" />
+    <Compile Include="SourceDetectorTest.cs" />
     <Compile Include="Validators.cs" />
     <Compile Include="PassInLogger.cs" />
     <Compile Include="DifferentXmlParser.cs" />
@@ -118,6 +121,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Cfg.Net.Reader\Cfg.Net.Reader.csproj">
+      <Project>{93afd9a7-5dc8-4392-8632-a553723bd3ac}</Project>
+      <Name>Cfg.Net.Reader</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Cfg.Net\Cfg.Net.csproj">
       <Project>{6ccfd0fd-c0b7-4b2b-ab17-2d8e3567b7e2}</Project>
       <Name>Cfg.Net</Name>

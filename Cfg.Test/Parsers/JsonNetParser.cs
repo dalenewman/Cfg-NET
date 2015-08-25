@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using Transformalize.Libs.Cfg.Net.Parsers;
+﻿using Cfg.Net.Contracts;
+using Cfg.Net.Parsers;
+using Newtonsoft.Json.Linq;
 
 namespace Cfg.Test.Parsers
 {

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Cfg.Net;
+using Cfg.Net.Contracts;
+using Cfg.Net.Parsers;
 using Cfg.Test.Parsers;
 using NUnit.Framework;
-using Transformalize.Libs.Cfg.Net;
-using Transformalize.Libs.Cfg.Net.Parsers;
-using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -43,7 +42,7 @@ namespace Cfg.Test {
         [Cfg()]
         public List<TestDifferentJsonParserParameter> Parameters { get; set; }
 
-        public TestDifferentJsonParser(string xml, IParser parser):base(parser) {
+        public TestDifferentJsonParser(string xml, IParser parser):base(parser:parser) {
             Load(xml);
         }
     }

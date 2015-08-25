@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Cfg.Net;
+using Cfg.Net.Contracts;
+using Cfg.Net.Loggers;
 using NUnit.Framework;
-using Transformalize.Libs.Cfg.Net;
-using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 
@@ -57,7 +57,7 @@ namespace Cfg.Test {
    }
 
    public class CustomProblemCfg : CfgNode {
-      public CustomProblemCfg(string xml, ILogger anotherLogger) : base(null, anotherLogger) {
+      public CustomProblemCfg(string xml, ILogger anotherLogger) : base(logger:anotherLogger) {
          Load(xml);
       }
 

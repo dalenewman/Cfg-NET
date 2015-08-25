@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cfg.Net;
 using NUnit.Framework;
-using Transformalize.Libs.Cfg.Net;
-using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
 

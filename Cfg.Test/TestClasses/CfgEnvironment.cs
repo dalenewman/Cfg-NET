@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Transformalize.Libs.Cfg.Net;
+using Cfg.Net;
 
 namespace Cfg.Test.TestClasses
 {

@@ -2,10 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using Cfg.Net.Parsers;
 using Cfg.Test.Parsers;
 using NUnit.Framework;
-using Transformalize.Libs.Cfg.Net.Parsers;
-using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
     [TestFixture]

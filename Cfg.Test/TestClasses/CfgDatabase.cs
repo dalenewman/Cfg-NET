@@ -1,4 +1,4 @@
-using Transformalize.Libs.Cfg.Net;
+using Cfg.Net;
 
 namespace Cfg.Test.TestClasses {
     public class CfgDatabase : CfgNode {

@@ -1,5 +1,6 @@
 ﻿using System.Xml.Linq;
-using Transformalize.Libs.Cfg.Net.Parsers;
+using Cfg.Net.Contracts;
+using Cfg.Net.Parsers;
 
 namespace Cfg.Test.Parsers {
     public class XDocumentParser : IParser {

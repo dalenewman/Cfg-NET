@@ -77,19 +77,21 @@ attribute properties indicate that
 each server has a **required**,
 and **unique** name.
 
-Attributes are processed in this order:
+A property is processed in this order 
+as it is read from the configuration:
 
-1. `value` set a default value
-1. `toLower` lower case the input
-1. `toUpper` upper case the input
+1. `value` sets a default value
+1. `toLower` or `toUpper` modify the value
+1. `get` is invoked (the property's getter)
 1. `shorthand` checks for [shorthand translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-1. `domain` checks input against valid values
-1. `minLength` checks input against a minimum length
-1. `maxLength` checks input against a maximum length
-1. `minValue` checks input against a minimum value
-1. `maxValue` checks input against a maximum value
+1. `domain` checks value against valid values
+1. `minLength` checks value against a minimum length
+1. `maxLength` checks value against a maximum length
+1. `minValue` checks value against a minimum value
+1. `maxValue` checks value against a maximum value
+1. `validators` checks value against injected validators
 1. `required` confirms value exists
-1. `unique` confirms value is unique
+1. `unique` confirms value is unique in it's collection
 
 ###Create Corresponding Configuration
 
@@ -98,12 +100,12 @@ and *Saruman*. So, depending on your preference,
 write your configuration in **JSON** or **XML**:
 
 <pre class="prettyprint" lang="xml">
-&lt;backup-manager&gt;
+&lt;cfg&gt;
     &lt;servers&gt;
         &lt;add name=&quot;Gandalf&quot; /&gt;
         &lt;add name=&quot;Saruman&quot; /&gt;
     &lt;/servers&gt;
-&lt;/backup-manager&gt;
+&lt;/cfg&gt;
 </pre>
 
 <pre class="prettyprint" lang="js">
@@ -230,7 +232,7 @@ namespace Cfg.Test {
 Now let's update *BackupManager.xml* or *BackupManager.json*:
 
 <pre class="prettyprint" lang="xml">
-    &lt;backup-manager&gt;
+    &lt;cfg&gt;
         &lt;servers&gt;
             &lt;add name=&quot;Gandalf&quot;&gt;
                 &lt;databases&gt;
@@ -247,7 +249,7 @@ Now let's update *BackupManager.xml* or *BackupManager.json*:
                 &lt;/databases&gt;
             &lt;/add&gt;
         &lt;/servers&gt;
-    &lt;/backup-manager&gt;
+    &lt;/cfg&gt;
 </pre>
 
 Now we have a collection of servers, and each
@@ -272,18 +274,18 @@ decorated with the `Cfg` attribute are
 initialized.
 
 ##Validation &amp; Modification
-The `Cfg` attribute properties offer *configurable* validation.
+The `Cfg` attribute's optional properties offer *configurable* validation.
 If it's not enough, you have 5 ways to extend:
 
-1. Coding Inside Your Property's Setter
+1. In Your Property
 1. Overriding `PreValidate()`
 1. Overriding `Validate()`
 1. Overriding `PostValidate()`
 1. Injecting `IValidator` into Model's Contructor
 
-###Coding Inside the Property's Setter
+###In Your Property
 
-You don't have to use auto-properties.  Instead of this:
+You don't _have_ to use auto-properties.  Instead of this:
 <pre class="prettyprint" lang="csharp">
     [Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
     public string Provider { get; set; }
@@ -294,7 +296,7 @@ You can use a property with a backing field:
     ...
     [Cfg]
     public string Provider {
-        get { return _provider; }
+        get { return _provider ?? "sqlserver"; }
         set {
             if(value != null && value == "Bad Words"){
                 Error("I don't like Bad Words!")
@@ -305,12 +307,18 @@ You can use a property with a backing field:
     }
 </pre>
 
+If you (by providing a default) or your configuration doesn't provide a value, 
+your property's `get` is invoked; hoping a default value is provided.
+
+If there is a value, `toLower` or `toUpper` is 
+enforced. Then, your property's `set` is invoked. Then, your 
+property's `get` is invoked to retrieve the *possibly* updated 
+value.
 
 ###Overriding PreValidate()
 
-If you want to quietly modify (aka fix)
-the configuration, you may override `PreValidate()`
-like this:
+If you want to quietly modify the configuration, 
+you may override `PreValidate()` like this:
 
 <pre class="prettyprint" lang="csharp">
     protected override void PreValidate() {

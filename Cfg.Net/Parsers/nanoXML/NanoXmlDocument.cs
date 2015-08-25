@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 
-namespace Transformalize.Libs.Cfg.Net.Parsers.nanoXML
+namespace Cfg.Net.Parsers.nanoXML
 {
     /// <summary>
     ///     Class representing whole DOM XML document
     /// </summary>
-    public class NanoXmlDocument : NanoXmlBase {
+    public class NanoXmlDocument : NanoXmlBase
+    {
         private readonly List<NanoXmlAttribute> _declarations = new List<NanoXmlAttribute>();
         private readonly NanoXmlNode _rootNode;
 
@@ -13,10 +14,12 @@ namespace Transformalize.Libs.Cfg.Net.Parsers.nanoXML
         ///     Public constructor. Loads xml document from raw string
         /// </summary>
         /// <param name="xmlString">String with xml</param>
-        public NanoXmlDocument(string xmlString) {
-            var i = 0;
+        public NanoXmlDocument(string xmlString)
+        {
+            int i = 0;
 
-            while (true) {
+            while (true)
+            {
                 SkipSpaces(xmlString, ref i);
 
                 if (xmlString[i] != '<')
@@ -52,9 +55,9 @@ namespace Transformalize.Libs.Cfg.Net.Parsers.nanoXML
         /// <summary>
         ///     Root document element
         /// </summary>
-        public NanoXmlNode RootNode {
+        public NanoXmlNode RootNode
+        {
             get { return _rootNode; }
         }
-
     }
 }

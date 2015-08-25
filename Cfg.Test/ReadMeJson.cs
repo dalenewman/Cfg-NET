@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using NUnit.Framework;
-using Transformalize.Libs.Cfg.Net.Loggers;
 
 namespace Cfg.Test {
     [TestFixture]

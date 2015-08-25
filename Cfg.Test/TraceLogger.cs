@@ -1,5 +1,6 @@
 ﻿using System;
-using Transformalize.Libs.Cfg.Net.Loggers;
+using Cfg.Net.Contracts;
+using Cfg.Net.Loggers;
 
 namespace Cfg.Test {
    public class TraceLogger : ILogger {

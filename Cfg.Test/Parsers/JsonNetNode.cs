@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Cfg.Net.Contracts;
+using Cfg.Net.Parsers;
 using Newtonsoft.Json.Linq;
-using Transformalize.Libs.Cfg.Net.Parsers;
 
 namespace Cfg.Test.Parsers {
 
