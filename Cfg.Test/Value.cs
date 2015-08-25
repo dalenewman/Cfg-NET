@@ -29,8 +29,8 @@ namespace Cfg.Test {
             var problems = cfg.Errors();
             Assert.AreEqual(3, problems.Length);
             Assert.IsTrue(problems[0] == "The 'value' attribute value '5' is too small. The minimum value allowed is '6'.");
-            Assert.IsTrue(problems[1] == "The 'longValue' attribute value '5' is too small. The minimum value allowed is '6'.");
-            Assert.IsTrue(problems[2] == "The 'stringValue' attribute value '6' is too big. The maximum value allowed is '5'.");
+            Assert.IsTrue(problems[1] == "The 'longvalue' attribute value '5' is too small. The minimum value allowed is '6'.");
+            Assert.IsTrue(problems[2] == "The 'stringvalue' attribute value '6' is too big. The maximum value allowed is '5'.");
 
         }
 
@@ -54,8 +54,8 @@ namespace Cfg.Test {
             var problems = cfg.Errors();
             Assert.AreEqual(3, problems.Length);
             Assert.IsTrue(problems[0] == "The 'value' attribute value '5' is too small. The minimum value allowed is '6'.");
-            Assert.IsTrue(problems[1] == "The 'longValue' attribute value '5' is too small. The minimum value allowed is '6'.");
-            Assert.IsTrue(problems[2] == "The 'stringValue' attribute value '6' is too big. The maximum value allowed is '5'.");
+            Assert.IsTrue(problems[1] == "The 'longvalue' attribute value '5' is too small. The minimum value allowed is '6'.");
+            Assert.IsTrue(problems[2] == "The 'stringvalue' attribute value '6' is too big. The maximum value allowed is '5'.");
 
         }
 

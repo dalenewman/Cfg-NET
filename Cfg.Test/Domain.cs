@@ -27,7 +27,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
+            Assert.AreEqual("A 'things' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }
 
@@ -48,7 +48,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
+            Assert.AreEqual("A 'things' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }
 
@@ -71,7 +71,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad' in the 'value' attribute.  The valid domain is: GOOD, VALUE, ANOTHER, GOOD, VALUE.", problems[0]);
+            Assert.AreEqual("A 'things' element has an invalid value of 'bad' in the 'value' attribute.  The valid domain is: GOOD, VALUE, ANOTHER, GOOD, VALUE.", problems[0]);
 
         }
 
@@ -94,7 +94,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("A 'things' 'add' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
+            Assert.AreEqual("A 'things' element has an invalid value of 'bad-value' in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }
     }

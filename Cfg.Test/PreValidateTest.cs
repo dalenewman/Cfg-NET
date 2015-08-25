@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Cfg.Net;
 using Cfg.Net.Contracts;
-using Cfg.Net.Reader;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -10,21 +9,34 @@ namespace Cfg.Test {
     public class PreValidateTest {
 
         [Test]
-        public void TestPreValidate() {
+        public void TestPreValidateAProperty() {
             const string resource = @"<cfg>
                 <things>
                     <add name='one' value='something' />
                     <add name='two' value='Another' />
                 </things>
             </cfg>";
-            var actual = new Test(resource, new MyLogger());
+            var actual = new TestProperty(resource, new MyLogger());
             Assert.AreEqual(0, actual.Errors().Length);
             Assert.AreEqual(2, actual.Things.Count);
         }
 
 
-        private class Test : CfgNode {
-            public Test(string cfg, ILogger logger)
+        [Test]
+        public void TestPreValidateACollection() {
+            const string resource = @"<cfg>
+                <things>
+                    <add name='one' value='something' />
+                    <add name='two' value='Another' />
+                </things>
+            </cfg>";
+            var actual = new TestCollection(resource, new MyLogger());
+            Assert.AreEqual(1, actual.Errors().Length);
+            Assert.AreEqual(3, actual.Things.Count);
+        }
+
+        private class TestProperty : CfgNode {
+            public TestProperty(string cfg, ILogger logger)
                 : base(logger: logger) {
                 Load(cfg);
             }
@@ -45,6 +57,18 @@ namespace Cfg.Test {
             }
         }
 
+        private class TestCollection : CfgNode {
+            public TestCollection(string cfg, ILogger logger)
+                : base(logger: logger) {
+                Load(cfg);
+            }
+            [Cfg]
+            public List<Thing> Things { get; set; }
+
+            protected override void PreValidate() {
+                Things.Add(GetDefaultOf<Thing>(thing => { thing.Name = "three"; thing.Value = "error"; }));
+            }
+        }
 
     }
 }

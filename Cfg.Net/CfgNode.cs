@@ -401,15 +401,24 @@ namespace Cfg.Net {
         /// <param name="setter"></param>
         /// <returns></returns>
         public T GetDefaultOf<T>(Action<T> setter = null) {
-            object obj = Activator.CreateInstance(typeof(T));
+            var obj = Activator.CreateInstance(typeof(T));
 
-            SetDefaults(obj, GetMetadata(typeof(T), Events, _builder));
+            var metadata = GetMetadata(typeof (T), Events, _builder);
+            SetDefaults(obj, metadata);
 
             if (setter != null) {
                 setter((T)obj);
             }
 
-            ((CfgNode)obj).PreValidate();
+            var cfgNode = (CfgNode)obj;
+            cfgNode.PreValidate();
+            cfgNode.ValidateProperties(metadata, null);
+            cfgNode.Validate();
+            cfgNode.PostValidate();
+            if (!cfgNode.Errors().Any()) return (T)obj;
+            foreach (var error in cfgNode.Errors()) {
+                Events.Error(error);
+            }
 
             return (T)obj;
         }
@@ -504,8 +513,9 @@ namespace Cfg.Net {
             }
 
             LoadProperties(node, null, parameters);
-            LoadCollections(node, null, parameters);
             PreValidate();
+            LoadCollections(node, null, parameters);
+            ValidateProperties(_metadata, null);
             Validate();
             PostValidate();
         }
@@ -589,8 +599,9 @@ namespace Cfg.Net {
             _metadata = GetMetadata(_type, events, _builder);
             SetDefaults(this, _metadata);
             LoadProperties(node, parentName, parameters);
-            LoadCollections(node, parentName, parameters);
             PreValidate();
+            LoadCollections(node, parentName, parameters);
+            ValidateProperties(_metadata, parentName);
             Validate();
             PostValidate();
             return this;
@@ -633,7 +644,7 @@ namespace Cfg.Net {
                 string subNodeKey = NormalizeName(_type, subNode.Name, _builder);
                 if (_metadata.ContainsKey(subNodeKey)) {
                     elementHits.Add(subNodeKey);
-                    CfgMetadata item = _metadata[subNodeKey];
+                    var item = _metadata[subNodeKey];
 
                     object value = null;
                     CfgMetadata sharedCfg = null;
@@ -681,13 +692,18 @@ namespace Cfg.Net {
                                     }
                                 }
                             } else {
+                                // here's the normal case, everything else is crazy-town
                                 var loaded = item.Loader().Load(add, subNode.Name, Events, _validators, _shorthand, parameters);
+
+                                // crazy again
                                 if (sharedCfg != null) {
                                     object sharedValue = sharedCfg.Getter(loaded);
                                     if (sharedValue == null) {
                                         sharedCfg.Setter(loaded, value ?? item.SharedValue);
                                     }
                                 }
+
+                                // normal again
                                 elements[addKey].Add(loaded);
                             }
                         } else {
@@ -777,7 +793,7 @@ namespace Cfg.Net {
             var keyHits = new HashSet<string>();
             var nullWarnings = new HashSet<string>();
 
-            for (int i = 0; i < node.Attributes.Count; i++) {
+            for (var i = 0; i < node.Attributes.Count; i++) {
                 var attribute = node.Attributes[i];
                 var attributeKey = NormalizeName(_type, attribute.Name, _builder);
                 if (_metadata.ContainsKey(attributeKey)) {
@@ -795,20 +811,27 @@ namespace Cfg.Net {
                         attribute.Value = maybe.ToString();
                     }
 
-                    var decoded = false;
                     if (attribute.Value.IndexOf(CfgConstants.ENTITY_START) > -1) {
                         attribute.Value = Decode(attribute.Value, _builder);
-                        decoded = true;
                     }
 
                     attribute.Value = CheckParameters(parameters, attribute.Value);
 
-                    if (item.PropertyInfo.PropertyType == typeof(string)) {
-                        if (item.Attribute.toLower) {
-                            attribute.Value = attribute.Value.ToLower();
-                        } else if (item.Attribute.toUpper) {
-                            attribute.Value = attribute.Value.ToUpper();
+                    if (item.Attribute.toLower) {
+                        attribute.Value = attribute.Value.ToLower();
+                    } else if (item.Attribute.toUpper) {
+                        attribute.Value = attribute.Value.ToUpper();
+                    }
+
+                    if (item.Attribute.shorthand) {
+                        if (_shorthand == null || _shorthand.MethodDataLookup == null) {
+                            Events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
+                        } else {
+                            TranslateShorthand(node, attribute.Value);
                         }
+                    }
+
+                    if (item.PropertyInfo.PropertyType == typeof(string)) {
                         item.Setter(this, attribute.Value);
                         keyHits.Add(attributeKey);
                     } else {
@@ -819,40 +842,6 @@ namespace Cfg.Net {
                             Events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
                         }
                     }
-
-                    // Setter called above and may have changed the value, so get the updated value from Getter
-                    var objectValue = item.Getter(this);
-                    var stringValue = item.PropertyInfo.PropertyType == typeof(string) ? (string)objectValue : objectValue.ToString();
-
-                    if (item.Attribute.unique) {
-                        UniqueProperties[attributeKey] = stringValue;
-                    }
-
-                    if (item.Attribute.shorthand) {
-                        if (_shorthand == null || _shorthand.MethodDataLookup == null) {
-                            Events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
-                        } else {
-                            TranslateShorthand(node, stringValue);
-                        }
-                    }
-
-                    if (item.Attribute.DomainSet) {
-                        if (!item.IsInDomain(stringValue)) {
-                            if (parentName == null) {
-                                Events.RootValueNotInDomain(stringValue, attribute.Name, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
-                            } else {
-                                Events.ValueNotInDomain(parentName, node.Name, attribute.Name, stringValue, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
-                            }
-                        }
-                    }
-
-                    CheckValueLength(item.Attribute, attribute.Name, stringValue);
-
-                    CheckValueBoundaries(item.Attribute, attribute.Name, objectValue);
-
-                    CheckValidators(item, attribute, parentName, objectValue);
-
-                    attribute.Value = decoded ? Encode(stringValue, _builder) : stringValue;
                 } else {
                     Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
                 }
@@ -860,21 +849,57 @@ namespace Cfg.Net {
 
             // missing any required attributes?
             foreach (var key in keys.Except(keyHits)) {
-                CfgMetadata item = _metadata[key];
+                var item = _metadata[key];
                 if (item.Attribute.required) {
                     Events.MissingAttribute(parentName, node.Name, key);
                 }
             }
+
         }
 
-        private void CheckValidators(CfgMetadata item, IAttribute attribute, string parent, object value) {
+        private void ValidateProperties(Dictionary<string, CfgMetadata> metadata, string parentName) {
+            var keys = _propertyCache[_type];
+
+            if (keys.Count == 0)
+                return;
+
+            for (var i = 0; i < keys.Count; i++) {
+                var key = keys[i];
+                var item = metadata[key];
+
+                var objectValue = item.Getter(this);
+                var stringValue = item.PropertyInfo.PropertyType == typeof(string) ? (string)objectValue : objectValue.ToString();
+
+                if (item.Attribute.unique) {
+                    UniqueProperties[key] = stringValue;
+                }
+
+                if (item.Attribute.DomainSet) {
+                    if (!item.IsInDomain(stringValue)) {
+                        if (parentName == null) {
+                            Events.RootValueNotInDomain(stringValue, key, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                        } else {
+                            Events.ValueNotInDomain(parentName, key, stringValue, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
+                        }
+                    }
+                }
+
+                CheckValueLength(item.Attribute, key, stringValue);
+
+                CheckValueBoundaries(item.Attribute, key, objectValue);
+
+                CheckValidators(item, parentName, key, objectValue);
+            }
+        }
+
+        private void CheckValidators(CfgMetadata item, string parent, string name, object value) {
             if (!item.Attribute.ValidatorsSet)
                 return;
 
             foreach (var validator in item.Validators()) {
                 if (_validators.ContainsKey(validator)) {
                     try {
-                        var result = _validators[validator].Validate(parent, attribute.Name, value);
+                        var result = _validators[validator].Validate(parent, name, value);
                         if (result.Valid)
                             continue;
 
@@ -892,7 +917,7 @@ namespace Cfg.Net {
                         Events.ValidatorException(validator, ex, value);
                     }
                 } else {
-                    Events.MissingValidator(parent, attribute.Name, validator);
+                    Events.MissingValidator(parent, name, validator);
                 }
             }
         }
@@ -1079,12 +1104,11 @@ namespace Cfg.Net {
                         continue;
                     if (!propertyInfo.CanWrite)
                         continue;
-                    var attribute =
-                        (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
+                    var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
                     if (attribute == null)
                         continue;
 
-                    string key = NormalizeName(type, propertyInfo.Name, sb);
+                    var key = NormalizeName(type, propertyInfo.Name, sb);
                     var item = new CfgMetadata(propertyInfo, attribute);
 
                     // check default value for type mismatch

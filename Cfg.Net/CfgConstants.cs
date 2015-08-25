@@ -65,7 +65,7 @@ namespace Cfg.Net {
         public static string PROBLEM_PARSE = "Could not parse the configuration. {0}";
 
         public static string PROBLEM_VALUE_NOT_IN_DOMAIN =
-            "A{5} '{0}' '{1}' element has an invalid value of '{3}' in the '{2}' attribute.  The valid domain is: {4}.";
+            "A{4} '{0}' element has an invalid value of '{2}' in the '{1}' attribute.  The valid domain is: {3}.";
 
         public static string PROBLEM_ROOT_VALUE_NOT_IN_DOMAIN =
             "The root element has an invalid value of '{0}' in the '{1}' attribute.  The valid domain is: {2}.";

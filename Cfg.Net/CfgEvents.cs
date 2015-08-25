@@ -91,10 +91,8 @@ namespace Cfg.Net {
                 Suffix(parentName));
         }
 
-        public void ValueNotInDomain(string parentName, string nodeName, string propertyName, object value,
-            string validValues) {
-            Logger.Error(CfgConstants.PROBLEM_VALUE_NOT_IN_DOMAIN, parentName, nodeName, propertyName, value,
-                validValues, Suffix(parentName));
+        public void ValueNotInDomain(string parentName, string propertyName, object value, string validValues) {
+            Logger.Error(CfgConstants.PROBLEM_VALUE_NOT_IN_DOMAIN, parentName, propertyName, value, validValues, Suffix(parentName));
         }
 
         public void RootValueNotInDomain(object value, string propertyName, string validValues) {
