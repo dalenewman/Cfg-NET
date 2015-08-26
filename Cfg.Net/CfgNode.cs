@@ -521,8 +521,8 @@ namespace Cfg.Net {
             }
 
             LoadProperties(node, null, parameters);
-            PreValidate();
             LoadCollections(node, null, parameters);
+            PreValidate();
             ValidateProperties(_metadata, null);
             Validate();
             PostValidate();
@@ -607,8 +607,8 @@ namespace Cfg.Net {
             _metadata = GetMetadata(_type, events, _builder);
             SetDefaults(this, _metadata);
             LoadProperties(node, parentName, parameters);
-            PreValidate();
             LoadCollections(node, parentName, parameters);
+            PreValidate();
             ValidateProperties(_metadata, parentName);
             Validate();
             PostValidate();
@@ -876,6 +876,9 @@ namespace Cfg.Net {
                 var item = metadata[key];
 
                 var objectValue = item.Getter(this);
+                if (objectValue == null)
+                    continue;
+
                 var stringValue = item.PropertyInfo.PropertyType == typeof(string) ? (string)objectValue : objectValue.ToString();
 
                 if (item.Attribute.unique) {
