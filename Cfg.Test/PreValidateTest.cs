@@ -66,7 +66,7 @@ namespace Cfg.Test {
             public List<Thing> Things { get; set; }
 
             protected override void PreValidate() {
-                Things.Add(GetDefaultOf<Thing>(thing => { thing.Name = "three"; thing.Value = "error"; }));
+                Things.Add(GetValidatedOf<Thing>(thing => { thing.Name = "three"; thing.Value = "error"; }));
             }
         }
 

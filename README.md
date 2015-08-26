@@ -42,8 +42,9 @@ First, install Cfg-NET with Nuget:
 Then, in your code, _model_ your configuration:
 
 <pre class="prettyprint" lang="cs">
+<code>
 using System.Collections.Generic;
-<strong>using Transformalize.Libs.Cfg.Net;</strong>
+<strong>using Cfg.Net;</strong>
 namespace Cfg.Test {
     public class Cfg : <strong>CfgNode</strong> {
     <strong>[Cfg(required = true)]</strong>
@@ -54,6 +55,7 @@ namespace Cfg.Test {
         public string Name { get; set; }
     }
 }
+</code>
 </pre>
 
 ####The CfgNode Class
@@ -77,7 +79,7 @@ attribute properties indicate that
 each server has a **required**,
 and **unique** name.
 
-A property is processed in this order 
+A property is processed in this order
 as it is read from the configuration:
 
 1. `value` sets a default value
@@ -123,29 +125,25 @@ Save this to *BackupManager.xml* or *BackupManager.json*.
 
 Load the file into your model like this:
 
-<pre class="prettyprint" lang="cs">
-    var cfg = new Cfg();
-    cfg.Load(File.ReadAllText(&quot;BackupManager.xml&quot;));
-</pre>
+<pre class="prettyprint" lang="cs"><code>var cfg = new Cfg();
+cfg.Load(File.ReadAllText(&quot;BackupManager.xml&quot;));
+</code></pre>
 
 I suggest adding a constructor to the `Cfg` class:
 
-<pre class="prettyprint" lang="cs">
-    public class Cfg : CfgNode {
-        [Cfg(required = true)]
-        public List&lt;CfgServer&gt; Servers { get; set; }
-        //constructor
-        <strong>public Cfg(string cfg) {
-            this.Load(cfg);
-        }</strong>
-    }
-</pre>
+<pre class="prettyprint" lang="cs"><code>public class Cfg : CfgNode {
+    [Cfg(required = true)]
+    public List&lt;CfgServer&gt; Servers { get; set; }
+    //constructor
+    <strong>public Cfg(string cfg) {
+        this.Load(cfg);
+    }</strong>
+}
+</code></pre>
 
 Now loading it is one line:
 
-<pre class="prettyprint" lang="cs">
-    var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-</pre>
+<pre class="prettyprint" lang="cs"><code>var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));</code></pre>
 
 ###Is the Configuration Valid?
 
@@ -155,12 +153,13 @@ _all_ the errors and/or warnings. So, after loading,
 you should always check for any issues using
 the `Errors()` and `Warnings()` method:
 
-<pre class="prettyprint" lang="cs">
-    //LOAD CONFIGURATION
-    var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-    //TEST FOR ERRORS
-    Assert.AreEqual(0, cfg.<strong>Errors()</strong>.Length);
-</pre>
+<pre class="prettyprint" lang="cs"><code>//LOAD CONFIGURATION
+var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+// TEST FOR WARNINGS
+Assert.AreEqual(0, cfg.<strong>Warnings()</strong>.Length);
+// TEST FOR ERRORS
+Assert.AreEqual(0, cfg.<strong>Errors()</strong>.Length);
+</code></pre>
 
 An error entry means the configuration is
 invalid.  It can not be trusted.  On the other hand,
@@ -174,14 +173,12 @@ The messages produced are usually
 quite helpful. Here are some examples:
 
 Put another server named *Gandalf* in there, and it says:
-<pre class="prettyprint" lang="yaml">
-You set a duplicate 'name' value 'Gandalf' in 'servers'.
-</pre>
+<pre class="prettyprint" lang="bash">You set a duplicate 'name' value 'Gandalf' in 'servers'.</pre>
 
 Add a _nickName_ instead of a _name_ in servers, and it says:
-<pre class="prettyprint" lang="yaml">
-A 'servers' 'add' element contains an invalid 'nickName' attribute.  Valid attributes are: name.
-A 'servers' 'add' element is missing a 'name' attribute.
+<pre class="prettyprint" lang="bash">
+A 'servers' entry contains an invalid 'nickName' attribute.  Valid attributes are: name.
+A 'servers' entry is missing a 'name' attribute.
 </pre>
 
 If Cfg-NET doesn't report any issues, you can
@@ -201,8 +198,7 @@ we know people change their minds, we're going to save
 ourself some (future) time by adding
 an optional `backups-to-keep` attribute.
 
-<pre class="prettyprint" lang="cs">
-using System.Collections.Generic;
+<pre class="prettyprint" lang="cs"><code>using System.Collections.Generic;
 using Transformalize.Libs.Cfg.Net;
 namespace Cfg.Test {
     public class Cfg : CfgNode {
@@ -218,7 +214,7 @@ namespace Cfg.Test {
         <strong>[Cfg(required = true)]
         public List&lt;CfgDatabase&gt; Databases { get; set; }</strong>
     }
-        <strong>public class CfgDatabase : CfgNode {
+    <strong>public class CfgDatabase : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
         [Cfg(required = true, unique = true)]
@@ -226,8 +222,7 @@ namespace Cfg.Test {
         [Cfg(value = 4)]
         public int BackupsToKeep { get; set; }
     }</strong>
-}
-</pre>
+}</code></pre>
 
 Now let's update *BackupManager.xml* or *BackupManager.json*:
 
@@ -257,15 +252,13 @@ server holds a collection of databases.
 Our program can easily loop through
 the servers and databases like this:
 
-<pre class="prettyprint" lang="cs">
-    var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-    //check for problems
-    foreach (var server in cfg.Servers) {
-        foreach (var database in server.Databases) {
-            // use server.Name, database.Name, and database.BackupFolder...  
-        }
+<pre class="prettyprint" lang="csharp"><code>var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
+/* check for errors */
+foreach (var server in cfg.Servers) {
+    foreach (var database in server.Databases) {
+        // use server.Name, database.Name, and database.BackupFolder...  
     }
-</pre>
+}</code></pre>
 
 If you set default values, you never have to worry
 about a property being `null`.  Moreover, you never
@@ -286,47 +279,41 @@ If it's not enough, you have 5 ways to extend:
 ###In Your Property
 
 You don't _have_ to use auto-properties.  Instead of this:
-<pre class="prettyprint" lang="csharp">
-    [Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
-    public string Provider { get; set; }
-</pre>
+<pre class="prettyprint" lang="csharp"><code>[Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
+public string Provider { get; set; }</code></pre>
 You can use a property with a backing field:
-<pre class="prettyprint" lang="csharp">
-    private string _provider;
-    ...
-    [Cfg]
-    public string Provider {
-        get { return _provider ?? "sqlserver"; }
-        set {
-            if(value != null && value == "Bad Words"){
-                Error("I don't like Bad Words!")
-            } else {
-                _provider = value; 
-            }
+<pre class="prettyprint" lang="csharp"><code>private string _provider;
+/* snip */
+[Cfg]
+public string Provider {
+    get { return _provider ?? "sqlserver"; }
+    set {
+        if(value != null && value == "Bad Words"){
+            Error("I don't like Bad Words!")
+        } else {
+            _provider = value; 
         }
     }
-</pre>
+}</code></pre>
 
-If you (by providing a default) or your configuration doesn't provide a value, 
+If you (by providing a default) or your configuration doesn't provide a value,
 your property's `get` is invoked; hoping a default value is provided.
 
-If there is a value, `toLower` or `toUpper` is 
-enforced. Then, your property's `set` is invoked. Then, your 
-property's `get` is invoked to retrieve the *possibly* updated 
+If there is a value, `toLower` or `toUpper` is
+enforced. Then, your property's `set` is invoked. Then, your
+property's `get` is invoked to retrieve the *possibly* updated
 value.
 
 ###Overriding PreValidate()
 
-If you want to quietly modify the configuration, 
+If you want to quietly modify the configuration,
 you may override `PreValidate()` like this:
 
-<pre class="prettyprint" lang="csharp">
-    protected override void PreValidate() {
-        if (Provider == "Bad Words") {
-            Provider = "Good Words. Ha!";
-        }
+<pre class="prettyprint" lang="csharp"><code>protected override void PreValidate() {
+    if (Provider == "Bad Words") {
+        Provider = "Good Words. Ha!";
     }
-</pre>
+}</code></pre>
 
 `PreValidate()` runs _after_ the properties are set,
 but _before_ `Validate()` runs.  It has access to
@@ -337,55 +324,51 @@ all the properties.
 To perform complex validation with more than one property,
 override the `Validate()` method like so:
 
-<pre class="prettyprint" lang="csharp">
-public class Connection : CfgNode {
- 
-    [Cfg(required = true, domain = &quot;file,folder,other&quot;)]
+<pre class="prettyprint" lang="csharp"><code>public class Connection : CfgNode {
+    [Cfg(required = true, domain = "file,folder,other")]
     public string Provider { get; set; }
-    [Cfg()]
+    [Cfg]
     public string File { get; set; }
-    [Cfg()]
+    [Cfg]
     public string Folder { get; set; }
-    <strong>// custom validation
+    <strong>/* custom validation */
     protected override void Validate() {
-        if (Provider == &quot;file&quot; &amp;&amp; string.IsNullOrEmpty(File)) {
-            Error(&quot;file provider needs file attribute.&quot;);
-        } else if (Provider == &quot;folder&quot; &amp;&amp; string.IsNullOrEmpty(Folder)) {
-            Error(&quot;folder provider needs folder attribute.&quot;);
+        if (Provider == "file" &amp;&amp; string.IsNullOrEmpty(File)) {
+            Error("file provider needs file attribute.");
+        } else if (Provider == "folder" &amp;&amp; string.IsNullOrEmpty(Folder)) {
+            Error("folder provider needs folder attribute.");
         }
     }</strong>
-}
-</pre>
+}</code></pre>
 
 The `Validate()` method has access
 to the `Provider`, `File`, and `Folder` properties.
-It runs _after_ they're set and _after_ `PreValidate()`. 
-So, it can perform more complex validation. 
+It runs _after_ they're set and _after_ `PreValidate()`.
+So, it can perform more complex validation.
 If you find errors, add them using
-the `Error()` method.  If you find things you think 
-the user should know about, add them using the 
+the `Error()` method.  If you find things you think
+the user should know about, add them using the
 `Warn()` method.
 
 ###Overriding PostValidate()
 
-After `Validate()` runs.  You can check for Errors() and/or 
-Warnings().  Then, if you want, you may quietly modify 
-the configuration some more; making sure your app has 
+After `Validate()` runs.  You can check for Errors() and/or
+Warnings().  Then, if you want, you may quietly modify
+the configuration some more; making sure your app has
 everything it needs for a clean run.
 
-<pre class="prettyprint" lang="csharp">
-    protected override void PostValidate() {
-        if (Errors().Length == 0) {
-            MakeSomeOtherPreparations();
-        }
+<pre class="prettyprint" lang="csharp"><code>protected override void PostValidate() {
+    if (Errors().Length == 0) {
+        MakeSomeOtherPreparations();
     }
-</pre>
+}</code></pre>
 
 ###Injecting IValidator into Model's Contructor
-You may want to inject a validator into Cfg-NET instead 
+
+You may want to inject a validator into Cfg-NET instead
 of coding it up in one of the above methods.
 
-
+_More on this later..._
 
 ##Finishing Up The Scenario
 
@@ -411,6 +394,7 @@ When the DBA changes his/her mind about keeping **4**
 backup sets, point out the `backups-to-keep` attribute.
 
 ##About the Code:
+
 Cfg.Net is over-engineered to keep it independent. It has built in `XML` and `JSON`
 default parsers.  You can inject your own parser if you want. Examples using
 `XDocument` and `JSON.NET` are in the test app.  Cfg-NET is a portable class
