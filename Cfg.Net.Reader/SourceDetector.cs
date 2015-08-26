@@ -44,6 +44,12 @@ namespace Cfg.Net.Reader {
             try {
                 return new Uri(resource).IsFile ? Source.File : Source.Url;
             } catch (Exception) {
+
+                var queryStringIndex = resource.IndexOf('?');
+                if (queryStringIndex > 0) {
+                    resource = resource.Substring(0, queryStringIndex);
+                }
+
                 var fileName = Path.GetFileName(resource);
                 if (fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
                     logger.Error("Your configuration contains invalid characters");
