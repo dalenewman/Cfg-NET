@@ -269,7 +269,7 @@ have to worry about a list being `null`; all lists
 decorated with the `Cfg` attribute are
 initialized.
 
-##Validation &amp; Modification
+##Validation and Modification
 
 The `Cfg` attribute's optional properties offer *configurable* validation.
 If it's not enough, you have 5 ways to extend:
@@ -281,6 +281,7 @@ If it's not enough, you have 5 ways to extend:
 1. [Injecting `IValidator` into Model's Contructor](#InjectingValidators)
 
 <a name="InYourProperty"></a>
+
 ###In Your Property
 
 You don't _have_ to use auto-properties.  Instead of this:
@@ -305,6 +306,7 @@ Your property's `get` and `set` are invoked during the loading, modifying,
 and validation process.  So any code you have in here will be executed.
 
 <a name="PreValidate"></a>
+
 ###Overriding PreValidate()
 
 If you want to modify the configuration before validation,
@@ -320,6 +322,7 @@ you may override `PreValidate()` like this:
 but _before_ any validation runs.
 
 <a name="Validate"></a>
+
 ###Overriding Validate()
 
 To perform complex validation or validation involving more than 
@@ -350,6 +353,7 @@ the `Error()` method.  If you find non-critical issues,
 add them using the `Warn()` method.
 
 <a name="PostValidate"></a>
+
 ###Overriding PostValidate()
 
 After `Validate()` runs.  You can check for `Errors()` and/or
@@ -364,6 +368,7 @@ everything it needs for a clean run.
 }</code></pre>
 
 <a name="InjectingValidators"></a>
+
 ###Injecting IValidator into Model's Contructor
 
 You may want to inject a validator into Cfg-NET instead
@@ -382,9 +387,7 @@ For example, in a Console application (e.g. *BackupManager.exe*), allow
 the configuration file to be passed in as an argument,
 like this:
 
-<pre class="prettyprint" lang="bash">
-    C:\> BackupManager.exe BackupManager.xml
-</pre>
+<pre class="prettyprint" lang="bash">C:\> BackupManager.exe BackupManager.xml</pre>
 
 Show the DBA how to add or remove servers and
 databases in *BackupManager.xml*.  Explain that
