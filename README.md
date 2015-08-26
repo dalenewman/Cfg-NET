@@ -64,8 +64,8 @@ The classes above model a
 collection of _servers_.  `Cfg` is
 the root, and it holds a list of
 `CfgServer`.  Both `Cfg` and `CfgServer`
-inherit from `CfgNode`.  Your configuration
-model must inherit from `CfgNode`.
+inherit from `CfgNode`.  All parts of your model 
+must inherit from `CfgNode`.
 
 ####The Cfg Attribute
 
@@ -84,8 +84,9 @@ as it is read from the configuration:
 
 1. `value` sets a default value
 1. `toLower` or `toUpper` modify the value
-1. `get` is invoked (the property's getter)
 1. `shorthand` checks for [shorthand translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
+1. `get` is invoked ([the property's getter](#InYourProperty))
+1. [`PreValidate()`](#PreValidate) is executed
 1. `domain` checks value against valid values
 1. `minLength` checks value against a minimum length
 1. `maxLength` checks value against a maximum length
@@ -94,6 +95,8 @@ as it is read from the configuration:
 1. `validators` checks value against injected validators
 1. `required` confirms value exists
 1. `unique` confirms value is unique in it's collection
+1. [`Validate`](#Validate) is executed
+1. [`PostValidate`](#PostValidate) is executed
 
 ###Create Corresponding Configuration
 
@@ -227,24 +230,24 @@ namespace Cfg.Test {
 Now let's update *BackupManager.xml* or *BackupManager.json*:
 
 <pre class="prettyprint" lang="xml">
-    &lt;cfg&gt;
-        &lt;servers&gt;
-            &lt;add name=&quot;Gandalf&quot;&gt;
-                &lt;databases&gt;
-                    &lt;add name=&quot;master&quot;
-                         backup-folder=&quot;\\san\sql-backups\gandalf\master&quot; /&gt;
-                &lt;/databases&gt;
-            &lt;/add&gt;
-            &lt;add name=&quot;Saruman&quot;&gt;
-                &lt;databases&gt;
-                    &lt;add name=&quot;master&quot;
-                         backup-folder=&quot;\\san\sql-backups\saruman\master&quot; /&gt;
-                    &lt;add name=&quot;model&quot;
-                         backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
-                &lt;/databases&gt;
-            &lt;/add&gt;
-        &lt;/servers&gt;
-    &lt;/cfg&gt;
+&lt;cfg&gt;
+    &lt;servers&gt;
+        &lt;add name=&quot;Gandalf&quot;&gt;
+            &lt;databases&gt;
+                &lt;add name=&quot;master&quot;
+                     backup-folder=&quot;\\san\sql-backups\gandalf\master&quot; /&gt;
+            &lt;/databases&gt;
+        &lt;/add&gt;
+        &lt;add name=&quot;Saruman&quot;&gt;
+            &lt;databases&gt;
+                &lt;add name=&quot;master&quot;
+                     backup-folder=&quot;\\san\sql-backups\saruman\master&quot; /&gt;
+                &lt;add name=&quot;model&quot;
+                     backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
+            &lt;/databases&gt;
+        &lt;/add&gt;
+    &lt;/servers&gt;
+&lt;/cfg&gt;
 </pre>
 
 Now we have a collection of servers, and each
@@ -267,15 +270,17 @@ decorated with the `Cfg` attribute are
 initialized.
 
 ##Validation &amp; Modification
+
 The `Cfg` attribute's optional properties offer *configurable* validation.
 If it's not enough, you have 5 ways to extend:
 
-1. In Your Property
-1. Overriding `PreValidate()`
-1. Overriding `Validate()`
-1. Overriding `PostValidate()`
-1. Injecting `IValidator` into Model's Contructor
+1. [In Your Property](#InYourProperty)
+1. Overriding [`PreValidate()`](#PreValidate)
+1. Overriding [`Validate()`](#Validate)
+1. Overriding [`PostValidate()`](#PostValidate)
+1. [Injecting `IValidator` into Model's Contructor](#InjectingValidators)
 
+<a name="InYourProperty"></a>
 ###In Your Property
 
 You don't _have_ to use auto-properties.  Instead of this:
@@ -296,17 +301,13 @@ public string Provider {
     }
 }</code></pre>
 
-If you (by providing a default) or your configuration doesn't provide a value,
-your property's `get` is invoked; hoping a default value is provided.
+Your property's `get` and `set` are invoked during the loading, modifying, 
+and validation process.  So any code you have in here will be executed.
 
-If there is a value, `toLower` or `toUpper` is
-enforced. Then, your property's `set` is invoked. Then, your
-property's `get` is invoked to retrieve the *possibly* updated
-value.
-
+<a name="PreValidate"></a>
 ###Overriding PreValidate()
 
-If you want to quietly modify the configuration,
+If you want to modify the configuration before validation,
 you may override `PreValidate()` like this:
 
 <pre class="prettyprint" lang="csharp"><code>protected override void PreValidate() {
@@ -316,13 +317,13 @@ you may override `PreValidate()` like this:
 }</code></pre>
 
 `PreValidate()` runs _after_ the properties are set,
-but _before_ `Validate()` runs.  It has access to
-all the properties.
+but _before_ any validation runs.
 
+<a name="Validate"></a>
 ###Overriding Validate()
 
-To perform complex validation with more than one property,
-override the `Validate()` method like so:
+To perform complex validation or validation involving more than 
+one property, override the `Validate()` method like this:
 
 <pre class="prettyprint" lang="csharp"><code>public class Connection : CfgNode {
     [Cfg(required = true, domain = "file,folder,other")]
@@ -344,17 +345,16 @@ override the `Validate()` method like so:
 The `Validate()` method has access
 to the `Provider`, `File`, and `Folder` properties.
 It runs _after_ they're set and _after_ `PreValidate()`.
-So, it can perform more complex validation.
-If you find errors, add them using
-the `Error()` method.  If you find things you think
-the user should know about, add them using the
-`Warn()` method.
+If you find that the configuration is invalid, add errors using
+the `Error()` method.  If you find non-critical issues, 
+add them using the `Warn()` method.
 
+<a name="PostValidate"></a>
 ###Overriding PostValidate()
 
-After `Validate()` runs.  You can check for Errors() and/or
-Warnings().  Then, if you want, you may quietly modify
-the configuration some more; making sure your app has
+After `Validate()` runs.  You can check for `Errors()` and/or
+`Warnings()`.  If you want, you may modify
+the configuration further; making sure your app has
 everything it needs for a clean run.
 
 <pre class="prettyprint" lang="csharp"><code>protected override void PostValidate() {
@@ -363,6 +363,7 @@ everything it needs for a clean run.
     }
 }</code></pre>
 
+<a name="InjectingValidators"></a>
 ###Injecting IValidator into Model's Contructor
 
 You may want to inject a validator into Cfg-NET instead
