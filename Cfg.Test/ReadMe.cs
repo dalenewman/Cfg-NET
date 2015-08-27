@@ -7,6 +7,7 @@ using Cfg.Net.Parsers.Xml.Linq;
 using NUnit.Framework;
 
 namespace Cfg.Test {
+
     [TestFixture]
     public class ReadMe {
 

@@ -39,66 +39,32 @@ First, install Cfg-NET with Nuget:
 
 `PM> Install-Package Cfg-NET`
 
-Then, in your code, _model_ your configuration:
+Then, in your code, _model_ your program:
 
-<pre class="prettyprint" lang="cs">
-<code>
-using System.Collections.Generic;
+<pre class="prettyprint" lang="cs"><code>using System.Collections.Generic;
 <strong>using Cfg.Net;</strong>
-namespace Cfg.Test {
-    public class Cfg : <strong>CfgNode</strong> {
+
+public class DatabaseAdmin : <strong>CfgNode</strong> {
     <strong>[Cfg(required = true)]</strong>
-        public List&lt;CfgServer&gt; Servers { get; set; }
-    }
-    public class CfgServer : <strong>CfgNode</strong> {
-    <strong>[Cfg(required = true, unique = true)]</strong>
-        public string Name { get; set; }
-    }
+    public List&lt;Server&gt; Servers { get; set; }
 }
-</code>
-</pre>
 
-####The CfgNode Class
+public class Server : <strong>CfgNode</strong> {
+    <strong>[Cfg(required = true, unique = true)]</strong>
+    public string Name { get; set; }
+}</code></pre>
 
-The classes above model a
-collection of _servers_.  `Cfg` is
-the root, and it holds a list of
-`CfgServer`.  Both `Cfg` and `CfgServer`
-inherit from `CfgNode`.  All parts of your model 
-must inherit from `CfgNode`.
+These two classes represent the DBA and his/her servers. 
+Combined, they are a Cfg-NET model because:
 
-####The Cfg Attribute
+1. The classes inherit from `CfgNode`.
+1. The properties are decorated with the `Cfg` attribute.
 
-To control your model's properties,
-decorate them with a `Cfg` attribute. `Cfg` adds
-validation and modification instructions
-to the property.
+###CfgNode Class
+The `CfgNode` class loads your configuration according to 
+your instructions defined in the `Cfg` attributes.
 
-In our model above, the `Cfg`
-attribute properties indicate that
-each server has a **required**,
-and **unique** name.
-
-A property is processed in this order
-as it is read from the configuration:
-
-1. `value` sets a default value
-1. `toLower` or `toUpper` modify the value
-1. `shorthand` checks for [shorthand translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-1. `get` is invoked ([the property's getter](#InYourProperty))
-1. [`PreValidate()`](#PreValidate) is executed
-1. `domain` checks value against valid values
-1. `minLength` checks value against a minimum length
-1. `maxLength` checks value against a maximum length
-1. `minValue` checks value against a minimum value
-1. `maxValue` checks value against a maximum value
-1. `validators` checks value against injected validators
-1. `required` confirms value exists
-1. `unique` confirms value is unique in it's collection
-1. [`Validate`](#Validate) is executed
-1. [`PostValidate`](#PostValidate) is executed
-
-###Create Corresponding Configuration
+###Configuration
 
 The DBA told you the servers are named *Gandalf*,
 and *Saruman*. So, depending on your preference,
@@ -122,52 +88,80 @@ write your configuration in **JSON** or **XML**:
 }
 </pre>
 
-Save this to *BackupManager.xml* or *BackupManager.json*.
+Save this to *DatabaseAdmin.xml* or *DatabaseAdmin.json*.
+
+###Cfg Attribute
+
+Decorate your properties with the `Cfg` attribute. `Cfg` adds
+validation and modification instructions to the property.
+
+For example, in the model above, the `Cfg` attribute indicates that
+each server has a **required**, and **unique** name.
+
+###The Order of Things
+
+1. `value` sets a default value
+1. `toLower` or `toUpper` modify the value (optional)
+1. `shorthand` checks for [shorthand translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
+1. `get` is invoked ([the property's getter](#InYourProperty))
+1. `required` confirms a value exists
+1. `unique` confirms the value is unique in it's collection
+1. [`PreValidate()`](#PreValidate) is executed
+1. `domain` checks value against valid values
+1. `minLength` checks value against a minimum length
+1. `maxLength` checks value against a maximum length
+1. `minValue` checks value against a minimum value
+1. `maxValue` checks value against a maximum value
+1. `validators` checks value against injected validators
+1. [`Validate`](#Validate) is executed
+1. [`PostValidate`](#PostValidate) is executed
 
 ###Load the Configuration
 
 Load the file into your model like this:
 
-<pre class="prettyprint" lang="cs"><code>var cfg = new Cfg();
-cfg.Load(File.ReadAllText(&quot;BackupManager.xml&quot;));
+<pre class="prettyprint" lang="csharp"><code>var dba = new DatabaseAdmin();
+dba.Load(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
 </code></pre>
 
-I suggest adding a constructor to the `Cfg` class:
+I suggest adding a constructor to the `DatabaseAdmin` class:
 
-<pre class="prettyprint" lang="cs"><code>public class Cfg : CfgNode {
-    [Cfg(required = true)]
-    public List&lt;CfgServer&gt; Servers { get; set; }
-    //constructor
+<pre class="prettyprint" lang="cs"><code>public class DatabaseAdmin : CfgNode {
     <strong>public Cfg(string cfg) {
         this.Load(cfg);
     }</strong>
+    
+    [Cfg(required = true)]
+    public List&lt;Server&gt; Servers { get; set; }
 }
 </code></pre>
 
 Now loading it is one line:
 
-<pre class="prettyprint" lang="cs"><code>var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));</code></pre>
+<pre class="prettyprint" lang="cs"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));</code></pre>
 
-###Is the Configuration Valid?
+###Check the Configuration
 
-When you load a configuration, Cfg-NET doesn't throw errors
- (on purpose that is). Instead, it attempts to collect
+When you load a configuration, Cfg-NET doesn't throw exceptions 
+(on purpose that is). Instead, it attempts to collect
 _all_ the errors and/or warnings. So, after loading,
-you should always check for any issues using
-the `Errors()` and `Warnings()` method:
+you should always check it for any issues using
+the `Errors()` and `Warnings()` methods:
 
 <pre class="prettyprint" lang="cs"><code>//LOAD CONFIGURATION
-var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-// TEST FOR WARNINGS
-Assert.AreEqual(0, cfg.<strong>Warnings()</strong>.Length);
-// TEST FOR ERRORS
-Assert.AreEqual(0, cfg.<strong>Errors()</strong>.Length);
+var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
+
+/* CHECK FOR WARNINGS */
+Assert.AreEqual(0, dba.<strong>Warnings()</strong>.Length);
+
+/* CHECK FOR ERRORS */
+Assert.AreEqual(0, dba.<strong>Errors()</strong>.Length);
+
+/* EVERYTHING IS AWESOME!!! */
 </code></pre>
 
-An error entry means the configuration is
-invalid.  It can not be trusted.  On the other hand,
-a warning is something you ought to address,
-but you could ignore it for now (if you're too busy).
+An error means the configuration is invalid. A warning is 
+something you ought to address, but could ignore (probably...).
 
 By collecting multiple errors and warnings,
 you can report them to an end-user
@@ -202,32 +196,38 @@ ourself some (future) time by adding
 an optional `backups-to-keep` attribute.
 
 <pre class="prettyprint" lang="cs"><code>using System.Collections.Generic;
-using Transformalize.Libs.Cfg.Net;
-namespace Cfg.Test {
-    public class Cfg : CfgNode {
-        [Cfg(required = true)]
-        public List&lt;CfgServer&gt; Servers { get; set; }
-        public Cfg(string xml) {
-            this.Load(xml);
-        }
-    }
-    public class CfgServer : CfgNode {
-        [Cfg(required = true, unique = true)]
-        public string Name { get; set; }
-        <strong>[Cfg(required = true)]
-        public List&lt;CfgDatabase&gt; Databases { get; set; }</strong>
-    }
-    <strong>public class CfgDatabase : CfgNode {
-        [Cfg(required = true, unique = true)]
-        public string Name { get; set; }
-        [Cfg(required = true, unique = true)]
-        public string BackupFolder { get; set; }
-        [Cfg(value = 4)]
-        public int BackupsToKeep { get; set; }
-    }</strong>
-}</code></pre>
+using Cfg.Net;
 
-Now let's update *BackupManager.xml* or *BackupManager.json*:
+public class DatabaseAdmin : CfgNode {
+    public Cfg(string xml) {
+        this.Load(xml);
+    }
+
+    [Cfg(required = true)]
+    public List&lt;Server&gt; Servers { get; set; }
+}
+
+public class Server : CfgNode {
+    [Cfg(required = true, unique = true)]
+    public string Name { get; set; }
+    
+    <strong>[Cfg(required = true)]
+    public List&lt;Database&gt; Databases { get; set; }</strong>
+}
+
+<strong>public class Database : CfgNode {
+    [Cfg(required = true, unique = true)]
+    public string Name { get; set; }
+    
+    [Cfg(required = true, unique = true)]
+    public string BackupFolder { get; set; }
+    
+    [Cfg(value = 4)]
+    public int BackupsToKeep { get; set; }
+}</strong>
+</code></pre>
+
+Now let's update *DatabaseAdmin.xml*:
 
 <pre class="prettyprint" lang="xml">
 &lt;cfg&gt;
@@ -255,11 +255,13 @@ server holds a collection of databases.
 Our program can easily loop through
 the servers and databases like this:
 
-<pre class="prettyprint" lang="csharp"><code>var cfg = new Cfg(File.ReadAllText(&quot;BackupManager.xml&quot;));
-/* check for errors */
+<pre class="prettyprint" lang="csharp"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
+    
+/* CHECK FOR ERRORS */
+
 foreach (var server in cfg.Servers) {
     foreach (var database in server.Databases) {
-        // use server.Name, database.Name, and database.BackupFolder...  
+        /* use server.Name, database.Name, and database.BackupFolder... */  
     }
 }</code></pre>
 
@@ -331,11 +333,14 @@ one property, override the `Validate()` method like this:
 <pre class="prettyprint" lang="csharp"><code>public class Connection : CfgNode {
     [Cfg(required = true, domain = "file,folder,other")]
     public string Provider { get; set; }
+    
     [Cfg]
     public string File { get; set; }
+    
     [Cfg]
     public string Folder { get; set; }
-    <strong>/* custom validation */
+    
+    <strong>/* CUSTOM VALIDATION */
     protected override void Validate() {
         if (Provider == "file" &amp;&amp; string.IsNullOrEmpty(File)) {
             Error("file provider needs file attribute.");
@@ -383,14 +388,14 @@ backup sets, for _y_ servers, and _z_ databases, deploy
 your program with some method of allowing the user to
 update and choose the configuration he/she wants to use.
 
-For example, in a Console application (e.g. *BackupManager.exe*), allow
+For example, in a Console application (e.g. *Dba.exe*), allow
 the configuration file to be passed in as an argument,
 like this:
 
-<pre class="prettyprint" lang="bash">C:\> BackupManager.exe BackupManager.xml</pre>
+<pre class="prettyprint" lang="bash">C:\> Dba.exe DatabaseAdmin.xml</pre>
 
 Show the DBA how to add or remove servers and
-databases in *BackupManager.xml*.  Explain that
+databases in *DatabaseAdmin.xml*.  Explain that
 he/she can create as many configuration files
 as necessary.
 
