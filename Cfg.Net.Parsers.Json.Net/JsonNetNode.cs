@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net.Contracts;
-using Cfg.Net.Parsers;
 using Newtonsoft.Json.Linq;
 
-namespace Cfg.Test.Parsers {
+namespace Cfg.Net.Parsers.Json.Net {
 
     public class JsonNetNode : INode {
 
-        public string Name { get; private set; }
-        public List<IAttribute> Attributes { get; private set; }
-        public List<INode> SubNodes { get; private set; }
+        public string Name { get; }
+        public List<IAttribute> Attributes { get; }
+        public List<INode> SubNodes { get; }
 
         public JsonNetNode(string name, JObject node) {
 

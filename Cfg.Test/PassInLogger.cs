@@ -1,32 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net;
+using Cfg.Net.Contracts;
+using Cfg.Net.Loggers;
 using NUnit.Framework;
-using Serilog;
-using ILogger = Cfg.Net.Contracts.ILogger;
 
 namespace Cfg.Test {
-
-
-    public class MyLogger : ILogger {
-        private readonly Serilog.ILogger _logger;
-
-        public MyLogger() {
-            _logger = new LoggerConfiguration()
-             .WriteTo.ColoredConsole()
-             .CreateLogger();
-        }
-
-        public void Warn(string message, params object[] args) {
-            _logger.Warning(message, args);
-        }
-
-        public void Error(string message, params object[] args) {
-            _logger.Error(message, args);
-        }
-    }
-
     [TestFixture]
     public class PassInLogger {
 
@@ -40,7 +19,7 @@ namespace Cfg.Test {
     </parameters>
 </xml>".Replace("'", "\"");
 
-            var cfg = new TestPassInLogger(xml, new MyLogger());
+            var cfg = new TestPassInLogger(xml, new TraceLogger());
 
             var problems = cfg.Logs();
             Assert.AreEqual(1, problems.Count);

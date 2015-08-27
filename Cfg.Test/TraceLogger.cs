@@ -1,6 +1,4 @@
-﻿using System;
-using Cfg.Net.Contracts;
-using Cfg.Net.Loggers;
+﻿using Cfg.Net.Contracts;
 
 namespace Cfg.Test {
    public class TraceLogger : ILogger {

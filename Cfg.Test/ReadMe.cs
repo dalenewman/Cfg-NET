@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using Cfg.Net.Parsers;
-using Cfg.Test.Parsers;
+using Cfg.Net.Parsers.Xml.Linq;
 using NUnit.Framework;
 
 namespace Cfg.Test {

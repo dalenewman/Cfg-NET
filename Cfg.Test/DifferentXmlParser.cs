@@ -4,7 +4,7 @@ using System.Linq;
 using Cfg.Net;
 using Cfg.Net.Contracts;
 using Cfg.Net.Parsers;
-using Cfg.Test.Parsers;
+using Cfg.Net.Parsers.Xml.Linq;
 using NUnit.Framework;
 
 namespace Cfg.Test {

@@ -48,18 +48,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog">
-      <HintPath>..\packages\Serilog.1.5.6\lib\net45\Serilog.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.FullNetFx">
-      <HintPath>..\packages\Serilog.1.5.6\lib\net45\Serilog.FullNetFx.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -76,10 +66,6 @@
     <Compile Include="DifferentXmlParser.cs" />
     <Compile Include="FreeFormData.cs" />
     <Compile Include="Case.cs" />
-    <Compile Include="Parsers\JsonNetNode.cs" />
-    <Compile Include="Parsers\JsonNetParser.cs" />
-    <Compile Include="Parsers\XDocumentNode.cs" />
-    <Compile Include="Parsers\XDocumentParser.cs" />
     <Compile Include="ShorthandTest.cs" />
     <Compile Include="TraceLogger.cs" />
     <Compile Include="Value.cs" />
@@ -121,6 +107,14 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Cfg.Net.Parsers.Json.Net\Cfg.Net.Parsers.Json.Net.csproj">
+      <Project>{d64515c8-95b0-459b-bf6c-9f54e170211f}</Project>
+      <Name>Cfg.Net.Parsers.Json.Net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Cfg.Net.Parsers.Xml.Linq\Cfg.Net.Parsers.Xml.Linq.csproj">
+      <Project>{093898fa-64e6-4e71-8dff-141c8888bfbe}</Project>
+      <Name>Cfg.Net.Parsers.Xml.Linq</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Cfg.Net.Reader\Cfg.Net.Reader.csproj">
       <Project>{93afd9a7-5dc8-4392-8632-a553723bd3ac}</Project>
       <Name>Cfg.Net.Reader</Name>

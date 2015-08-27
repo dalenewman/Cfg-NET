@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cfg.Net;
 using Cfg.Net.Contracts;
+using Cfg.Net.Loggers;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -16,7 +17,7 @@ namespace Cfg.Test {
                     <add name='two' value='Another' />
                 </things>
             </cfg>";
-            var actual = new TestProperty(resource, new MyLogger());
+            var actual = new TestProperty(resource, new TraceLogger());
             Assert.AreEqual(0, actual.Errors().Length);
             Assert.AreEqual(2, actual.Things.Count);
         }
@@ -30,7 +31,7 @@ namespace Cfg.Test {
                     <add name='two' value='Another' />
                 </things>
             </cfg>";
-            var actual = new TestCollection(resource, new MyLogger());
+            var actual = new TestCollection(resource, new TraceLogger());
             Assert.AreEqual(1, actual.Errors().Length);
             Assert.AreEqual(3, actual.Things.Count);
         }

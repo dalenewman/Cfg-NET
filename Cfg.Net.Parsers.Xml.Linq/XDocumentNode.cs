@@ -2,15 +2,14 @@
 using System.Linq;
 using System.Xml.Linq;
 using Cfg.Net.Contracts;
-using Cfg.Net.Parsers;
 
-namespace Cfg.Test.Parsers {
+namespace Cfg.Net.Parsers.Xml.Linq {
 
     public class XDocumentNode : INode {
 
-        public string Name { get; private set; }
-        public List<IAttribute> Attributes { get; private set; }
-        public List<INode> SubNodes { get; private set; }
+        public string Name { get; }
+        public List<IAttribute> Attributes { get; }
+        public List<INode> SubNodes { get; }
 
         public XDocumentNode(XElement node) {
             Name = node.Name.LocalName;

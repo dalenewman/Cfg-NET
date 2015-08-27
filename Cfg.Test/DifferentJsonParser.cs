@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net;
 using Cfg.Net.Contracts;
-using Cfg.Net.Parsers;
-using Cfg.Test.Parsers;
+using Cfg.Net.Parsers.Json.Net;
 using NUnit.Framework;
 
 namespace Cfg.Test {
