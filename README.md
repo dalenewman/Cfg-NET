@@ -5,13 +5,13 @@ Cfg-NET is a JSON or XML based [open source](https://github.com/dalenewman/Cfg.N
 configuration handler. It is an alternative for custom sections
 in _app_ or _web.config_. It is licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
-####Good Configurations:
+#### Good Configurations:
 
 * remove the need to re-compile
 * may be edited by end-users (in [JSON](http://en.wikipedia.org/wiki/JSON) or [XML](http://en.wikipedia.org/wiki/XML))
 * co-exist with other configurations
 
-####Good Configuration Handlers:
+#### Good Configuration Handlers:
 
 * validate and report issues
 * allow for custom validation and modification
@@ -20,7 +20,8 @@ in _app_ or _web.config_. It is licensed under [Apache 2](http://www.apache.org/
 * are available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
 * are portable
 
-##Getting Started: a Scenario
+Getting Started
+---------------
 
 Your database adminstrator (DBA) is unhappy with a
 backup wizard's ability to manage previous backup sets.
@@ -33,7 +34,7 @@ keeping **4** complete sets on disk, and deleting the rest.
 For each _database_, he provides you with the _server name_, and the
 associated _backup folder_.
 
-###Create a Cfg-NET Model
+### Create a Cfg-NET Model
 
 First, install Cfg-NET with Nuget:
 
@@ -60,37 +61,33 @@ Combined, they are a Cfg-NET model because:
 1. The classes inherit from `CfgNode`.
 1. The properties are decorated with the `Cfg` attribute.
 
-###CfgNode Class
+### CfgNode Class
 The `CfgNode` class loads your configuration according to 
 your instructions defined in the `Cfg` attributes.
 
-###Configuration
+### Configuration
 
 The DBA told you the servers are named *Gandalf*,
 and *Saruman*. So, depending on your preference,
 write your configuration in **JSON** or **XML**:
 
-<pre class="prettyprint" lang="xml">
-&lt;cfg&gt;
+<pre class="prettyprint" lang="xml">&lt;cfg&gt;
     &lt;servers&gt;
         &lt;add name=&quot;Gandalf&quot; /&gt;
         &lt;add name=&quot;Saruman&quot; /&gt;
     &lt;/servers&gt;
-&lt;/cfg&gt;
-</pre>
+&lt;/cfg&gt;</pre>
 
-<pre class="prettyprint" lang="js">
-{
+<pre class="prettyprint" lang="js">{
     &quot;servers&quot;: [
         { &quot;name&quot;:&quot;Gandalf&quot; }
         { &quot;name&quot;:&quot;Saruman&quot; }
     ]
-}
-</pre>
+}</pre>
 
 Save this to *DatabaseAdmin.xml* or *DatabaseAdmin.json*.
 
-###Cfg Attribute
+### Cfg Attribute
 
 Decorate your properties with the `Cfg` attribute. `Cfg` adds
 validation and modification instructions to the property.
@@ -98,7 +95,7 @@ validation and modification instructions to the property.
 For example, in the model above, the `Cfg` attribute indicates that
 each server has a **required**, and **unique** name.
 
-###The Order of Things
+### The Order of Things
 
 1. `value` sets a default value
 1. `toLower` or `toUpper` modify the value (optional)
@@ -116,7 +113,7 @@ each server has a **required**, and **unique** name.
 1. [`Validate`](#Validate) is executed
 1. [`PostValidate`](#PostValidate) is executed
 
-###Load the Configuration
+### Load the Configuration
 
 Load the file into your model like this:
 
@@ -133,17 +130,16 @@ I suggest adding a constructor to the `DatabaseAdmin` class:
     
     [Cfg(required = true)]
     public List&lt;Server&gt; Servers { get; set; }
-}
-</code></pre>
+}</code></pre>
 
 Now loading it is one line:
 
 <pre class="prettyprint" lang="cs"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));</code></pre>
 
-###Check the Configuration
+### Check the Configuration
 
 When you load a configuration, Cfg-NET doesn't throw exceptions 
-(on purpose that is). Instead, it attempts to collect
+(on purpose). Instead, it attempts to collect
 _all_ the errors and/or warnings. So, after loading,
 you should always check it for any issues using
 the `Errors()` and `Warnings()` methods:
@@ -160,8 +156,9 @@ Assert.AreEqual(0, dba.<strong>Errors()</strong>.Length);
 /* EVERYTHING IS AWESOME!!! */
 </code></pre>
 
-An error means the configuration is invalid. A warning is 
-something you ought to address, but could ignore (probably...).
+By convention, an error means the configuration is invalid. 
+A warning is something you ought to address, but the program 
+should still work.
 
 By collecting multiple errors and warnings,
 you can report them to an end-user
@@ -182,7 +179,7 @@ If Cfg-NET doesn't report any issues, you can
 be sure your configuration conforms
 to your model.
 
-###Back to the Scenario
+### Back to the Scenario
 
 Moving on with our scenario; we need to make it so
 each _server_ has a required collection of _databases_.
@@ -229,8 +226,7 @@ public class Server : CfgNode {
 
 Now let's update *DatabaseAdmin.xml*:
 
-<pre class="prettyprint" lang="xml">
-&lt;cfg&gt;
+<pre class="prettyprint" lang="xml">&lt;cfg&gt;
     &lt;servers&gt;
         &lt;add name=&quot;Gandalf&quot;&gt;
             &lt;databases&gt;
@@ -247,8 +243,7 @@ Now let's update *DatabaseAdmin.xml*:
             &lt;/databases&gt;
         &lt;/add&gt;
     &lt;/servers&gt;
-&lt;/cfg&gt;
-</pre>
+&lt;/cfg&gt;</pre>
 
 Now we have a collection of servers, and each
 server holds a collection of databases.
@@ -271,7 +266,8 @@ have to worry about a list being `null`; all lists
 decorated with the `Cfg` attribute are
 initialized.
 
-##Validation and Modification
+Validation and Modification
+---------------------------
 
 The `Cfg` attribute's optional properties offer *configurable* validation.
 If it's not enough, you have 5 ways to extend:
@@ -284,7 +280,7 @@ If it's not enough, you have 5 ways to extend:
 
 <a name="InYourProperty"></a>
 
-###In Your Property
+### In Your Property
 
 You don't _have_ to use auto-properties.  Instead of this:
 <pre class="prettyprint" lang="csharp"><code>[Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
@@ -309,7 +305,7 @@ and validation process.  So any code you have in here will be executed.
 
 <a name="PreValidate"></a>
 
-###Overriding PreValidate()
+### Overriding PreValidate()
 
 If you want to modify the configuration before validation,
 you may override `PreValidate()` like this:
@@ -325,7 +321,7 @@ but _before_ any validation runs.
 
 <a name="Validate"></a>
 
-###Overriding Validate()
+### Overriding Validate()
 
 To perform complex validation or validation involving more than 
 one property, override the `Validate()` method like this:
@@ -359,7 +355,7 @@ add them using the `Warn()` method.
 
 <a name="PostValidate"></a>
 
-###Overriding PostValidate()
+### Overriding PostValidate()
 
 After `Validate()` runs.  You can check for `Errors()` and/or
 `Warnings()`.  If you want, you may modify
@@ -374,14 +370,15 @@ everything it needs for a clean run.
 
 <a name="InjectingValidators"></a>
 
-###Injecting IValidator into Model's Contructor
+### Injecting IValidator into Model's Contructor
 
 You may want to inject a validator into Cfg-NET instead
 of coding it up in one of the above methods.
 
 _More on this later..._
 
-##Finishing Up The Scenario
+Finishing Up The Scenario
+-------------------------
 
 After you unravel the mystery of saving _x_ complete
 backup sets, for _y_ servers, and _z_ databases, deploy
@@ -402,12 +399,12 @@ as necessary.
 When the DBA changes his/her mind about keeping **4**
 backup sets, point out the `backups-to-keep` attribute.
 
-##About the Code:
+About the Code
+--------------
 
-Cfg.Net is over-engineered to keep it independent. It has built in `XML` and `JSON`
-default parsers.  You can inject your own parser if you want. Examples using
-`XDocument` and `JSON.NET` are in the test app.  Cfg-NET is a portable class
-library targeting:
+Cfg.Net doesn't have any direct dependencies.  It has built-in `XML` and `JSON`
+default parsers.  There is a constructor on `CfgNode` that allows you to inject 
+(or compose) some of it's behavior. Cfg-NET is a portable class library targeting:
 
 * .NET 4
 * Silverlight 5
