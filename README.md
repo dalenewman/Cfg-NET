@@ -134,7 +134,6 @@ Then:
 
 1. `toLower` or `toUpper` may modify the value
 1. `shorthand` may check for [translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-1. `get` is invoked ([the property's getter](#InYourProperty))
 1. `required` confirms a value exists
 1. `unique` confirms the value is unique in it's collection
 1. [`PreValidate()`](#PreValidate) is executed
