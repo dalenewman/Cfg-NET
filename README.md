@@ -31,8 +31,8 @@ saying "**Backup drive has less than 10% free space!**"
 He wants a program that manages database backups by
 keeping **4** complete sets on disk, and deleting the rest.
 
-For each _database_, he provides you with the _server name_, and the
-associated _backup folder_.
+For each *database*, he provides you with the *server name*, and the
+associated *backup folder*.
 
 ### Create a Cfg-NET Model
 
@@ -40,9 +40,9 @@ First, install Cfg-NET with Nuget:
 
 `PM> Install-Package Cfg-NET`
 
-Then, in your code, _model_ your program:
+Then, in your code, *model* your program:
 
-<pre class="prettyprint lang-cs" lang="cs"><code>using System.Collections.Generic;
+<pre class="prettyprint lang-csharp" lang="csharp"><code>using System.Collections.Generic;
 using Cfg.Net;
 
 public class DatabaseAdmin : CfgNode {
@@ -122,7 +122,7 @@ dba.Load(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
 
 I suggest adding a constructor to the `DatabaseAdmin` class:
 
-<pre class="prettyprint lang-cs" lang="cs"><code>public class DatabaseAdmin : CfgNode {
+<pre class="prettyprint lang-csharp" lang="csharp"><code>public class DatabaseAdmin : CfgNode {
     <strong>public Cfg(string cfg) {
         this.Load(cfg);
     }</strong>
@@ -133,17 +133,17 @@ I suggest adding a constructor to the `DatabaseAdmin` class:
 
 Now loading it is one line:
 
-<pre class="prettyprint lang-cs" lang="cs"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));</code></pre>
+<pre class="prettyprint lang-csharp" lang="csharp"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));</code></pre>
 
 ### Check the Configuration
 
 When you load a configuration, Cfg-NET doesn't throw exceptions 
 (on purpose). Instead, it attempts to collect
-_all_ the errors and/or warnings. So, after loading,
+*all* the errors and/or warnings. So, after loading,
 you should always check it for any issues using
 the `Errors()` and `Warnings()` methods:
 
-<pre class="prettyprint lang-cs" lang="cs"><code>//LOAD CONFIGURATION
+<pre class="prettyprint lang-csharp" lang="csharp"><code>//LOAD CONFIGURATION
 var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
 
 /* CHECK FOR WARNINGS */
@@ -168,7 +168,7 @@ quite helpful. Here are some examples:
 Put another server named *Gandalf* in there, and it says:
 <pre class="prettyprint" lang="bash">You set a duplicate 'name' value 'Gandalf' in 'servers'.</pre>
 
-Add a _nickName_ instead of a _name_ in servers, and it says:
+Add a *nickName* instead of a *name* in servers, and it says:
 <pre class="prettyprint" lang="bash">
 A 'servers' entry contains an invalid 'nickName' attribute.  Valid attributes are: name.
 A 'servers' entry is missing a 'name' attribute.
@@ -181,9 +181,9 @@ to your model.
 ### Back to the Scenario
 
 Moving on with our scenario; we need to make it so
-each _server_ has a required collection of _databases_.
+each *server* has a required collection of *databases*.
 
-Each _database_ must have a unique `name` and
+Each *database* must have a unique `name` and
 unique `backup-folder`.
 
 The DBA said he wanted **4** backup sets, but since
@@ -191,7 +191,7 @@ we know people change their minds, we're going to save
 ourself some (future) time by adding
 an optional `backups-to-keep` attribute.
 
-<pre class="prettyprint lang-cs" lang="cs"><code>using System.Collections.Generic;
+<pre class="prettyprint lang-csharp" lang="csharp"><code>using System.Collections.Generic;
 using Cfg.Net;
 
 public class DatabaseAdmin : CfgNode {
@@ -315,8 +315,8 @@ you may override `PreValidate()` like this:
     }
 }</code></pre>
 
-`PreValidate()` runs _after_ the properties are set,
-but _before_ any validation runs.
+`PreValidate()` runs *after* the properties are set,
+but *before* any validation runs.
 
 <a name="Validate"></a>
 
@@ -347,7 +347,7 @@ one property, override the `Validate()` method like this:
 
 The `Validate()` method has access
 to the `Provider`, `File`, and `Folder` properties.
-It runs _after_ they're set and _after_ `PreValidate()`.
+It runs *after* they're set and *after* `PreValidate()`.
 If you find that the configuration is invalid, add errors using
 the `Error()` method.  If you find non-critical issues, 
 add them using the `Warn()` method.
@@ -374,13 +374,13 @@ everything it needs for a clean run.
 You may want to inject a validator into Cfg-NET instead
 of coding it up in one of the above methods.
 
-_More on this later..._
+*More on this later...*
 
 Finishing Up The Scenario
 -------------------------
 
-After you unravel the mystery of saving _x_ complete
-backup sets, for _y_ servers, and _z_ databases, deploy
+After you unravel the mystery of saving *x* complete
+backup sets, for *y* servers, and *z* databases, deploy
 your program with some method of allowing the user to
 update and choose the configuration he/she wants to use.
 
@@ -412,9 +412,9 @@ default parsers.  There is a constructor on `CfgNode` that allows you to inject
 * Windows Phone Silverlight 8
 
 ###Credits
-*  a modified version of _NanoXmlParser_ found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
+*  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
 *  a modified version of `fastJSON` found [here](http://www.codeproject.com/Articles/159450/fastJSON)
-*  .NET Source of WebUtility.HtmlDecode found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
+*  .NET Source of `WebUtility.HtmlDecode` found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
 
 ###Further Reading
 
