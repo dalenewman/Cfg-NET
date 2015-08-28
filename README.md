@@ -42,18 +42,20 @@ First, install Cfg-NET with Nuget:
 
 Then, in your code, *model* your program:
 
-<pre class="prettyprint lang-csharp" lang="csharp">using System.Collections.Generic;
-using Cfg.Net;
-
-public class DatabaseAdmin : CfgNode {
-    [Cfg(required = true)]
-    public List&lt;Server&gt; Servers { get; set; }
-}
-
-public class Server : CfgNode {
-    [Cfg(required = true, unique = true)]
-    public string Name { get; set; }
-}</pre>
+```csharp
+    using System.Collections.Generic;
+    using Cfg.Net;
+    
+    public class DatabaseAdmin : CfgNode {
+        [Cfg(required = true)]
+        public List&lt;Server&gt; Servers { get; set; }
+    }
+    
+    public class Server : CfgNode {
+        [Cfg(required = true, unique = true)]
+        public string Name { get; set; }
+    }
+```
 
 These two classes represent the DBA and his/her servers.
 
