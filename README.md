@@ -43,15 +43,15 @@ First, install Cfg-NET with Nuget:
 Then, in your code, _model_ your program:
 
 <pre class="prettyprint" lang="cs"><code>using System.Collections.Generic;
-<strong>using Cfg.Net;</strong>
+using Cfg.Net;
 
-public class DatabaseAdmin : <strong>CfgNode</strong> {
-    <strong>[Cfg(required = true)]</strong>
+public class DatabaseAdmin : CfgNode {
+    [Cfg(required = true)]
     public List&lt;Server&gt; Servers { get; set; }
 }
 
-public class Server : <strong>CfgNode</strong> {
-    <strong>[Cfg(required = true, unique = true)]</strong>
+public class Server : CfgNode {
+    [Cfg(required = true, unique = true)]
     public string Name { get; set; }
 }</code></pre>
 
