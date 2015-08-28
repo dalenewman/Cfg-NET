@@ -42,7 +42,7 @@ First, install Cfg-NET with Nuget:
 
 Then, in your code, *model* your program:
 
-<pre class="prettyprint lang-csharp" lang="csharp"><code>using System.Collections.Generic;
+<pre class="prettyprint lang-csharp" lang="csharp">using System.Collections.Generic;
 using Cfg.Net;
 
 public class DatabaseAdmin : CfgNode {
@@ -53,7 +53,7 @@ public class DatabaseAdmin : CfgNode {
 public class Server : CfgNode {
     [Cfg(required = true, unique = true)]
     public string Name { get; set; }
-}</code></pre>
+}</pre>
 
 These two classes represent the DBA and his/her servers.
 
