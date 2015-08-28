@@ -24,55 +24,62 @@ Released under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 Getting Started
 ---------------
 
-Your database adminstrator (DBA) is unhappy with a
-backup wizard's ability to manage previous backup sets.
-The backups use too much disk space. Alarms are triggered,
-saying "**Backup drive has less than 10% free space!**"
+Your database adminstrator (DBA) is unhappy.  Every few days he 
+gets text alerts saying "**Gandalf's E drive has less than 10% free space!**"
 
-He wants a program that manages database backups by
-keeping **4** complete sets on disk, and deleting the rest.
+He wants a program to make this text go away.  In other words, he 
+needs a program to move database backups from E drive to *another place*.
 
-For each *database*, he provides you with the *server name*, and the
-associated *backup folder*.
+He provides you this information:
 
-### Create a Cfg-NET Model
+- a list of servers
+- a list of databases (for each server)
+- the local path where backups are kept (for each server)
+- how many backup sets he wants to keep on the local drive
+
+With this, you can start modeling your configuration.  We'll 
+start with modeling *him*, and his *servers*.
+
+### Create a Model
 
 First, install Cfg-NET with Nuget:
 
 `PM> Install-Package Cfg-NET`
 
-Then, in your code, *model* your program:
+Then write:
 
 ```csharp
 using System.Collections.Generic;
 using Cfg.Net;
 
+/* him */
 public class DatabaseAdmin : CfgNode {
-[Cfg(required = true)]
-public List<Server> Servers { get; set; }
+    [Cfg(required = true)]
+    public List<Server> Servers { get; set; }
 }
 
+/* his servers */
 public class Server : CfgNode {
-[Cfg(required = true, unique = true)]
-public string Name { get; set; }
+    [Cfg(required = true, unique = true)]
+    public string Name { get; set; }
 }
 ```
 
-These two classes represent the DBA and his/her servers.
+Both classes:
 
-- They inherit from `CfgNode`.
-- Their properties are decorated with the `Cfg` attribute.
+- Inherit from `CfgNode`.
+- Have properties decorated with the `Cfg` attribute.
 
-### CfgNode Class
-The `CfgNode` class loads your configuration according to
-your instructions defined in the `Cfg` attributes.
+#### CfgNode Class
+The `CfgNode` class loads your configuration according to instructions defined in the `Cfg` attributes.
 
-### Configuration
+### Write a Configuration
 
 The DBA told you the servers are named *Gandalf*,
 and *Saruman*. So, depending on your preference,
 write your configuration in **JSON** or **XML**:
 
+#### XML
 ```xml
 <cfg>
     <servers>
@@ -81,6 +88,8 @@ write your configuration in **JSON** or **XML**:
     </servers>
 </cfg>
 ```
+
+#### JSON
 
 ```json
 {
@@ -93,19 +102,38 @@ write your configuration in **JSON** or **XML**:
 
 Save this to *DatabaseAdmin.xml* or *DatabaseAdmin.json*.
 
-### Cfg Attribute
+#### Cfg Attribute
 
-Decorate your properties with the `Cfg` attribute. `Cfg` adds
-validation and modification instructions to the property.
+The `Cfg` attribute adds validation and modification 
+instructions to the property.  Currently, it has these 
+built-in options:
 
-For example, in the model above, the `Cfg` attribute indicates that
-each server has a **required**, and **unique** name.
+* `value`, as in _default_ value
+* `toLower` or `toUpper`
+* `shorthand`, to be explained later...
+* `required`
+* `unique`
+* `domain` with `domainDelimiter` and `ignoreCase` options
+* `minLength` and/or `maxLength`
+* `minValue` and/or `maxValue`
+* `validators` with `validatorDelimiter` option
+
+In our model, the `Server` class has a `Name` property that is `required`, and must be `unique`.
 
 ### The Order of Things
 
-1. `value` sets a default value
-1. `toLower` or `toUpper` modify the value (optional)
-1. `shorthand` checks for [shorthand translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
+For each node in your configuration, the `Cfg` attribute, the .NET `PropertyInfo`, 
+the `get`, and the `set` is loaded (and cached). With this metadata, 
+an instance is created. Each property in the instance is defaulted to `value` and 
+each collection is initialized.
+
+Per the metadata, Cfg-Net tries to read each attribute. If a 
+value is found, it is `set`. Then, `get` is invoked.
+
+Then:
+
+1. `toLower` or `toUpper` may modify the value
+1. `shorthand` may check for [translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
 1. `get` is invoked ([the property's getter](#InYourProperty))
 1. `required` confirms a value exists
 1. `unique` confirms the value is unique in it's collection
@@ -125,7 +153,7 @@ Load the file into your model like this:
 
 ```csharp
 var dba = new DatabaseAdmin();
-dba.Load(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
+dba.Load(File.ReadAllText("DatabaseAdmin.xml"));
 ```
 
 I suggest adding a constructor to the `DatabaseAdmin` class:
@@ -143,7 +171,7 @@ public class DatabaseAdmin : CfgNode {
 
 Now loading it is one line:
 
-```
+```csharp
 var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
 ```
 
@@ -224,7 +252,7 @@ public class Server : CfgNode {
     public List<Database>; Databases { get; set; }
 }
 
-<strong>public class Database : CfgNode {
+public class Database : CfgNode {
     [Cfg(required = true, unique = true)]
     public string Name { get; set; }
     
@@ -425,7 +453,7 @@ databases in *DatabaseAdmin.xml*.  Explain that
 he/she can create as many configuration files
 as necessary.
 
-When the DBA changes his/her mind about keeping **4**
+When the DBA changes her mind about keeping **4**
 backup sets, point out the `backups-to-keep` attribute.
 
 About the Code
