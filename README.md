@@ -42,7 +42,7 @@ First, install Cfg-NET with Nuget:
 
 Then, in your code, _model_ your program:
 
-<pre class="prettyprint" lang="cs"><code>using System.Collections.Generic;
+<pre class="prettyprint lang-cs" lang="cs"><code>using System.Collections.Generic;
 using Cfg.Net;
 
 public class DatabaseAdmin : CfgNode {
@@ -57,8 +57,8 @@ public class Server : CfgNode {
 
 These two classes represent the DBA and his/her servers.
 
-- The classes inherit from `CfgNode`.
-- The properties are decorated with the `Cfg` attribute.
+- They inherit from `CfgNode`.
+- Their properties are decorated with the `Cfg` attribute.
 
 ### CfgNode Class
 The `CfgNode` class loads your configuration according to 
@@ -122,7 +122,7 @@ dba.Load(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
 
 I suggest adding a constructor to the `DatabaseAdmin` class:
 
-<pre class="prettyprint" lang="cs"><code>public class DatabaseAdmin : CfgNode {
+<pre class="prettyprint lang-cs" lang="cs"><code>public class DatabaseAdmin : CfgNode {
     <strong>public Cfg(string cfg) {
         this.Load(cfg);
     }</strong>
@@ -133,7 +133,7 @@ I suggest adding a constructor to the `DatabaseAdmin` class:
 
 Now loading it is one line:
 
-<pre class="prettyprint" lang="cs"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));</code></pre>
+<pre class="prettyprint lang-cs" lang="cs"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));</code></pre>
 
 ### Check the Configuration
 
@@ -143,7 +143,7 @@ _all_ the errors and/or warnings. So, after loading,
 you should always check it for any issues using
 the `Errors()` and `Warnings()` methods:
 
-<pre class="prettyprint" lang="cs"><code>//LOAD CONFIGURATION
+<pre class="prettyprint lang-cs" lang="cs"><code>//LOAD CONFIGURATION
 var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
 
 /* CHECK FOR WARNINGS */
@@ -191,7 +191,7 @@ we know people change their minds, we're going to save
 ourself some (future) time by adding
 an optional `backups-to-keep` attribute.
 
-<pre class="prettyprint" lang="cs"><code>using System.Collections.Generic;
+<pre class="prettyprint lang-cs" lang="cs"><code>using System.Collections.Generic;
 using Cfg.Net;
 
 public class DatabaseAdmin : CfgNode {
