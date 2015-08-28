@@ -42,7 +42,6 @@ First, install Cfg-NET with Nuget:
 
 Then, in your code, *model* your program:
 
-```csharp
     using System.Collections.Generic;
     using Cfg.Net;
     
@@ -55,7 +54,6 @@ Then, in your code, *model* your program:
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
     }
-```
 
 These two classes represent the DBA and his/her servers.
 
