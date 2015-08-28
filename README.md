@@ -2,21 +2,22 @@ Cfg-NET
 =======
 
 Cfg-NET is a JSON or XML based [open source](https://github.com/dalenewman/Cfg.Net) .NET
-configuration handler. It is an alternative for custom sections
-in _app_ or _web.config_. It is licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
+configuration handler. It is an alternative to adding 
+custom sections in *app* or *web*.config. 
+Released under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
 #### Good Configurations:
 
-* remove the need to re-compile
 * may be edited by end-users (in [JSON](http://en.wikipedia.org/wiki/JSON) or [XML](http://en.wikipedia.org/wiki/XML))
+* remove the need to re-compile
 * co-exist with other configurations
 
 #### Good Configuration Handlers:
 
-* validate and report issues
+* are easy to use
+* validate and report errors and warnings
 * allow for custom validation and modification
 * protect the program from `null`, by setting defaults
-* are easy to use
 * are available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
 * are portable
 
@@ -42,18 +43,20 @@ First, install Cfg-NET with Nuget:
 
 Then, in your code, *model* your program:
 
-    using System.Collections.Generic;
-    using Cfg.Net;
-    
-    public class DatabaseAdmin : CfgNode {
-        [Cfg(required = true)]
-        public List&lt;Server&gt; Servers { get; set; }
-    }
-    
-    public class Server : CfgNode {
-        [Cfg(required = true, unique = true)]
-        public string Name { get; set; }
-    }
+```csharp
+using System.Collections.Generic;
+using Cfg.Net;
+
+public class DatabaseAdmin : CfgNode {
+[Cfg(required = true)]
+public List<Server> Servers { get; set; }
+}
+
+public class Server : CfgNode {
+[Cfg(required = true, unique = true)]
+public string Name { get; set; }
+}
+```
 
 These two classes represent the DBA and his/her servers.
 
@@ -61,7 +64,7 @@ These two classes represent the DBA and his/her servers.
 - Their properties are decorated with the `Cfg` attribute.
 
 ### CfgNode Class
-The `CfgNode` class loads your configuration according to 
+The `CfgNode` class loads your configuration according to
 your instructions defined in the `Cfg` attributes.
 
 ### Configuration
@@ -70,19 +73,23 @@ The DBA told you the servers are named *Gandalf*,
 and *Saruman*. So, depending on your preference,
 write your configuration in **JSON** or **XML**:
 
-<pre class="prettyprint" lang="xml">&lt;cfg&gt;
-    &lt;servers&gt;
-        &lt;add name=&quot;Gandalf&quot; /&gt;
-        &lt;add name=&quot;Saruman&quot; /&gt;
-    &lt;/servers&gt;
-&lt;/cfg&gt;</pre>
+```xml
+<cfg>
+    <servers>
+        <add name="Gandalf" />
+        <add name="Saruman" />
+    </servers>
+</cfg>
+```
 
-<pre class="prettyprint" lang="js">{
-    &quot;servers&quot;: [
-        { &quot;name&quot;:&quot;Gandalf&quot; }
-        { &quot;name&quot;:&quot;Saruman&quot; }
+```json
+{
+    "servers": [
+        { "name":"Gandalf" },
+        { "name":"Saruman" }
     ]
-}</pre>
+}
+```
 
 Save this to *DatabaseAdmin.xml* or *DatabaseAdmin.json*.
 
@@ -116,47 +123,53 @@ each server has a **required**, and **unique** name.
 
 Load the file into your model like this:
 
-<pre class="prettyprint" lang="csharp"><code>var dba = new DatabaseAdmin();
+```csharp
+var dba = new DatabaseAdmin();
 dba.Load(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
-</code></pre>
+```
 
 I suggest adding a constructor to the `DatabaseAdmin` class:
 
-<pre class="prettyprint lang-csharp" lang="csharp"><code>public class DatabaseAdmin : CfgNode {
-    <strong>public Cfg(string cfg) {
+```csharp
+public class DatabaseAdmin : CfgNode {
+    public Cfg(string cfg) {
         this.Load(cfg);
-    }</strong>
+    }
     
     [Cfg(required = true)]
-    public List&lt;Server&gt; Servers { get; set; }
-}</code></pre>
+    public List<Server> Servers { get; set; }
+}
+```
 
 Now loading it is one line:
 
-<pre class="prettyprint lang-csharp" lang="csharp"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));</code></pre>
+```
+var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
+```
 
 ### Check the Configuration
 
-When you load a configuration, Cfg-NET doesn't throw exceptions 
+When you load a configuration, Cfg-NET doesn't throw exceptions
 (on purpose). Instead, it attempts to collect
 *all* the errors and/or warnings. So, after loading,
 you should always check it for any issues using
 the `Errors()` and `Warnings()` methods:
 
-<pre class="prettyprint lang-csharp" lang="csharp"><code>//LOAD CONFIGURATION
-var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
+```csharp
+//LOAD CONFIGURATION
+var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
 
 /* CHECK FOR WARNINGS */
-Assert.AreEqual(0, dba.<strong>Warnings()</strong>.Length);
+Assert.AreEqual(0, dba.Warnings().Length);
 
 /* CHECK FOR ERRORS */
-Assert.AreEqual(0, dba.<strong>Errors()</strong>.Length);
+Assert.AreEqual(0, dba.Errors().Length);
 
 /* EVERYTHING IS AWESOME!!! */
-</code></pre>
+```
 
-By convention, an error means the configuration is invalid. 
-A warning is something you ought to address, but the program 
+By convention, an error means the configuration is invalid.
+A warning is something you ought to address, but the program
 should still work.
 
 By collecting multiple errors and warnings,
@@ -166,17 +179,17 @@ The messages produced are usually
 quite helpful. Here are some examples:
 
 Put another server named *Gandalf* in there, and it says:
-<pre class="prettyprint" lang="bash">You set a duplicate 'name' value 'Gandalf' in 'servers'.</pre>
+
+`You set a duplicate 'name' value 'Gandalf' in 'servers'.`
 
 Add a *nickName* instead of a *name* in servers, and it says:
-<pre class="prettyprint" lang="bash">
-A 'servers' entry contains an invalid 'nickName' attribute.  Valid attributes are: name.
-A 'servers' entry is missing a 'name' attribute.
-</pre>
+
+`A 'servers' entry contains an invalid 'nickName' attribute.  Valid attributes are: name.`
+
+`A 'servers' entry is missing a 'name' attribute.`
 
 If Cfg-NET doesn't report any issues, you can
-be sure your configuration conforms
-to your model.
+be sure your configuration conforms to your model.
 
 ### Back to the Scenario
 
@@ -191,24 +204,24 @@ we know people change their minds, we're going to save
 ourself some (future) time by adding
 an optional `backups-to-keep` attribute.
 
-<pre class="prettyprint lang-csharp" lang="csharp"><code>using System.Collections.Generic;
+```csharp
+using System.Collections.Generic;
 using Cfg.Net;
 
 public class DatabaseAdmin : CfgNode {
     public Cfg(string xml) {
         this.Load(xml);
     }
-
     [Cfg(required = true)]
-    public List&lt;Server&gt; Servers { get; set; }
+    public List<Server> Servers { get; set; }
 }
 
 public class Server : CfgNode {
     [Cfg(required = true, unique = true)]
     public string Name { get; set; }
     
-    <strong>[Cfg(required = true)]
-    public List&lt;Database&gt; Databases { get; set; }</strong>
+    [Cfg(required = true)
+    public List<Database>; Databases { get; set; }
 }
 
 <strong>public class Database : CfgNode {
@@ -220,44 +233,47 @@ public class Server : CfgNode {
     
     [Cfg(value = 4)]
     public int BackupsToKeep { get; set; }
-}</strong>
-</code></pre>
+}
+```
 
-Now let's update *DatabaseAdmin.xml*:
+Now update *DatabaseAdmin.xml*:
 
-<pre class="prettyprint" lang="xml">&lt;cfg&gt;
-    &lt;servers&gt;
-        &lt;add name=&quot;Gandalf&quot;&gt;
-            &lt;databases&gt;
-                &lt;add name=&quot;master&quot;
-                     backup-folder=&quot;\\san\sql-backups\gandalf\master&quot; /&gt;
-            &lt;/databases&gt;
-        &lt;/add&gt;
-        &lt;add name=&quot;Saruman&quot;&gt;
-            &lt;databases&gt;
-                &lt;add name=&quot;master&quot;
-                     backup-folder=&quot;\\san\sql-backups\saruman\master&quot; /&gt;
-                &lt;add name=&quot;model&quot;
-                     backup-folder=&quot;\\san\sql-backups\saruman\model&quot; /&gt;
-            &lt;/databases&gt;
-        &lt;/add&gt;
-    &lt;/servers&gt;
-&lt;/cfg&gt;</pre>
+```xml
+<cfg>
+    <servers>
+        <add name="Gandalf">
+            <databases>
+                <add name="master"
+                     backup-folder="\\san\sql-backups\gandalf\master" />
+            </databases>
+        </add>
+        <add name="Saruman">
+            <databases>
+                <add name="master"
+                     backup-folder="\\san\sql-backups\saruman\master" />
+                <add name="model"
+                     backup-folder="\\san\sql-backups\saruman\model" />
+            </databases>
+        </add>
+    </servers>
+</cfg>
+```
 
 Now we have a collection of servers, and each
 server holds a collection of databases.
 Our program can easily loop through
 the servers and databases like this:
 
-<pre class="prettyprint" lang="csharp"><code>var dba = new DatabaseAdmin(File.ReadAllText(&quot;DatabaseAdmin.xml&quot;));
+```csharp
+var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
     
 /* CHECK FOR ERRORS */
-
 foreach (var server in cfg.Servers) {
     foreach (var database in server.Databases) {
         /* use server.Name, database.Name, and database.BackupFolder... */  
     }
-}</code></pre>
+}
+```
 
 If you set default values, you never have to worry
 about a property being `null`.  Moreover, you never
@@ -282,11 +298,17 @@ If it's not enough, you have 5 ways to extend:
 ### In Your Property
 
 You don't _have_ to use auto-properties.  Instead of this:
-<pre class="prettyprint" lang="csharp"><code>[Cfg(value = &quot;file&quot;, domain = &quot;file,folder,other&quot;, ignoreCase = true)]
-public string Provider { get; set; }</code></pre>
+
+```csharp
+[Cfg(value = "file", domain = "file,folder,other", ignoreCase = true)]
+public string Provider { get; set; }
+```
+
 You can use a property with a backing field:
-<pre class="prettyprint" lang="csharp"><code>private string _provider;
-/* snip */
+
+```csharp
+private string _provider = "sqlserver";
+
 [Cfg]
 public string Provider {
     get { return _provider ?? "sqlserver"; }
@@ -297,9 +319,10 @@ public string Provider {
             _provider = value; 
         }
     }
-}</code></pre>
+}
+```
 
-Your property's `get` and `set` are invoked during the loading, modifying, 
+Your property's `get` and `set` are invoked during the loading, modifying,
 and validation process.  So any code you have in here will be executed.
 
 <a name="PreValidate"></a>
@@ -309,11 +332,14 @@ and validation process.  So any code you have in here will be executed.
 If you want to modify the configuration before validation,
 you may override `PreValidate()` like this:
 
-<pre class="prettyprint" lang="csharp"><code>protected override void PreValidate() {
+```csharp
+protected override void PreValidate() {
     if (Provider == "Bad Words") {
         Provider = "Good Words. Ha!";
+        Warn("I'm warning you man. You know what you did.");
     }
-}</code></pre>
+}
+```
 
 `PreValidate()` runs *after* the properties are set,
 but *before* any validation runs.
@@ -322,10 +348,11 @@ but *before* any validation runs.
 
 ### Overriding Validate()
 
-To perform complex validation or validation involving more than 
+To perform complex validation or validation involving more than
 one property, override the `Validate()` method like this:
 
-<pre class="prettyprint" lang="csharp"><code>public class Connection : CfgNode {
+```csharp
+public class Connection : CfgNode {
     [Cfg(required = true, domain = "file,folder,other")]
     public string Provider { get; set; }
     
@@ -335,21 +362,22 @@ one property, override the `Validate()` method like this:
     [Cfg]
     public string Folder { get; set; }
     
-    <strong>/* CUSTOM VALIDATION */
+    /* CUSTOM VALIDATION */
     protected override void Validate() {
-        if (Provider == "file" &amp;&amp; string.IsNullOrEmpty(File)) {
+        if (Provider == "file" && string.IsNullOrEmpty(File)) {
             Error("file provider needs file attribute.");
-        } else if (Provider == "folder" &amp;&amp; string.IsNullOrEmpty(Folder)) {
+        } else if (Provider == "folder" && string.IsNullOrEmpty(Folder)) {
             Error("folder provider needs folder attribute.");
         }
-    }</strong>
-}</code></pre>
+    }
+}
+```
 
 The `Validate()` method has access
 to the `Provider`, `File`, and `Folder` properties.
 It runs *after* they're set and *after* `PreValidate()`.
 If you find that the configuration is invalid, add errors using
-the `Error()` method.  If you find non-critical issues, 
+the `Error()` method.  If you find non-critical issues,
 add them using the `Warn()` method.
 
 <a name="PostValidate"></a>
@@ -361,11 +389,13 @@ After `Validate()` runs.  You can check for `Errors()` and/or
 the configuration further; making sure your app has
 everything it needs for a clean run.
 
-<pre class="prettyprint" lang="csharp"><code>protected override void PostValidate() {
+```csharp
+protected override void PostValidate() {
     if (Errors().Length == 0) {
         MakeSomeOtherPreparations();
     }
-}</code></pre>
+}
+```
 
 <a name="InjectingValidators"></a>
 
@@ -388,7 +418,7 @@ For example, in a Console application (e.g. *Dba.exe*), allow
 the configuration file to be passed in as an argument,
 like this:
 
-<pre class="prettyprint" lang="bash">C:\> Dba.exe DatabaseAdmin.xml</pre>
+`C:\> Dba.exe DatabaseAdmin.xml`
 
 Show the DBA how to add or remove servers and
 databases in *DatabaseAdmin.xml*.  Explain that
@@ -402,7 +432,7 @@ About the Code
 --------------
 
 Cfg.Net doesn't have any direct dependencies.  It has built-in `XML` and `JSON`
-default parsers.  There is a constructor on `CfgNode` that allows you to inject 
+default parsers.  There is a constructor on `CfgNode` that allows you to inject
 (or compose) some of it's behavior. Cfg-NET is a portable class library targeting:
 
 * .NET 4
