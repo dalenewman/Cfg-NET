@@ -55,12 +55,10 @@ public class Server : CfgNode {
     public string Name { get; set; }
 }</code></pre>
 
-These two classes represent the DBA and his/her servers. Combined, 
-they are a Cfg-NET model.
+These two classes represent the DBA and his/her servers.
 
-
-1.  The classes inherit from `CfgNode`.
-1.  The properties are decorated with the `Cfg` attribute.
+- The classes inherit from `CfgNode`.
+- The properties are decorated with the `Cfg` attribute.
 
 ### CfgNode Class
 The `CfgNode` class loads your configuration according to 
