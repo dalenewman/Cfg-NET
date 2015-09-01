@@ -160,7 +160,7 @@ I suggest adding a constructor to the `DatabaseAdmin` class:
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
-    public Cfg(string cfg) {
+    public DatabaseAdmin(string cfg) {
         this.Load(cfg);
     }
     
@@ -237,7 +237,7 @@ using System.Collections.Generic;
 using Cfg.Net;
 
 public class DatabaseAdmin : CfgNode {
-    public Cfg(string xml) {
+    public DatabaseAdmin(string xml) {
         this.Load(xml);
     }
     [Cfg(required = true)]
@@ -432,7 +432,7 @@ protected override void PostValidate() {
 You may want to inject a validator into Cfg-NET instead
 of coding it up in one of the above methods.
 
-*More on this later...*
+*More on this later... see [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
 
 Finishing Up The Scenario
 -------------------------
@@ -478,3 +478,4 @@ default parsers.  There is a constructor on `CfgNode` that allows you to inject
 
 * [Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
 * [Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
+* [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
