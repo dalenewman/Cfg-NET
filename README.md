@@ -134,7 +134,6 @@ Then:
 
 1. `toLower` or `toUpper` may modify the value
 1. `shorthand` may check for [translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-1. `get` is invoked ([the property's getter](#InYourProperty))
 1. `required` confirms a value exists
 1. `unique` confirms the value is unique in it's collection
 1. [`PreValidate()`](#PreValidate) is executed
@@ -478,4 +477,7 @@ default parsers.  There is a constructor on `CfgNode` that allows you to inject
 
 * [Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
 * [Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
+<<<<<<< HEAD
 * [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
+=======
+>>>>>>> origin/master
