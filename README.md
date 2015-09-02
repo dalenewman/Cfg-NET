@@ -477,7 +477,4 @@ default parsers.  There is a constructor on `CfgNode` that allows you to inject
 
 * [Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
 * [Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-<<<<<<< HEAD
 * [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
-=======
->>>>>>> origin/master
