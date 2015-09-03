@@ -118,7 +118,7 @@ public class DatabaseAdmin : CfgNode {
 var dba = new DatabaseAdmin("DatabaseAdmin.xml");
 ```
 
-### An IReader Problem
+### THAT CODE HAS A PROBLEM!
 
 You may have noticed I instantiated a reader inside my `DatabaseAdmin` 
 class. This tightly couples the reader to my class, which is bad. 
@@ -175,18 +175,16 @@ var dba = new DatabaseAdmin("DatabaseAdmin.xml", reader);
 ```
 
 The reader is instantiated with three dependencies, and then 
-passed into `DatabaseAdmin`.  So far, the examples have 
-only demonstrated switching out an `IReader`.  The next 
-example will use all possible dependencies.
+passed into `DatabaseAdmin`.  So far, the examples 
+only demonstrate switching out an `IReader`.  The next 
+example switches out everything.
 
 ### An IReader, an IParser, an IValidator, and an ILogger
 
 To see dependency injection in all it's glory, it's 
-worthwhile to take this one step further and demonstrate 
-implementing everything for `CfgNode`.  The `DatabaseAdmin` 
-constructor must be changed to accomadate all the parameters 
-and pass them to the base constructor. Then we'll 
-need to *new up* all the dependencies and pass them in.
+worthwhile implement everything for `CfgNode`. This example 
+modifies `DatabaseAdmin` to accomadate the dependencies, 
+creates them, and creates a fully-loaded `DatabaseAdmin`.
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
@@ -223,20 +221,21 @@ The example above uses:
 * a custom javascript validator implemented with [Jint](https://github.com/sebastienros/jint)
 * a trace logger implementation
 
-Although it took a fair amount of setup, this gives your configuration handler 
-a much more flexible reader, a faster XML parser, a javascript parser for 
-any properties you decorate with `Cfg[validators="js"]`, and finally; 
+Although it took a fair amount of setup, this provides a `DatabaseAdmin` with 
+a flexible reader, a faster parser, a javascript validator for 
+properties decorated with `Cfg[validators="js"]`, and finally; 
 some fancy tracing output.
 
-Taking an approach where you can inject dependencies has allowed 
-for us to create this *Super-Charged* version of the configuration 
-handler.  And, if you want to clean up all this constructor injection, 
-you may use an Inversion of Control *container* like Autofac.
+Injecting dependencies allows for a *Super-Charged* version of 
+the configuration handler.
 
 ### Autofac
 
-Instead of creating everything manually, we can use an `Autofac` module 
-to encapsulate our configuration handler setup:
+To tidy up dependency injection, use an Inversion of Control 
+container like Autofac.
+
+Instead of creating everything manually, use an Autofac `Module` 
+to encapsulate the setup choices:
 
 ```csharp
 public class ConfigurationModule : Module {
@@ -257,18 +256,20 @@ public class ConfigurationModule : Module {
         /* when I ask for an IValidator named "js", give me a JintParser */
         builder.RegisterType<JintParser>().Named<IValidator>("js");
 
+        /* register dependencies for DefaultReader */
         builder.RegisterType<SourceDetector>().As<ISourceDetector>();
         builder.RegisterType<FileReader>().Named<IReader>("file");
         builder.RegisterType<WebReader>().Named<IReader>("web");
         
-        /* this Register method provides Autofac's context (ctx), 
-           where we can resolve previously registered components */
+        /* user Register method with  Autofac's context (ctx), 
+           to resolve previously registered components */
         builder.Register<IReader>((ctx) => new DefaultReader(
             ctx.Resolve<ISourceDetector>(),
             ctx.ResolveNamed<IReader>("file"),
             ctx.ResolveNamed<IReader>("web")
         ));
 
+        /* using previously registered components, register the DatabaseAdmin */
         builder.Register((ctx) => new DatabaseAdmin(
             _resource,
             ctx.Resolve<IReader>(),
@@ -281,8 +282,8 @@ public class ConfigurationModule : Module {
 }
 ```
 
-The module (above) becomes our single place to *compose* 
-Cfg-NET.  We use it like this:
+The module (above) becomes a single place to *compose* 
+Cfg-NET.  Use it like this:
 
 ```csharp
 /* in composition root*/
@@ -301,7 +302,7 @@ var dba = container.Resolve<DatabaseAdmin>();
 container.Dispose();
 ```
 
-The convention is to **register**, **resolve**, and then **release** your 
+The convention is to **register**, **resolve**, and **release** your 
 dependencies.
 
 #### Further Reader:
