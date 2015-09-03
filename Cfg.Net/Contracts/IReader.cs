@@ -17,7 +17,7 @@
 
 namespace Cfg.Net.Contracts {
 
-    public interface IReader {
+    public interface IReader : IDependency {
         ReaderResult Read(string resource, ILogger logger);
     }
 }

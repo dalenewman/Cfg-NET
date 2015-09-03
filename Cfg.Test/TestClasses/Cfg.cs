@@ -9,7 +9,7 @@ namespace Cfg.Test.TestClasses {
         [Cfg(required = true)]
         public List<CfgServer> Servers { get; set; }
 
-        public Cfg(string cfg, IParser parser):base(parser:parser) {
+        public Cfg(string cfg, IParser parser):base(parser) {
             this.Load(cfg);
         }
 

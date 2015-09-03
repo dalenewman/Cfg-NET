@@ -38,10 +38,10 @@ namespace Cfg.Test {
     }
 
     public sealed class TestDifferentJsonParser : CfgNode {
-        [Cfg()]
+        [Cfg]
         public List<TestDifferentJsonParserParameter> Parameters { get; set; }
 
-        public TestDifferentJsonParser(string xml, IParser parser):base(parser:parser) {
+        public TestDifferentJsonParser(string xml, IDependency parser):base(parser) {
             Load(xml);
         }
     }

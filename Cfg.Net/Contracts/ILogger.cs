@@ -14,22 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-namespace Cfg.Net.Contracts
-{
-    public interface ILogger
-    {
+namespace Cfg.Net.Contracts {
+    public interface ILogger : IDependency {
         void Warn(string message, params object[] args);
         void Error(string message, params object[] args);
     }
 
-    internal class NullLogger : ILogger
-    {
-        public void Warn(string message, params object[] args)
-        {
+    internal class NullLogger : ILogger {
+        public void Warn(string message, params object[] args) {
         }
 
-        public void Error(string message, params object[] args)
-        {
+        public void Error(string message, params object[] args) {
         }
     }
 }

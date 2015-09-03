@@ -14,10 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-namespace Cfg.Net.Contracts
-{
-    public interface IParser
-    {
+namespace Cfg.Net.Contracts {
+    public interface IParser : IDependency {
         INode Parse(string cfg);
     }
 }

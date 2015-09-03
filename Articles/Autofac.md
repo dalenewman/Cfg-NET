@@ -1,13 +1,18 @@
 Dependency Injection with Autofac
 ==================================
 
-The `CfgNode` class has two constructors. 
-One has parameters, the other doesn't.
+The `CfgNode` class constructor accepts an optional array 
+of dependencies.
 
-### Cfg-NET Default
+### Cfg-NET by Default
 
-If you want to use Cfg-NET with it's default, built-in capabilities, 
-use the parameter-less constructor on your top-level model like this:
+If you want to use Cfg-NET's default, built-in 
+capabilities, don't pass parameters into the 
+`CfgNode` constructor.
+
+As seen in the [README](https://github.com/dalenewman/Cfg-NET/blob/master/README.md), 
+the `DatabaseAdmin` top-level class doesn't use the 
+base constructor all:
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
@@ -23,43 +28,45 @@ public class DatabaseAdmin : CfgNode {
 var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
 ```
 
-Note that the `DatabaseAdmin` constructor 
-cooresponds to the `CfgNode` parameter-less constructor.  This 
-constructor makes a few assumptions:
+This means you're okay with the default bahavior, and it 
+lets `CfgNode` make a few assumptions:
 
 1. You're passing in a valid `XML` or `JSON` string into the `Load` method.
-2. If `XML`, your string is parsed with the built-in `NanoXmlParser`
-3. If `JSON`, your string is parsed with the built-in `FastJsonParser`
+ - `XML` is parsed with `NanoXmlParser`
+ - `JSON` is parsed with `FastJsonParser`
 4. You're not using any custom validators
-5. You're not using any logging (other than what's stored internally)
+5. You're not requesting any logging
 
-In many cases, this is fine.  But, if you want to pass in anything other 
-than `XML` or `JSON`, use a different parser, add custom validation, or add 
-logging, you'll have to use the other constructor.
+In many cases, this is fine.  But, if you want to:
 
-### Cfg-NET Defined
+* pass in anything other than `XML` or `JSON`
+* use a different parser
+* add custom validation
+* or have Cfg-NET use your logger
 
-Currently, the customizable constructor has this signature:
+If you want to do any of the above, you'll have to 
+inject dependencies.
+
+### Cfg-NET by Injection
+
+
+The `CfgNode` constructor:
 
 ```csharp
-public abstract class CfgNode {    /* snip */
-    protected CfgNode(
-        IReader reader = null, 
-        IParser parser = null, 
-        IEnumerable<KeyValuePair<string, IValidator>> validators = null, 
-        ILogger logger = null
-    ) {
-        /* snip */
+public abstract class CfgNode {
+    /* snip */
+    protected CfgNode(params IDependency[] dependencies) { 
+        /* snip */ 
     }
 }
 ```
 
-These interfaces are exposed:
+Currently, an `IDependency` may be:
 
-* an [`IReader`](#IReader) - for passing in something other than `XML` or `JSON`.
-* an [`IParser`](#IParser) - for a different parser
-* a collection of [`IValidator`](#IValidators) - for custom validators
-* an [`ILogger`](#ILogger) - for additional logging
+* an `IReader` - for passing in something other than `XML` or `JSON`.
+* an `IParser` - for a different parser
+* an `IValidators` - for custom validators
+* an `ILogger` - for additional logging
 
 ### An IReader
 
@@ -79,12 +86,12 @@ public interface IReader {
 }
 ```
 
-The `Read` method provides us with a *resource* and 
-a *logger*. In our case, the resource is a file name.  The logger is 
-used to record *Errors* or *Warnings* you encounter. 
-Here is a *happy path* implementation:
+The `Read` method provides a *resource* and 
+a *logger*. In our case, the resource is a file name. 
+The logger is used to record *Errors* or *Warnings* 
+you encounter. Here is a *happy path* implementation:
 
- ```csharp
+```csharp
 public class FileReader : IReader {
     public ReaderResult Read(string resource, ILogger logger) {
         return new ReaderResult { 
@@ -99,7 +106,7 @@ constructor like this:
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
-    public DatabaseAdmin(string cfg):base(reader:new FileReader()) {
+    public DatabaseAdmin(string cfg):base(new FileReader()) {
         this.Load(cfg);
     }
     
@@ -115,15 +122,15 @@ var dba = new DatabaseAdmin("DatabaseAdmin.xml");
 
 You may have noticed I instantiated a reader inside my `DatabaseAdmin` 
 class. This tightly couples the reader to my class, which is bad. 
-When you're practicing dependency injection, you never want to *new up* 
-your dependencies internally. You should only instantiate dependencies 
-in a single place; which is referred to as your *composition root*.
+When you practice dependency injection, you never want to *new up* 
+dependencies internally. You instantiate dependencies 
+in one place; which is referred to as a *composition root*.
 
 So, let's add `IReader` to the `DatabaseAdmin` constructor instead:
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
-    public DatabaseAdmin(string cfg, IReader reader):base(reader:reader) {
+    public DatabaseAdmin(string cfg, IReader reader):base(reader) {
         this.Load(cfg);
     }
     
@@ -137,15 +144,15 @@ var dba = new DatabaseAdmin("DatabaseAdmin.xml", new FileReader());
 
 There we go.
 
-Unfortunately, we've just made our constructor more complicated, but it 
-necessary in order to maintain loose coupling.  In turn, loose coupling 
+Unfortunately, the constructor is more complicated, but it 
+necessary to maintain loose coupling. In turn, loose coupling 
 makes our code more flexible (aka composable).
 
-In this example, the `FileReader` above doesn't have any dependencies 
-of it's own. Next, we'll take a look at a reader with dependencies 
-to see how that works.
+In this example, the `FileReader` above has no dependencies 
+of it's own. The next example demonstrates using a reader 
+with dependencies.
 
-### An IReader with it's Own Dependencies
+### An IReader with Dependencies
 
 I have created a *Cfg-NET.Reader* and put it on [Nuget](https://www.nuget.org/packages/Cfg-NET.Reader).
 
@@ -167,13 +174,19 @@ var reader = new DefaultReader(
 var dba = new DatabaseAdmin("DatabaseAdmin.xml", reader);
 ```
 
+The reader is instantiated with three dependencies, and then 
+passed into `DatabaseAdmin`.  So far, the examples have 
+only demonstrated switching out an `IReader`.  The next 
+example will use all possible dependencies.
+
 ### An IReader, an IParser, an IValidator, and an ILogger
 
-It's worthwhile to take this one step further and 
-demonstrate implementing everything.  We'll have to change 
-our `DatabaseAdmin` constructor to take all the parameters 
-and pass them through to the base constructor.  Then we'll 
-need to *new up* all of them and pass them in.
+To see dependency injection in all it's glory, it's 
+worthwhile to take this one step further and demonstrate 
+implementing everything for `CfgNode`.  The `DatabaseAdmin` 
+constructor must be changed to accomadate all the parameters 
+and pass them to the base constructor. Then we'll 
+need to *new up* all the dependencies and pass them in.
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
@@ -181,7 +194,7 @@ public class DatabaseAdmin : CfgNode {
         string cfg, 
         IReader reader,
         IParser parser,
-        IEnumerable<KeyValuePair<string, IValidator>> validators,
+        IValidators validators,
         ILogger logger) :base(reader, parser, validators, logger) {
         this.Load(cfg);
     }
@@ -197,7 +210,7 @@ var reader = new DefaultReader(
     new WebReader()
 );
 var parser = new XDocumentParser();
-var validators = new Dictionary<string, IValidator>() { { "js", new JintParser() } }
+var validators = new Validators("js", new JintParser());
 var logger = new TraceLogger();
 
 var dba = new DatabaseAdmin("DatabaseAdmin.xml", reader, parser, validators, logger);

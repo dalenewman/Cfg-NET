@@ -43,7 +43,7 @@ namespace Cfg.Test {
         public List<TestDifferentXmlParserParameter> Parameters { get; set; }
 
         public TestDifferentXmlParser(string xml, IParser parser)
-            : base(parser: parser) {
+            : base(parser) {
             Load(xml);
         }
     }

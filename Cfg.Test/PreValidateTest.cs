@@ -38,7 +38,7 @@ namespace Cfg.Test {
 
         private class TestProperty : CfgNode {
             public TestProperty(string cfg, ILogger logger)
-                : base(logger: logger) {
+                : base(logger) {
                 Load(cfg);
             }
             [Cfg]
@@ -60,7 +60,7 @@ namespace Cfg.Test {
 
         private class TestCollection : CfgNode {
             public TestCollection(string cfg, ILogger logger)
-                : base(logger: logger) {
+                : base(logger) {
                 Load(cfg);
             }
             [Cfg]

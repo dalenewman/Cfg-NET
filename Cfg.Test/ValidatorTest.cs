@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Cfg.Test {
 
     [TestFixture]
-    public class Validators {
+    public class ValidatorTest {
 
         [Test]
         public void TestXml() {
@@ -68,7 +68,11 @@ namespace Cfg.Test {
     </test>
 ".Replace("'", "\"");
 
-            var cfg = new TestValidatorCfg2(xml);
+            var validators = new Dictionary<string, IValidator> {
+                {"2dashes", new Contains2Dashes()},
+                {"contains,good", new ContainsGood()}
+            };
+            var cfg = new TestValidatorCfg2(xml, new Validators(validators));
 
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
@@ -85,7 +89,7 @@ namespace Cfg.Test {
             public List<TestValidatorThing> Things { get; set; }
 
             public TestValidatorCfg(string xml)
-                : base(validators: new Dictionary<string, IValidator> { { "2dashes", new Contains2Dashes() } }) {
+                : base(new Validators("2dashes", new Contains2Dashes())) {
                 Load(xml);
             }
         }
@@ -96,15 +100,11 @@ namespace Cfg.Test {
         }
 
         public class TestValidatorCfg2 : CfgNode {
+
             [Cfg]
             public List<TestValidatorThing2> Things { get; set; }
 
-            public TestValidatorCfg2(string xml)
-                : base(validators: new Dictionary<string, IValidator>
-                {
-                    {"2dashes", new Contains2Dashes()},
-                    {"contains,good", new ContainsGood()}
-                }) {
+            public TestValidatorCfg2(string xml, IValidators validators) : base(validators) {
                 Load(xml);
             }
         }

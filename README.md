@@ -207,13 +207,12 @@ quite helpful. Here are some examples:
 
 Put another server named *Gandalf* in there, and it says:
 
-`You set a duplicate 'name' value 'Gandalf' in 'servers'.`
+> You set a duplicate 'name' value 'Gandalf' in 'servers'.
 
 Add a *nickName* instead of a *name* in servers, and it says:
 
-`A 'servers' entry contains an invalid 'nickName' attribute.  Valid attributes are: name.`
-
-`A 'servers' entry is missing a 'name' attribute.`
+> 'servers' entry contains an invalid 'nickName' attribute.  Valid attributes are: name.
+> 'servers' entry is missing a 'name' attribute.
 
 If Cfg-NET doesn't report any issues, you can
 be sure your configuration conforms to your model.
@@ -468,12 +467,12 @@ default parsers.  There is a constructor on `CfgNode` that allows you to inject
 * Windows Phone 8.1
 * Windows Phone Silverlight 8
 
-###Credits
+### Credits
 *  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
 *  a modified version of `fastJSON` found [here](http://www.codeproject.com/Articles/159450/fastJSON)
 *  .NET Source of `WebUtility.HtmlDecode` found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
 
-###Further Reading
+### Further Reading
 
 * [Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
 * [Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)

@@ -49,44 +49,31 @@ namespace Cfg.Net {
         private readonly IParser _parser;
         private readonly IReader _reader;
         private readonly Type _type;
-        private readonly Dictionary<string, string> _uniqueProperties = new Dictionary<string, string>();
         private CfgEvents _events;
         private Dictionary<string, CfgMetadata> _metadata;
         private ShorthandRoot _shorthand;
         private IDictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
 
-        /// <summary>
-        /// A constructor for those satisfied with the defaults
-        /// </summary>
-        protected CfgNode() {
-            _type = GetType();
-            lock (Locker) {
-                if (_initialized)
-                    return;
-                Initialize();
-                _initialized = true;
-            }
-        }
+        protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
 
         /// <summary>
-        /// A constructor for those wanting to inject different behavior
+        /// Fancy constructor for injecting anything marked as an IDependency
         /// </summary>
-        /// <param name="reader">If you want to pass in a resource identifier (e.g. url, or file name) instead of the configuration itself, you can pass in a reader here.  See Cfg-Net.Reader library for reference.</param>
-        /// <param name="parser">If you want to use a different parser, rather than the built-in XML and/or JSON parsers, you can pass it in here.</param>
-        /// <param name="validators">If you want to use the (named) validators attribute, you can pass in named validators here.</param>
-        /// <param name="logger">If you want to log Cfg-Net's errors and warnings, you can pass in an additional logger here.</param>
-        protected CfgNode(
-            IReader reader = null,
-            IParser parser = null,
-            IEnumerable<KeyValuePair<string, IValidator>> validators = null,
-            ILogger logger = null
-            ) {
-            _parser = parser;
-            _logger = logger;
-            _reader = reader;
-            if (validators != null) {
-                foreach (var pair in validators) {
-                    _validators[pair.Key] = pair.Value;
+        /// <param name="dependencies"></param>
+        protected CfgNode(params IDependency[] dependencies) {
+            if (dependencies != null) {
+                foreach (var dependency in dependencies.Where(dependency => dependency != null)) {
+                    if (dependency is IReader) {
+                        _reader = dependency as IReader;
+                    } else if (dependency is IParser) {
+                        _parser = dependency as IParser;
+                    } else if (dependency is ILogger) {
+                        _logger = dependency as ILogger;
+                    } else if (dependency is IValidators) {
+                        foreach (var pair in dependency as IValidators) {
+                            _validators[pair.Key] = pair.Value;
+                        }
+                    }
                 }
             }
 
@@ -97,10 +84,6 @@ namespace Cfg.Net {
                 Initialize();
                 _initialized = true;
             }
-        }
-
-        protected Dictionary<string, string> UniqueProperties {
-            get { return _uniqueProperties; }
         }
 
         private static Dictionary<string, char> Entities {

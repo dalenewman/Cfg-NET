@@ -57,7 +57,7 @@ namespace Cfg.Test {
    }
 
    public class CustomProblemCfg : CfgNode {
-      public CustomProblemCfg(string xml, ILogger anotherLogger) : base(logger:anotherLogger) {
+      public CustomProblemCfg(string xml, ILogger anotherLogger) : base(anotherLogger) {
          Load(xml);
       }
 

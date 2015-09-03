@@ -46,11 +46,13 @@
     <Compile Include="CfgNode.cs" />
     <Compile Include="CfgEvents.cs" />
     <Compile Include="Contracts\IAttribute.cs" />
+    <Compile Include="Contracts\IDependency.cs" />
     <Compile Include="Contracts\INode.cs" />
     <Compile Include="Contracts\IParser.cs" />
     <Compile Include="Contracts\IReader.cs" />
     <Compile Include="Contracts\ISourceDetector.cs" />
     <Compile Include="Contracts\IValidator.cs" />
+    <Compile Include="Contracts\IValidators.cs" />
     <Compile Include="ReaderResult.cs" />
     <Compile Include="Source.cs" />
     <Compile Include="CfgSourceDetector.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="Shorthand\ShorthandAttribute.cs" />
     <Compile Include="Shorthand\ShorthandNode.cs" />
     <Compile Include="Shorthand\Signature.cs" />
+    <Compile Include="Validators.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <PropertyGroup>

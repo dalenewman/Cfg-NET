@@ -14,10 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-namespace Cfg.Net.Contracts
-{
-    public interface IValidator
-    {
+
+namespace Cfg.Net.Contracts {
+    public interface IValidator {
         ValidatorResult Validate(string parent, string name, object value);
     }
 }

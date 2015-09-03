@@ -36,7 +36,7 @@ namespace Cfg.Test {
         public List<TestPassInLoggerParameter> Parameters { get; set; }
 
         public TestPassInLogger(string xml, ILogger externalLogger)
-            : base(logger:externalLogger) {
+            : base(externalLogger) {
             Load(xml);
         }
     }

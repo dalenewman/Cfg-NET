@@ -61,7 +61,7 @@
     <Compile Include="PreValidateTest.cs" />
     <Compile Include="QueryStringTest.cs" />
     <Compile Include="SourceDetectorTest.cs" />
-    <Compile Include="Validators.cs" />
+    <Compile Include="ValidatorTest.cs" />
     <Compile Include="PassInLogger.cs" />
     <Compile Include="DifferentXmlParser.cs" />
     <Compile Include="FreeFormData.cs" />
