@@ -11,8 +11,8 @@ capabilities, don't pass parameters into the
 `CfgNode` constructor.
 
 As seen in the [README](https://github.com/dalenewman/Cfg-NET/blob/master/README.md), 
-the `DatabaseAdmin` top-level class doesn't use the 
-base constructor all:
+the `DatabaseAdmin` top-level class does not use the 
+base constructor:
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
@@ -28,8 +28,8 @@ public class DatabaseAdmin : CfgNode {
 var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
 ```
 
-This means you're okay with the default bahavior, and it 
-lets `CfgNode` make a few assumptions:
+Without use of it's base constructor, `CfgNode` makes 
+a few assumptions:
 
 1. You're passing in a valid `XML` or `JSON` string into the `Load` method.
  - `XML` is parsed with `NanoXmlParser`
@@ -48,7 +48,6 @@ If you want to do any of the above, you'll have to
 inject dependencies.
 
 ### Cfg-NET by Injection
-
 
 The `CfgNode` constructor:
 
@@ -70,15 +69,16 @@ Currently, an `IDependency` may be:
 
 ### An IReader
 
-The reader is used in the `CfgNode.Load` method.  The default reader just 
-*reads the string* you pass in the `cfg` parameter.  It expects you to give 
-it `XML` or `JSON` that is ready for parsing.
+The reader is used in the `CfgNode.Load` method.  The default 
+reader *reads the string* you pass into `Load`.  It expects 
+valid `XML` or `JSON`.
 
-For an example, we will implement a reader that expects a file name, and reads 
-from the file system.  Note: Cfg-Net can not read files, because it is a portable class 
-library (PCL).
+To change that, implement a reader that expects a file 
+name, and reads it from the file system.  Note: Cfg-Net 
+can not read files, because it is a portable class library 
+(PCL).
 
-The `IReader` interface:
+The `IReader` inter face:
 
 ```csharp
 public interface IReader {
@@ -101,11 +101,12 @@ public class FileReader : IReader {
     }
 }
 ```
-Now we can use `FileReader` in the base `CfgNode` 
-constructor like this:
+
+Use `FileReader` in the base `CfgNode` constructor like this:
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
+    /* note: the :base() usage */
     public DatabaseAdmin(string cfg):base(new FileReader()) {
         this.Load(cfg);
     }
@@ -118,15 +119,15 @@ public class DatabaseAdmin : CfgNode {
 var dba = new DatabaseAdmin("DatabaseAdmin.xml");
 ```
 
-### THAT CODE HAS A PROBLEM!
+### VIOLATION!
 
-You may have noticed I instantiated a reader inside my `DatabaseAdmin` 
-class. This tightly couples the reader to my class, which is bad. 
-When you practice dependency injection, you never want to *new up* 
-dependencies internally. You instantiate dependencies 
+I instantiated a reader inside my `DatabaseAdmin` class. 
+This tightly couples the reader to `DatabaseAdmin`, which is bad. 
+When you practice dependency injection, you do not *new up* 
+dependencies internally. Instead, you instantiate dependencies 
 in one place; which is referred to as a *composition root*.
 
-So, let's add `IReader` to the `DatabaseAdmin` constructor instead:
+Add `IReader` to the `DatabaseAdmin` constructor instead:
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
@@ -142,13 +143,18 @@ public class DatabaseAdmin : CfgNode {
 var dba = new DatabaseAdmin("DatabaseAdmin.xml", new FileReader());
 ```
 
-There we go.
+Exposing `IReader` like this allows injection from 
+the composition root.
 
 Unfortunately, the constructor is more complicated, but it 
-necessary to maintain loose coupling. In turn, loose coupling 
-makes our code more flexible (aka composable).
+necessary to maintain a loose coupling between `Database` 
+and it's `IReader` implementation.
 
-In this example, the `FileReader` above has no dependencies 
+Just in case it's not clear; loose coupling makes our code more 
+flexible (aka composable), which is desirable for software 
+since requirements are likely to change.
+
+In this example, `FileReader` has no dependencies 
 of it's own. The next example demonstrates using a reader 
 with dependencies.
 
