@@ -8,63 +8,61 @@ It may be necessary for values in your configuration to
 change depending on the program's environment (i.e. `production`, or `test`).
 
 To take advantage of Cfg-NET's built-in environment features, include
-`environments` with nested `parameters` just inside your configuration's root.
+an `environment` attribute, and `environments` collection with nested 
+`parameters` just inside your configuration's root.
+
 Your configuration should look similar to this:
 
-<pre class="prettyprint" lang="xml">
-&lt;cfg&gt;
-    &lt;environments default=&quot;test&quot;&gt;
-        &lt;add name=&quot;prod&quot;&gt;
-            &lt;parameters&gt;
-                &lt;add name=&quot;Server&quot; value=&quot;ProductionServer&quot; /&gt;
-                &lt;add name=&quot;Database&quot; value=&quot;ProductionDatabase&quot; /&gt;
-                &lt;!-- more parameters, if you want --&gt;
-            &lt;/parameters&gt;
-        &lt;/add&gt;
-        &lt;add name=&quot;test&quot;&gt;
-            &lt;parameters&gt;
-                &lt;add name=&quot;Server&quot; value=&quot;TestServer&quot; /&gt;
-                &lt;add name=&quot;Database&quot; value=&quot;TestDatabase&quot; /&gt;
-                &lt;!-- more parameters, if you want --&gt;
-            &lt;/parameters&gt;
-        &lt;/add&gt;
-        &lt;!-- more environments, if you want --&gt;
-    &lt;/environments&gt;
-    &lt;!-- the rest of your configuration with @(Server) and @(Database) place-holders --&gt;
-&lt;/cfg&gt;
-</pre>
+```xml
+<cfg environment="test">
+    <environments >
+        <add name="prod">
+            <parameters>
+                <add name="Server" value="ProductionServer" />
+                <add name="Database" value="ProductionDatabase" />
+                <!-- more parameters, if you want -->
+            </parameters>
+        </add>
+        <add name="test">
+            <parameters>
+                <add name="Server" value="TestServer" />
+                <add name="Database" value="TestDatabase" />
+                <!-- more parameters, if you want -->
+            </parameters>
+        </add>
+        <!-- more environments, if you want -->
+    </environments>
+    <!-- the rest of your configuration with 
+         @(Server) and @(Database) place-holders -->
+</cfg>
+```
 
 The parameter names and values can be anything you want.
 They should be everything that can change between environments.
 I just used `Server` and `Database` as examples.
 
-**Important**:  The environment `add` elements must have a `name` attribute.
-The parameter `add` elements must have `name` and `value` attributes.
+**Important**:  
 
-A `default` attribute on the `environments` element tells Cfg.NET which
-environment to use by default. Without a default, the first environment is used.
-
-A keen observer notices that the `default` attribute is a property on the
-`environments` element, and not in an `add` element.  This is a special
-attribute called a **shared property**.  A shared property is represented
-in a Cfg-NET model like this:
-
-<pre class="prettyprint" lang="cs">
-[Cfg(required = false, sharedProperty = &quot;default&quot;, sharedValue = &quot;&quot;)]
-public List&lt;CfgEnvironment&gt; Environments { get; set; }
-</pre>
+* The environment `add` elements must have a `name` attribute.
+* The parameter `add` elements must have `name` and `value` attributes.
+* An `environment` attribute on the root element tells Cfg.NET which
+environment to use by default. Without a default, the first 
+environment is used.
 
 A Cfg-NET implementation of the above XML looks like this:
 
-<pre class="prettyprint" lang="cs">
+```csharp
 public class MyCfg : CfgNode {
 
     public MyCfg(string xml) {
         this.Load(xml);
     }
 
-    [Cfg(required = false, sharedProperty = &quot;default&quot;, sharedValue = &quot;&quot;)]
-    public List&lt;MyEnvironment&gt; Environments { get; set; }
+    [Cfg(value="")]
+    public string Environment {get; set;}
+
+    [Cfg(required = false)]
+    public List<MyEnvironment> Environments { get; set; }
 }
 
 public class MyEnvironment : CfgNode {
@@ -73,11 +71,7 @@ public class MyEnvironment : CfgNode {
     public string Name { get; set; }
 
     [Cfg(required = true)]
-    public List&lt;MyParameter&gt; Parameters { get; set; }
-
-    //shared property
-    [Cfg()]
-    public string Default { get; set; }
+    public List<MyParameter> Parameters { get; set; }
 }
 
 public class MyParameter : CfgNode {
@@ -88,7 +82,7 @@ public class MyParameter : CfgNode {
     [Cfg(required = true)]
     public string Value { get; set; }
 }
-</pre>
+```
 
 ###Parameters and Place-Holders
 Environments use collections of parameters, but parameters don't do anything
@@ -99,11 +93,13 @@ Insert explicit c# razor style place holders that reference parameter names in
 the XML's attribute values. The place-holder and parameter names must match
 exactly.  They are case-sensitive. In XML, they would look like this:
 
-<pre class="prettyprint" lang="xml">
-&lt;trusted-connections&gt;
-    &lt;add name=&quot;connection&quot; server=&quot;<strong>@(Server)</strong>&quot; database=&quot;<strong>@(Database)</strong>&quot; /&gt;
-&lt;/trusted-connections&gt;
-</pre>
+```xml
+<trusted-connections>
+    <add name="connection" 
+         server="@(Server)" 
+         database="@(Database)" />
+</trusted-connections>
+```
 
 Place-holders are replaced with environment default parameter values as the XML is loaded.
 
@@ -113,14 +109,15 @@ of parameters into the `CfgNode.Load()` method.
 
 Here is an example:
 
-<pre class="prettyprint" lang="cs">
-    var parameters = new Dictionary&lt;string, string&gt; {
-        {&quot;Server&quot;, &quot;Gandalf&quot;},
-        {&quot;Database&quot;, &quot;master&quot;}
-    };
-    var cfg = new Cfg(File.ReadAllText(&quot;Something.xml&quot;), parameters);
-</pre>
+```xml
+var parameters = new Dictionary<string, string> {
+    {"Server", "Gandalf"},
+    {"Database", "master"}
+};
+var cfg = new Cfg(File.ReadAllText("Something.xml"), parameters);
+```
 
-__Note__: If you have a place-holder in the configuration,
+**Note**: If you have a place-holder in the configuration,
 and you don't setup an environment default, or pass in a parameter, Cfg.NET
-reports it as a problem. So, always check for `Problems()` after loading the configuration.
+reports it as an error. So, always check `Errors()` after loading 
+the configuration.

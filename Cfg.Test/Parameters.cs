@@ -11,8 +11,8 @@ namespace Cfg.Test {
         [Test]
         public void TestXml() {
             var xml = @"
-    <cfg>
-        <environments default='two'>
+    <cfg environment='two'>
+        <environments>
             <add name='one'>
                 <parameters>
                     <add name='p1' value='one-1' />
@@ -46,8 +46,8 @@ namespace Cfg.Test {
             Assert.AreEqual(0, cfg.Errors().Length);
 
             Assert.AreEqual(2, cfg.Environments.Count);
-            Assert.AreEqual(false, cfg.Environments[0].Default == cfg.Environments[0].Name);
-            Assert.AreEqual(true, cfg.Environments[1].Default == cfg.Environments[1].Name);
+            Assert.AreEqual(false, cfg.Environment == cfg.Environments[0].Name);
+            Assert.AreEqual(true, cfg.Environment == cfg.Environments[1].Name);
 
             Assert.AreEqual("i am the new p1", cfg.Things[0].Value, "I should be passed in for p1.");
             Assert.AreEqual("two-2", cfg.Things[1].Value, "I am the default value for p2 in the default environment two.");
@@ -59,6 +59,7 @@ namespace Cfg.Test {
         public void TestJson() {
             var json = @"
     {
+        'environment':'two',
         'environments': [ {
                 'name':'one',
                 'parameters':[
@@ -68,14 +69,12 @@ namespace Cfg.Test {
             },
             {
                 'name':'two',
-                'default':'two',
                 'parameters':[
                     { 'name':'p1', 'value':'two-1' }
                     { 'name':'p2', 'value':'two-2' }
                 ]
             }
         ],
-        'environments.default':'two',
         'things':[
             { 'name':'thing-1', 'value':'@(p1)' }
             { 'name':'thing-2', 'value':'@(p2)' }
@@ -96,8 +95,8 @@ namespace Cfg.Test {
             Assert.AreEqual(0, cfg.Errors().Length);
 
             Assert.AreEqual(2, cfg.Environments.Count);
-            Assert.AreEqual(false, cfg.Environments[0].Default == cfg.Environments[0].Name);
-            Assert.AreEqual(true, cfg.Environments[1].Default == cfg.Environments[1].Name);
+            Assert.AreEqual(false, cfg.Environment == cfg.Environments[0].Name);
+            Assert.AreEqual(true, cfg.Environment == cfg.Environments[1].Name);
 
             Assert.AreEqual("i am the new p1", cfg.Things[0].Value, "I should be passed in for p1.");
             Assert.AreEqual("two-2", cfg.Things[1].Value, "I am the default value for p2 in the default environment two.");
@@ -111,7 +110,10 @@ namespace Cfg.Test {
             this.Load(xml, parameters);
         }
 
-        [Cfg(required = false, sharedProperty = "default", sharedValue = "")]
+        [Cfg(value = "")]
+        public string Environment { get; set; }
+
+        [Cfg(required = false)]
         public List<MyEnvironment> Environments { get; set; }
 
         [Cfg(required = true)]
@@ -135,8 +137,6 @@ namespace Cfg.Test {
         [Cfg(required = true)]
         public List<MyParameter> Parameters { get; set; }
 
-        [Cfg()] //shared property, defined in parent
-        public string Default { get; set; }
     }
 
     public class MyParameter : CfgNode {

@@ -43,8 +43,6 @@ namespace Cfg.Net {
         public bool toUpper { get; set; }
         public bool toLower { get; set; }
         public bool shorthand { get; set; }
-        public string sharedProperty { get; set; }
-        public object sharedValue { get; set; }
 
         public string domain {
             get { return _domain; }

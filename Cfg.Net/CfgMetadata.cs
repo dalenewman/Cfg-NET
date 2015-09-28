@@ -23,7 +23,7 @@ namespace Cfg.Net {
 
     internal sealed class CfgMetadata {
 
-        private const char DEFAULT_DELIMITER = ',';
+        private const char DefaultDelimiter = ',';
         private readonly HashSet<string> _domainSet;
         private readonly HashSet<string> _validatorSet;
 
@@ -33,7 +33,7 @@ namespace Cfg.Net {
 
             if (!string.IsNullOrEmpty(attribute.domain)) {
                 if (attribute.domainDelimiter == default(char)) {
-                    attribute.domainDelimiter = DEFAULT_DELIMITER;
+                    attribute.domainDelimiter = DefaultDelimiter;
                 }
                 var comparer = attribute.ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
                 _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.domainDelimiter }, StringSplitOptions.None).Distinct(), comparer);
@@ -42,7 +42,7 @@ namespace Cfg.Net {
             if (string.IsNullOrEmpty(attribute.validators)) return;
 
             if (attribute.validatorDelimiter == default(char)) {
-                attribute.validatorDelimiter = DEFAULT_DELIMITER;
+                attribute.validatorDelimiter = DefaultDelimiter;
             }
 
             _validatorSet =
@@ -56,8 +56,6 @@ namespace Cfg.Net {
         public Type ListType { get; set; }
         public Func<CfgNode> Loader { get; set; }
         public string[] UniquePropertiesInList { get; set; }
-        public string SharedProperty { get; set; }
-        public object SharedValue { get; set; }
         public Action<object, object> Setter { get; set; }
         public Func<object, object> Getter { get; set; }
         public bool TypeMismatch { get; set; }

@@ -170,44 +170,6 @@ namespace Cfg.Test {
 
         }
 
-        [Test]
-        public void TestSharedProperty() {
-            var xml = @"<cfg>
-                    <sites common='colts'>
-                        <add name='google' url='http://www.google.com' something='&lt;'/>
-                        <add name='github' url='http://www.github.com' numeric='5'/>
-                        <add name='stackoverflow' url='http://www.stackoverflow.com' numeric='7' />
-                    </sites>
-                </cfg>".Replace("'", "\"");
-
-            var cfg = new AttributeCfg(xml);
-
-            Assert.AreEqual(0, cfg.Errors().Length);
-            Assert.AreEqual("colts", cfg.Sites[0].Common);
-            Assert.AreEqual("colts", cfg.Sites[1].Common);
-            Assert.AreEqual("colts", cfg.Sites[2].Common);
-
-        }
-
-        [Test]
-        public void TestSharedPropertyJson() {
-            var xml = @"{
-                    'sites':[
-                        { 'name':'google',        'url':'http://www.google.com',        'something':'&lt;', 'common':'colts' },
-                        { 'name':'github',        'url':'http://www.github.com',        'numeric':'5',      'common':'colts' },
-                        { 'name':'stackoverflow', 'url':'http://www.stackoverflow.com', 'numeric':'7',      'common':'colts' }
-                    ]
-                }".Replace("'", "\"");
-
-            var cfg = new AttributeCfg(xml);
-
-            Assert.AreEqual(0, cfg.Errors().Length);
-            Assert.AreEqual("colts", cfg.Sites[0].Common);
-            Assert.AreEqual("colts", cfg.Sites[1].Common);
-            Assert.AreEqual("colts", cfg.Sites[2].Common);
-
-        }
-
     }
 
 }

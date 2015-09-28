@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ToXml.cs" />
     <Compile Include="DifferentJsonParser.cs" />
     <Compile Include="PreValidateTest.cs" />
     <Compile Include="QueryStringTest.cs" />
