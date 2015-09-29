@@ -16,9 +16,11 @@
 #endregion
 namespace Cfg.Net {
     public enum Source {
+        Custom,
         Error,
         File,
         Json,
+        Unknown,
         Url,
         Xml
     }

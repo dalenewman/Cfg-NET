@@ -17,5 +17,6 @@
 namespace Cfg.Net.Contracts {
     public interface IParser : IDependency {
         INode Parse(string cfg);
+        string Decode(string value);
     }
 }

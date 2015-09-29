@@ -38,11 +38,13 @@ namespace Cfg.Test {
             Console.WriteLine(actual);
             Assert.AreEqual(expected, actual);
 
+            Assert.AreEqual("<add name=\"p1\" value=\"true\" />", cfg.Parameters[0].Serialize());
+
         }
 
     }
 
-    public sealed class TestToXml : CfgNode {
+    public sealed class TestToXml : CfgNode { 
         [Cfg]
         public List<TestToXmlParameter> Parameters { get; set; }
 

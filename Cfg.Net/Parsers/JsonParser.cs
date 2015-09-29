@@ -18,13 +18,14 @@
 using Cfg.Net.Contracts;
 using Cfg.Net.Parsers.fastJSON;
 
-namespace Cfg.Net.Parsers
-{
-    public class FastJsonParser : IParser
-    {
-        public INode Parse(string cfg)
-        {
+namespace Cfg.Net.Parsers {
+    public class FastJsonParser : IParser {
+        public INode Parse(string cfg) {
             return new JsonNode(JSON.Parse(cfg));
+        }
+
+        public string Decode(string value) {
+            return value;
         }
     }
 }

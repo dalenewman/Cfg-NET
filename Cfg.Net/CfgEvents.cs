@@ -28,86 +28,79 @@ namespace Cfg.Net {
         }
 
         public void DuplicateSet(string uniqueAttribute, object value, string nodeName) {
-            Logger.Error(CfgConstants.PROBLEM_DUPLICATE_SET, uniqueAttribute, value, nodeName);
+            Logger.Error("Duplicate '{0}' value '{1}' in '{2}'.", uniqueAttribute, value, nodeName);
         }
 
         public void InvalidAttribute(string parentName, string nodeName, string attributeName, string validateAttributes) {
-            Logger.Error(CfgConstants.PROBLEM_INVALID_ATTRIBUTE, parentName, nodeName, attributeName,
+            Logger.Error("A{3} '{0}' '{1}' element contains an invalid '{2}' attribute.  Valid attributes are: {4}.", parentName, nodeName, attributeName,
                 Suffix(parentName), validateAttributes);
         }
 
         public void InvalidElement(string nodeName, string subNodeName) {
-            Logger.Error(CfgConstants.PROBLEM_INVALID_ELEMENT, nodeName, subNodeName, Suffix(nodeName));
+            Logger.Error("A{2} '{0}' element has an invalid '{1}' element.  If you need a{2} '{1}' element, decorate it with the Cfg[()] attribute in your Cfg-NET model.", nodeName, subNodeName, Suffix(nodeName));
         }
 
         public void InvalidNestedElement(string parentName, string nodeName, string subNodeName) {
-            Logger.Error(CfgConstants.PROBLEM_INVALID_NESTED_ELEMENT, parentName, nodeName, subNodeName,
+            Logger.Error("A{3} '{0}' '{1}' element has an invalid '{2}' element.", parentName, nodeName, subNodeName,
                 Suffix(parentName));
         }
 
         public void MissingAttribute(string parentName, string nodeName, string attributeName) {
-            Logger.Error(CfgConstants.PROBLEM_MISSING_ATTRIBUTE, parentName, nodeName, attributeName,
+            Logger.Error("A{3} '{0}' '{1}' element is missing a '{2}' attribute.", parentName, nodeName, attributeName,
                 Suffix(parentName));
         }
 
         public void MissingElement(string nodeName, string elementName) {
-            Logger.Error(CfgConstants.PROBLEM_MISSING_ELEMENT, nodeName == string.Empty ? "root" : "'" + nodeName + "'",
+            Logger.Error("The {0} element is missing a{2} '{1}' element.", nodeName == string.Empty ? "root" : "'" + nodeName + "'",
                 elementName, Suffix(elementName));
         }
 
         public void MissingAddElement(string elementName) {
-            Logger.Error(CfgConstants.PROBLEM_MISSING_ADD_ELEMENT, elementName, Suffix(elementName));
+            Logger.Error("A{1} '{0}' element is missing a child element.", elementName, Suffix(elementName));
         }
 
         public void MissingValidator(string parentName, string nodeName, string validatorName) {
-            Logger.Warn(CfgConstants.PROBLEM_MISSING_VALIDATOR, parentName, nodeName, validatorName);
+            Logger.Warn("A '{1}' attribute in {0} can not find the {2} validator.  Please make it's passed in to your Cfg-Net root constructor.", parentName, nodeName, validatorName);
         }
 
         public void ValidatorException(string validatorName, Exception ex, object value) {
-            Logger.Error(CfgConstants.PROBLEM_VALIDATOR_EXCEPTION, validatorName, ex.Message, value);
+            Logger.Error("The '{0}' validator threw an exception when validating the value '{2}'. {1}", validatorName, ex.Message, value);
         }
 
         public void MissingNestedElement(string parentName, string nodeName, string elementName) {
-            Logger.Error(CfgConstants.PROBLEM_MISSING_NESTED_ELEMENT, parentName, nodeName, elementName,
+            Logger.Error("A{3} '{0}' '{1}' element is missing a{4} '{2}' element.", parentName, nodeName, elementName,
                 Suffix(parentName), Suffix(elementName));
         }
 
         public void MissingPlaceHolderValues(string[] keys) {
             string formatted = "@(" + string.Join("), @(", keys) + ")";
-            Logger.Error(CfgConstants.PROBLEM_MISSING_PLACE_HOLDER_VALUE, keys.Length == 1 ? "a value" : "values",
+            Logger.Error("Missing {0} for {1}.", keys.Length == 1 ? "a value" : "values",
                 formatted);
         }
 
         public void SettingValue(string propertyName, object value, string parentName, string nodeName, string message) {
-            Logger.Error(CfgConstants.PROBLEM_SETTING_VALUE, propertyName, value, parentName, nodeName, message);
+            Logger.Error("Could not set '{0}' to '{1}' inside '{2}' '{3}'. {4}", propertyName, value, parentName, nodeName, message);
         }
 
         public void UnexpectedElement(string elementName, string subNodeName) {
-            Logger.Error(CfgConstants.PROBLEM_UNEXPECTED_ELEMENT, subNodeName, elementName);
+            Logger.Error("Invalid element {0} in {1}.  Only 'add' elements are allowed here.", subNodeName, elementName);
         }
 
         public void ShorthandNotLoaded(string parentName, string nodeName, string attributeName) {
-            Logger.Error(CfgConstants.PROBLEM_SHORTHAND_NOT_LOADED, parentName, nodeName, attributeName,
+            Logger.Error("A{3} '{0}' '{1}' element's '{2}' attribute needs a shorthand configuration, but none was loaded.", parentName, nodeName, attributeName,
                 Suffix(parentName));
         }
 
         public void ValueNotInDomain(string parentName, string propertyName, object value, string validValues) {
-            Logger.Error(CfgConstants.PROBLEM_VALUE_NOT_IN_DOMAIN, parentName, propertyName, value, validValues, Suffix(parentName));
+            Logger.Error("A{4} '{0}' element has an invalid value of '{2}' in the '{1}' attribute.  The valid domain is: {3}.", parentName, propertyName, value, validValues, Suffix(parentName));
         }
 
         public void RootValueNotInDomain(object value, string propertyName, string validValues) {
-            Logger.Error(CfgConstants.PROBLEM_ROOT_VALUE_NOT_IN_DOMAIN, value, propertyName, validValues);
-        }
-
-        public void SharedPropertyMissing(string name, string sharedProperty, string listType) {
-            var type = listType.IndexOf('.') > 0
-                ? listType.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Last()
-                : listType;
-            Logger.Error(CfgConstants.PROBLEM_SHARED_PROPERTY_MISSING, name, sharedProperty, type, Suffix(name));
+            Logger.Error("The root element has an invalid value of '{0}' in the '{1}' attribute.  The valid domain is: {2}.", value, propertyName, validValues);
         }
 
         public void ParseException(string message) {
-            Logger.Error(CfgConstants.PROBLEM_PARSE, message);
+            Logger.Error("Could not parse the configuration. {0}", message);
         }
 
         private static string Suffix(string thing) {
@@ -128,31 +121,31 @@ namespace Cfg.Net {
         }
 
         public void OnlyOneAttributeAllowed(string parentName, string name, int count) {
-            Logger.Error(CfgConstants.PROBLEM_ONLY_ONE_ATTRIBUTE_ALLOWED, parentName, name, count);
+            Logger.Error("The '{0}' '{1}' collection does not inherit from CfgNode, so you can only have one value (attribute).  You have {2} defined. So, limit it to one, or have your list item inherit from CfgNode.", parentName, name, count);
         }
 
         public void TypeMismatch(string key, object value, Type propertyType) {
-            Logger.Error(CfgConstants.PROBLEM_TYPE_MISMATCH, key, value, propertyType);
+            Logger.Error("The '{0}' attribute default value '{1}' does not have the same type as the property type of '{2}'.", key, value, propertyType);
         }
 
         public void ValueTooShort(string name, string value, int minLength) {
-            Logger.Error(CfgConstants.PROBLEM_VALUE_TOO_SHORT, name, value, minLength, value.Length);
+            Logger.Error("The '{0}' attribute value '{1}' is too short. It is {3} characters. It must be at least {2} characters.", name, value, minLength, value.Length);
         }
 
         public void ValueTooLong(string name, string value, int maxLength) {
-            Logger.Error(CfgConstants.PROBLEM_VALUE_TOO_LONG, name, value, maxLength, value.Length);
+            Logger.Error("The '{0}' attribute value '{1}' is too long. It is {3} characters. It must not exceed {2} characters.", name, value, maxLength, value.Length);
         }
 
         public void ValueIsNotComparable(string name, object value) {
-            Logger.Error(CfgConstants.PROBLEM_VALUE_IS_NOT_COMPARABLE, name, value);
+            Logger.Error("The '{0}' attribute value '{1}' is not comparable.  Having a minValue or maxValue set on an incomparable property type causes this.", name, value);
         }
 
         public void ValueTooSmall(string name, object value, object minValue) {
-            Logger.Error(CfgConstants.PROBLEM_VALUE_IS_TOO_SMALL, name, value, minValue);
+            Logger.Error("The '{0}' attribute value '{1}' is too small. The minimum value allowed is '{2}'.", name, value, minValue);
         }
 
         public void ValueTooBig(string name, object value, object maxValue) {
-            Logger.Error(CfgConstants.PROBLEM_VALUE_IS_TOO_BIG, name, value, maxValue);
+            Logger.Error("The '{0}' attribute value '{1}' is too big. The maximum value allowed is '{2}'.", name, value, maxValue);
         }
 
         public string[] Errors() {

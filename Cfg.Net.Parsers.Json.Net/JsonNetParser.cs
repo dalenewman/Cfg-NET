@@ -6,5 +6,9 @@ namespace Cfg.Net.Parsers.Json.Net {
         public INode Parse(string cfg) {
             return new JsonNetNode("root", JObject.Parse(cfg));
         }
+
+        public string Decode(string value) {
+            return value;
+        }
     }
 }

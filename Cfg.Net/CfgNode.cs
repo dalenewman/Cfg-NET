@@ -17,34 +17,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
 using Cfg.Net.Parsers;
+using Cfg.Net.Serializers;
 using Cfg.Net.Shorthand;
 
 namespace Cfg.Net {
 
     public abstract class CfgNode {
 
-        internal static string ControlString = ((char)31).ToString();
-        internal static char ControlChar = (char)31;
-        internal static char NamedParameterSplitter = ':';
-
-        //shared cache
-        private static bool _initialized;
         private static readonly object Locker = new object();
-        private static Dictionary<Type, Dictionary<string, CfgMetadata>> _metadataCache;
-        private static Dictionary<Type, List<string>> _propertyCache;
-        private static Dictionary<Type, List<string>> _elementCache;
-        private static Dictionary<Type, Dictionary<string, string>> _nameCache;
-        private static Dictionary<Type, Func<string, object>> _converter;
 
         private readonly ILogger _logger;
-        private readonly IParser _parser;
+        private IParser _parser;
+        private ISerializer _serializer;
         private readonly IReader _reader;
         private readonly Type _type;
         private CfgEvents _events;
@@ -52,6 +41,9 @@ namespace Cfg.Net {
         private ShorthandRoot _shorthand;
         private IDictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
 
+        //prefixed with Cfg to not interfer with parent property names
+        public string NodeName { get; set; } = string.Empty;
+        protected Source Source { get; set; } = Source.Unknown;
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
 
         /// <summary>
@@ -65,6 +57,8 @@ namespace Cfg.Net {
                         _reader = dependency as IReader;
                     } else if (dependency is IParser) {
                         _parser = dependency as IParser;
+                    } else if (dependency is ISerializer) {
+                        _serializer = dependency as ISerializer;
                     } else if (dependency is ILogger) {
                         _logger = dependency as ILogger;
                     } else if (dependency is IValidators) {
@@ -76,42 +70,11 @@ namespace Cfg.Net {
             }
 
             _type = GetType();
-            lock (Locker) {
-                if (_initialized)
-                    return;
-                Initialize();
-                _initialized = true;
-            }
         }
 
         internal CfgEvents Events {
             get { return _events ?? (_events = new CfgEvents(new CfgLogger(new MemoryLogger(), _logger))); }
             set { _events = value; }
-        }
-
-        private static void Initialize() {
-            _metadataCache = new Dictionary<Type, Dictionary<string, CfgMetadata>>();
-            _propertyCache = new Dictionary<Type, List<string>>();
-            _elementCache = new Dictionary<Type, List<string>>();
-            _nameCache = new Dictionary<Type, Dictionary<string, string>>();
-            _converter = new Dictionary<Type, Func<string, object>> {
-                {typeof (string), (x => x)},
-                {typeof (Guid), (x => Guid.Parse(x))},
-                {typeof (short), (x => Convert.ToInt16(x))},
-                {typeof (int), (x => Convert.ToInt32(x))},
-                {typeof (long), (x => Convert.ToInt64(x))},
-                {typeof (ushort), (x => Convert.ToUInt16(x))},
-                {typeof (uint), (x => Convert.ToUInt32(x))},
-                {typeof (ulong), (x => Convert.ToUInt64(x))},
-                {typeof (double), (x => Convert.ToDouble(x))},
-                {typeof (decimal), (x => decimal.Parse(x, NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol, (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo))))},
-                {typeof (char), (x => Convert.ToChar(x))},
-                {typeof (DateTime), (x => Convert.ToDateTime(x))},
-                {typeof (bool), (x => Convert.ToBoolean(x))},
-                {typeof (float), (x => Convert.ToSingle(x))},
-                {typeof (byte), (x => Convert.ToByte(x))},
-                {typeof(object), (x => x)}
-            };
         }
 
         /// <summary>
@@ -123,7 +86,7 @@ namespace Cfg.Net {
         public T GetDefaultOf<T>(Action<T> setter = null) {
             var obj = Activator.CreateInstance(typeof(T));
 
-            var metadata = GetMetadata(typeof(T), Events);
+            var metadata = CfgMetadataCache.GetMetadata(typeof(T), Events);
             SetDefaults(obj, metadata);
 
             var typed = (T)obj;
@@ -136,7 +99,7 @@ namespace Cfg.Net {
         public T GetValidatedOf<T>(Action<T> setter = null) {
             var obj = Activator.CreateInstance(typeof(T));
 
-            var metadata = GetMetadata(typeof(T), Events);
+            var metadata = CfgMetadataCache.GetMetadata(typeof(T), Events);
             SetDefaults(obj, metadata);
 
             var typed = (T)obj;
@@ -197,24 +160,28 @@ namespace Cfg.Net {
             _shorthand.InitializeMethodDataLookup();
         }
 
+        /// <summary>
+        /// This method is used to load the configuration into the root, or top-most node.
+        /// </summary>
+        /// <param name="cfg">by default, cfg should be XML or JSON, but can be other things depending on what IParser is injected.</param>
+        /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, Dictionary<string, string> parameters = null) {
-            _metadata = GetMetadata(_type, Events);
+            _metadata = CfgMetadataCache.GetMetadata(_type, Events);
             SetDefaults(this, _metadata);
 
             INode node;
             try {
-                Source source;
 
                 if (_reader == null) {
-                    source = new CfgSourceDetector().Detect(cfg, Events.Logger);
+                    Source = new CfgSourceDetector().Detect(cfg, Events.Logger);
                 } else {
                     var result = _reader.Read(cfg, Events.Logger);
                     if (Events.Errors().Any()) {
                         return;
                     }
                     cfg = result.Content;
-                    source = result.Source;
-                    if (source != Source.Error && result.Parameters.Any()) {
+                    Source = result.Source;
+                    if (Source != Source.Error && result.Parameters.Any()) {
                         if (parameters == null) {
                             parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         }
@@ -224,12 +191,23 @@ namespace Cfg.Net {
                     }
                 }
 
-                if (source == Source.Error) {
+                if (Source == Source.Error) {
                     return;
                 }
 
-                var parser = _parser ?? (source == Source.Json ? new FastJsonParser() : (IParser)new NanoXmlParser());
-                node = parser.Parse(cfg);
+                // see if built-in parser, serializer used
+                if (_parser == null) {
+                    if (Source == Source.Json) {
+                        _parser = new FastJsonParser();
+                        _serializer = new JsonSerializer();
+                    } else {
+                        _parser = new NanoXmlParser();
+                        _serializer = new XmlSerializer();
+                    }
+                }
+
+                node = _parser.Parse(cfg);
+                NodeName = node.Name;
 
                 var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
                 if (environmentDefaults.Length > 0) {
@@ -247,8 +225,8 @@ namespace Cfg.Net {
                 return;
             }
 
-            LoadProperties(node, null, parameters);
-            LoadCollections(node, null, parameters);
+            LoadProperties(node, null, _parser, parameters);
+            LoadCollections(node, null, _parser, _serializer, parameters);
             PreValidate();
             ValidateProperties(_metadata, null);
             Validate();
@@ -256,8 +234,8 @@ namespace Cfg.Net {
         }
 
         protected IEnumerable<string[]> LoadEnvironment(INode node, Dictionary<string, string> parameters) {
-            for (int i = 0; i < node.SubNodes.Count; i++) {
-                var environmentsNode = node.SubNodes.FirstOrDefault(n=>n.Name == CfgConstants.ENVIRONMENTS_ELEMENT_NAME);
+            for (var i = 0; i < node.SubNodes.Count; i++) {
+                var environmentsNode = node.SubNodes.FirstOrDefault(n => n.Name == CfgConstants.EnvironmentsElementName);
                 if (environmentsNode == null)
                     continue;
 
@@ -268,10 +246,10 @@ namespace Cfg.Net {
 
                 if (environmentsNode.SubNodes.Count > 1) {
                     IAttribute defaultEnvironment;
-                    if (!node.TryAttribute(CfgConstants.ENVIRONMENTS_DEFAULT_NAME, out defaultEnvironment))
+                    if (!node.TryAttribute(CfgConstants.EnvironmentsDefaultName, out defaultEnvironment))
                         continue;
 
-                    for (int j = 0; j < environmentsNode.SubNodes.Count; j++) {
+                    for (var j = 0; j < environmentsNode.SubNodes.Count; j++) {
                         environmentNode = environmentsNode.SubNodes[j];
 
                         IAttribute environmentName;
@@ -293,7 +271,7 @@ namespace Cfg.Net {
 
                 var parametersNode = environmentNode.SubNodes[0];
 
-                if (parametersNode.Name != CfgConstants.PARAMETERS_ELEMENT_NAME || environmentNode.SubNodes.Count == 0)
+                if (parametersNode.Name != CfgConstants.ParametersElementName || environmentNode.SubNodes.Count == 0)
                     break;
 
                 return GetParameters(parametersNode);
@@ -305,12 +283,12 @@ namespace Cfg.Net {
         private static IEnumerable<string[]> GetParameters(INode parametersNode) {
             var parameters = new List<string[]>();
 
-            for (int j = 0; j < parametersNode.SubNodes.Count; j++) {
-                INode parameter = parametersNode.SubNodes[j];
+            for (var j = 0; j < parametersNode.SubNodes.Count; j++) {
+                var parameter = parametersNode.SubNodes[j];
                 string name = null;
                 string value = null;
-                for (int k = 0; k < parameter.Attributes.Count; k++) {
-                    IAttribute attribute = parameter.Attributes[k];
+                for (var k = 0; k < parameter.Attributes.Count; k++) {
+                    var attribute = parameter.Attributes[k];
                     switch (attribute.Name) {
                         case "name":
                             name = attribute.Value;
@@ -327,14 +305,27 @@ namespace Cfg.Net {
             return parameters;
         }
 
-        private CfgNode Load(INode node, string parentName, CfgEvents events, IDictionary<string, IValidator> validators, ShorthandRoot shorthand, Dictionary<string, string> parameters) {
+        private CfgNode Load(
+            INode node,
+            string parentName,
+            IParser parser,
+            ISerializer serializer,
+            CfgEvents events,
+            IDictionary<string, IValidator> validators,
+            ShorthandRoot shorthand,
+            Dictionary<string, string> parameters
+        ) {
             Events = events;
+            NodeName = node.Name;
             _shorthand = shorthand;
             _validators = validators;
-            _metadata = GetMetadata(_type, events);
+            _parser = parser;
+            _serializer = serializer;
+            _metadata = CfgMetadataCache.GetMetadata(_type, events);
+
             SetDefaults(this, _metadata);
-            LoadProperties(node, parentName, parameters);
-            LoadCollections(node, parentName, parameters);
+            LoadProperties(node, parentName, parser, parameters);
+            LoadCollections(node, parentName, parser, serializer, parameters);
             PreValidate();
             ValidateProperties(_metadata, parentName);
             Validate();
@@ -362,35 +353,39 @@ namespace Cfg.Net {
         protected virtual void PostValidate() {
         }
 
-        private void LoadCollections(INode node, string parentName, Dictionary<string, string> parameters = null) {
-            List<string> keys = _elementCache[_type];
+        public string Serialize() {
+            return _serializer.Serialize(this);
+        }
+
+        private void LoadCollections(INode node, string parentName, IParser parser, ISerializer serializer, Dictionary<string, string> parameters = null) {
+            var keys = CfgMetadataCache.ElementNames(_type).ToList();
             var elements = new Dictionary<string, IList>();
             var elementHits = new HashSet<string>();
             var addHits = new HashSet<string>();
 
             //initialize all the lists
-            for (int i = 0; i < keys.Count; i++) {
-                string key = keys[i];
+            for (var i = 0; i < keys.Count; i++) {
+                var key = keys[i];
                 elements.Add(key, (IList)_metadata[key].Getter(this));
             }
 
-            for (int i = 0; i < node.SubNodes.Count; i++) {
-                INode subNode = node.SubNodes[i];
-                string subNodeKey = NormalizeName(_type, subNode.Name);
+            for (var i = 0; i < node.SubNodes.Count; i++) {
+                var subNode = node.SubNodes[i];
+                var subNodeKey = CfgMetadataCache.NormalizeName(_type, subNode.Name);
                 if (_metadata.ContainsKey(subNodeKey)) {
                     elementHits.Add(subNodeKey);
                     var item = _metadata[subNodeKey];
 
-                    for (int j = 0; j < subNode.SubNodes.Count; j++) {
-                        INode add = subNode.SubNodes[j];
+                    for (var j = 0; j < subNode.SubNodes.Count; j++) {
+                        var add = subNode.SubNodes[j];
                         if (add.Name.Equals("add", StringComparison.Ordinal)) {
-                            string addKey = NormalizeName(_type, subNode.Name);
+                            var addKey = CfgMetadataCache.NormalizeName(_type, subNode.Name);
                             addHits.Add(addKey);
                             if (item.Loader == null) {
                                 if (item.ListType == typeof(Dictionary<string, string>)) {
                                     var dict = new Dictionary<string, string>();
-                                    for (int k = 0; k < add.Attributes.Count; k++) {
-                                        IAttribute attribute = add.Attributes[k];
+                                    for (var k = 0; k < add.Attributes.Count; k++) {
+                                        var attribute = add.Attributes[k];
                                         dict[attribute.Name] = attribute.Value;
                                     }
                                     elements[addKey].Add(dict);
@@ -401,7 +396,7 @@ namespace Cfg.Net {
                                             elements[addKey].Add(attrValue);
                                         } else {
                                             try {
-                                                elements[addKey].Add(_converter[item.ListType](attrValue));
+                                                elements[addKey].Add(CfgConstants.Converter[item.ListType](attrValue));
                                             } catch (Exception ex) {
                                                 Events.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
                                             }
@@ -411,7 +406,7 @@ namespace Cfg.Net {
                                     }
                                 }
                             } else {
-                                var loaded = item.Loader().Load(add, subNode.Name, Events, _validators, _shorthand, parameters);
+                                var loaded = item.Loader().Load(add, subNode.Name, parser, serializer, Events, _validators, _shorthand, parameters);
                                 elements[addKey].Add(loaded);
                             }
                         } else {
@@ -429,14 +424,14 @@ namespace Cfg.Net {
 
             // check for duplicates of unique properties required to be unique in collections
             for (int i = 0; i < keys.Count; i++) {
-                string key = keys[i];
-                CfgMetadata item = _metadata[key];
-                IList list = elements[key];
+                var key = keys[i];
+                var item = _metadata[key];
+                var list = elements[key];
 
                 if (list.Count > 1) {
                     lock (Locker) {
                         if (item.UniquePropertiesInList == null) {
-                            item.UniquePropertiesInList = GetMetadata(item.ListType, Events)
+                            item.UniquePropertiesInList = CfgMetadataCache.GetMetadata(item.ListType, Events)
                                 .Where(p => p.Value.Attribute.unique)
                                 .Select(p => p.Key)
                                 .ToArray();
@@ -446,9 +441,9 @@ namespace Cfg.Net {
                     if (item.UniquePropertiesInList.Length <= 0)
                         continue;
 
-                    for (int j = 0; j < item.UniquePropertiesInList.Length; j++) {
-                        string unique = item.UniquePropertiesInList[j];
-                        string[] duplicates = list
+                    for (var j = 0; j < item.UniquePropertiesInList.Length; j++) {
+                        var unique = item.UniquePropertiesInList[j];
+                        var duplicates = list
                             .Cast<CfgNode>()
                             .Where(n => n.UniqueProperties.ContainsKey(unique))
                             .Select(n => n.UniqueProperties[unique])
@@ -457,7 +452,7 @@ namespace Cfg.Net {
                             .Select(group => @group.Key)
                             .ToArray();
 
-                        for (int l = 0; l < duplicates.Length; l++) {
+                        for (var l = 0; l < duplicates.Length; l++) {
                             Events.DuplicateSet(unique, duplicates[l], key);
                         }
                     }
@@ -475,27 +470,10 @@ namespace Cfg.Net {
             }
         }
 
-        private static string NormalizeName(Type type, string name) {
-            var cache = _nameCache[type];
-            if (cache.ContainsKey(name)) {
-                return cache[name];
-            }
-            var builder = new StringBuilder();
-            for (var i = 0; i < name.Length; i++) {
-                var character = name[i];
-                if (char.IsLetterOrDigit(character)) {
-                    builder.Append(char.IsUpper(character) ? char.ToLowerInvariant(character) : character);
-                }
-            }
-            string result = builder.ToString();
-            cache[name] = result;
-            return result;
-        }
+        private void LoadProperties(INode node, string parentName, IParser parser, IDictionary<string, string> parameters = null) {
+            var keys = CfgMetadataCache.PropertyNames(_type).ToArray();
 
-        private void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
-            var keys = _propertyCache[_type];
-
-            if (keys.Count == 0)
+            if (!keys.Any())
                 return;
 
             var keyHits = new HashSet<string>();
@@ -503,7 +481,7 @@ namespace Cfg.Net {
 
             for (var i = 0; i < node.Attributes.Count; i++) {
                 var attribute = node.Attributes[i];
-                var attributeKey = NormalizeName(_type, attribute.Name);
+                var attributeKey = CfgMetadataCache.NormalizeName(_type, attribute.Name);
                 if (_metadata.ContainsKey(attributeKey)) {
                     var item = _metadata[attributeKey];
 
@@ -519,10 +497,7 @@ namespace Cfg.Net {
                         attribute.Value = maybe.ToString();
                     }
 
-                    if (attribute.Value.IndexOf(CfgConstants.ENTITY_START) > -1) {
-                        attribute.Value = Decode(attribute.Value);
-                    }
-
+                    attribute.Value = parser.Decode(attribute.Value);
                     attribute.Value = CheckParameters(parameters, attribute.Value);
 
                     if (item.Attribute.toLower) {
@@ -532,7 +507,7 @@ namespace Cfg.Net {
                     }
 
                     if (item.Attribute.shorthand) {
-                        if (_shorthand == null || _shorthand.MethodDataLookup == null) {
+                        if (_shorthand?.MethodDataLookup == null) {
                             Events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
                         } else {
                             TranslateShorthand(node, attribute.Value);
@@ -544,7 +519,7 @@ namespace Cfg.Net {
                         keyHits.Add(attributeKey);
                     } else {
                         try {
-                            item.Setter(this, _converter[item.PropertyInfo.PropertyType](attribute.Value));
+                            item.Setter(this, CfgConstants.Converter[item.PropertyInfo.PropertyType](attribute.Value));
                             keyHits.Add(attributeKey);
                         } catch (Exception ex) {
                             Events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
@@ -566,12 +541,12 @@ namespace Cfg.Net {
         }
 
         private void ValidateProperties(IDictionary<string, CfgMetadata> metadata, string parentName) {
-            var keys = _propertyCache[_type];
+            var keys = CfgMetadataCache.PropertyNames(_type).ToArray();
 
-            if (keys.Count == 0)
+            if (!keys.Any())
                 return;
 
-            for (var i = 0; i < keys.Count; i++) {
+            for (var i = 0; i < keys.Length; i++) {
                 var key = keys[i];
                 var item = metadata[key];
 
@@ -661,12 +636,12 @@ namespace Cfg.Net {
                         // named parameters
                         for (int i = 0; i < passedParameters.Length; i++) {
                             string parameter = passedParameters[i];
-                            string[] split = Split(parameter, NamedParameterSplitter);
+                            string[] split = Split(parameter, CfgConstants.NamedParameterSplitter);
                             if (split.Length == 2) {
-                                string name = NormalizeName(typeof(Parameter), split[0]);
+                                string name = CfgMetadataCache.NormalizeName(typeof(Parameter), split[0]);
                                 shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
                                 signatureParameters.RemoveAll(
-                                    p => NormalizeName(typeof(Parameter), p.Name) == name);
+                                    p => CfgMetadataCache.NormalizeName(typeof(Parameter), p.Name) == name);
                                 expression.Parameters.RemoveAll(p => p == parameter);
                             }
                         }
@@ -752,11 +727,11 @@ namespace Cfg.Net {
             var builder = new StringBuilder();
             List<string> badKeys = null;
             for (int j = 0; j < value.Length; j++) {
-                if (value[j] == CfgConstants.PLACE_HOLDER_FIRST &&
+                if (value[j] == CfgConstants.PlaceHolderFirst &&
                     value.Length > j + 1 &&
-                    value[j + 1] == CfgConstants.PLACE_HOLDER_SECOND) {
+                    value[j + 1] == CfgConstants.PlaceHolderSecond) {
                     int length = 2;
-                    while (value.Length > j + length && value[j + length] != CfgConstants.PLACE_HOLDER_LAST) {
+                    while (value.Length > j + length && value[j + length] != CfgConstants.PlaceHolderLast) {
                         length++;
                     }
                     if (length > 2) {
@@ -794,123 +769,13 @@ namespace Cfg.Net {
             return Events.Warnings();
         }
 
-        private static Dictionary<string, CfgMetadata> GetMetadata(Type type, CfgEvents events) {
-            Dictionary<string, CfgMetadata> metadata;
-
-            if (_metadataCache.TryGetValue(type, out metadata))
-                return metadata;
-
-            lock (Locker) {
-                _nameCache[type] = new Dictionary<string, string>();
-
-                var keyCache = new List<string>();
-                var listCache = new List<string>();
-                PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-                metadata = new Dictionary<string, CfgMetadata>(StringComparer.Ordinal);
-                for (int i = 0; i < propertyInfos.Length; i++) {
-                    PropertyInfo propertyInfo = propertyInfos[i];
-
-                    if (!propertyInfo.CanRead)
-                        continue;
-                    if (!propertyInfo.CanWrite)
-                        continue;
-                    var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
-                    if (attribute == null)
-                        continue;
-
-                    var key = NormalizeName(type, propertyInfo.Name);
-                    var item = new CfgMetadata(propertyInfo, attribute);
-
-                    // check default value for type mismatch
-                    if (attribute.ValueIsSet) {
-                        if (attribute.value.GetType() != propertyInfo.PropertyType) {
-                            object value = attribute.value;
-                            if (TryConvertValue(ref value, propertyInfo.PropertyType)) {
-                                attribute.value = value;
-                            } else {
-                                item.TypeMismatch = true;
-                                events.TypeMismatch(key, value, propertyInfo.PropertyType);
-                            }
-                        }
-                    }
-
-                    // type safety for value, min value, and max value
-                    object defaultValue = attribute.value;
-                    if (ResolveType(() => attribute.ValueIsSet, ref defaultValue, key, item, events)) {
-                        attribute.value = defaultValue;
-                    }
-
-                    object minValue = attribute.minValue;
-                    if (ResolveType(() => attribute.MinValueSet, ref minValue, key, item, events)) {
-                        attribute.minValue = minValue;
-                    }
-
-                    object maxValue = attribute.maxValue;
-                    if (ResolveType(() => attribute.MaxValueSet, ref maxValue, key, item, events)) {
-                        attribute.maxValue = maxValue;
-                    }
-
-                    if (propertyInfo.PropertyType.IsGenericType) {
-                        listCache.Add(key);
-                        item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                        if (item.ListType.IsSubclassOf(typeof(CfgNode))) {
-                            item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
-                        }
-                    } else {
-                        keyCache.Add(key);
-                    }
-                    item.Setter = CfgReflectionHelper.CreateSetter(propertyInfo);
-                    item.Getter = CfgReflectionHelper.CreateGetter(propertyInfo);
-
-                    metadata[key] = item;
-                }
-
-                _propertyCache[type] = keyCache;
-                _elementCache[type] = listCache;
-                _metadataCache[type] = metadata;
-            }
-
-            return _metadataCache[type];
-        }
-
-        private static bool ResolveType(Func<bool> isSet, ref object input, string key, CfgMetadata metadata,
-            CfgEvents events) {
-            if (!isSet())
-                return true;
-
-            Type type = metadata.PropertyInfo.PropertyType;
-
-            if (input.GetType() == type)
-                return true;
-
-            object value = input;
-            if (TryConvertValue(ref value, type)) {
-                input = value;
-                return true;
-            }
-
-            metadata.TypeMismatch = true;
-            events.TypeMismatch(key, value, type);
-            return false;
-        }
-
-        private static bool TryConvertValue(ref object value, Type conversionType) {
-            try {
-                value = Convert.ChangeType(value, conversionType, null);
-                return true;
-            } catch {
-                return false;
-            }
-        }
-
         internal static string[] Split(string arg, char splitter, int skip = 0) {
             if (arg.Equals(string.Empty))
                 return new string[0];
 
-            string[] split = arg.Replace("\\" + splitter, ControlString).Split(splitter);
+            string[] split = arg.Replace("\\" + splitter, CfgConstants.ControlString).Split(splitter);
             return
-                split.Select(s => s.Replace(ControlChar, splitter))
+                split.Select(s => s.Replace(CfgConstants.ControlChar, splitter))
                     .Skip(skip)
                     .Where(s => !string.IsNullOrEmpty(s))
                     .ToArray();
@@ -920,128 +785,12 @@ namespace Cfg.Net {
             if (arg.Equals(string.Empty))
                 return new string[0];
 
-            string[] split = arg.Replace("\\" + splitter[0], ControlString).Split(splitter, StringSplitOptions.None);
+            string[] split = arg.Replace("\\" + splitter[0], CfgConstants.ControlString).Split(splitter, StringSplitOptions.None);
             return
-                split.Select(s => s.Replace(ControlString, splitter[0]))
+                split.Select(s => s.Replace(CfgConstants.ControlString, splitter[0]))
                     .Skip(skip)
                     .Where(s => !string.IsNullOrEmpty(s))
                     .ToArray();
-        }
-
-        // a naive implementation for hand-written configurations
-        public static string Encode(string value) {
-            var builder = new StringBuilder();
-            for (int i = 0; i < value.Length; i++) {
-                char ch = value[0];
-                if (ch <= '>') {
-                    switch (ch) {
-                        case '<':
-                            builder.Append("&lt;");
-                            break;
-                        case '>':
-                            builder.Append("&gt;");
-                            break;
-                        case '"':
-                            builder.Append("&quot;");
-                            break;
-                        case '\'':
-                            builder.Append("&#39;");
-                            break;
-                        case '&':
-                            builder.Append("&amp;");
-                            break;
-                        default:
-                            builder.Append(ch);
-                            break;
-                    }
-                } else {
-                    builder.Append(ch);
-                }
-            }
-            return builder.ToString();
-        }
-
-        public static string Decode(string input) {
-            var builder = new StringBuilder();
-            var htmlEntityEndingChars = new[] { CfgConstants.ENTITY_END, CfgConstants.ENTITY_START };
-
-            for (int i = 0; i < input.Length; i++) {
-                char c = input[i];
-
-                if (c == CfgConstants.ENTITY_START) {
-                    // Found &. Look for the next ; or &. If & occurs before ;, then this is not entity, and next & may start another entity
-                    int index = input.IndexOfAny(htmlEntityEndingChars, i + 1);
-                    if (index > 0 && input[index] == CfgConstants.ENTITY_END) {
-                        string entity = input.Substring(i + 1, index - i - 1);
-
-                        if (entity.Length > 1 && entity[0] == '#') {
-                            bool parsedSuccessfully;
-                            uint parsedValue;
-                            if (entity[1] == 'x' || entity[1] == 'X') {
-                                parsedSuccessfully = uint.TryParse(entity.Substring(2), NumberStyles.AllowHexSpecifier,
-                                    NumberFormatInfo.InvariantInfo, out parsedValue);
-                            } else {
-                                parsedSuccessfully = uint.TryParse(entity.Substring(1), NumberStyles.Integer,
-                                    NumberFormatInfo.InvariantInfo, out parsedValue);
-                            }
-
-                            if (parsedSuccessfully) {
-                                parsedSuccessfully = (0 < parsedValue && parsedValue <= CfgConstants.UNICODE_00_END);
-                            }
-
-                            if (parsedSuccessfully) {
-                                if (parsedValue <= CfgConstants.UNICODE_00_END) {
-                                    // single character
-                                    builder.Append((char)parsedValue);
-                                } else {
-                                    // multi-character
-                                    var utf32 = (int)(parsedValue - CfgConstants.UNICODE_01_START);
-                                    var leadingSurrogate = (char)((utf32 / 0x400) + CfgConstants.HIGH_SURROGATE);
-                                    var trailingSurrogate = (char)((utf32 % 0x400) + CfgConstants.LOW_SURROGATE);
-
-                                    builder.Append(leadingSurrogate);
-                                    builder.Append(trailingSurrogate);
-                                }
-
-                                i = index;
-                                continue;
-                            }
-                        } else {
-                            i = index;
-                            char entityChar;
-                            CfgConstants.Entities.TryGetValue(entity, out entityChar);
-
-                            if (entityChar != (char)0) {
-                                c = entityChar;
-                            } else {
-                                builder.Append(CfgConstants.ENTITY_START);
-                                builder.Append(entity);
-                                builder.Append(CfgConstants.ENTITY_END);
-                                continue;
-                            }
-                        }
-                    }
-                }
-                builder.Append(c);
-            }
-            return builder.ToString();
-        }
-
-        public string Serialize() {
-            var builder = new StringBuilder();
-            var meta = GetMetadata(_type, Events);
-            builder.AppendLine("<cfg-net>");
-            foreach (var pair in meta) {
-                builder.Append("<");
-                builder.Append(pair.Key);
-                builder.AppendLine(">");
-
-                builder.Append("</");
-                builder.Append(pair.Key);
-                builder.AppendLine(">");
-            }
-            builder.Append("</cfg-net>");
-            return builder.ToString();
         }
 
     }

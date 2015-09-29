@@ -20,12 +20,20 @@ using System.Linq;
 using System.Reflection;
 
 namespace Cfg.Net {
-
-    internal sealed class CfgMetadata {
+    sealed class CfgMetadata {
 
         private const char DefaultDelimiter = ',';
         private readonly HashSet<string> _domainSet;
         private readonly HashSet<string> _validatorSet;
+
+        public PropertyInfo PropertyInfo { get; set; }
+        public CfgAttribute Attribute { get; set; }
+        public Type ListType { get; set; }
+        public Func<CfgNode> Loader { get; set; }
+        public string[] UniquePropertiesInList { get; set; }
+        public Action<object, object> Setter { get; set; }
+        public Func<object, object> Getter { get; set; }
+        public bool TypeMismatch { get; set; }
 
         public CfgMetadata(PropertyInfo propertyInfo, CfgAttribute attribute) {
             PropertyInfo = propertyInfo;
@@ -50,15 +58,6 @@ namespace Cfg.Net {
                     attribute.validators.Split(new[] { attribute.validatorDelimiter }, StringSplitOptions.None).Distinct(),
                     attribute.ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         }
-
-        public PropertyInfo PropertyInfo { get; set; }
-        public CfgAttribute Attribute { get; set; }
-        public Type ListType { get; set; }
-        public Func<CfgNode> Loader { get; set; }
-        public string[] UniquePropertiesInList { get; set; }
-        public Action<object, object> Setter { get; set; }
-        public Func<object, object> Getter { get; set; }
-        public bool TypeMismatch { get; set; }
 
         public bool IsInDomain(string value) {
             return _domainSet == null || (value != null && _domainSet.Contains(value));

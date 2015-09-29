@@ -96,6 +96,25 @@ namespace Cfg.Test {
             Assert.AreEqual(@"\\san\sql-backups\vinny\model", cfg.Servers[1].Databases[1].BackupFolder);
             Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
 
+            const string expected = @"<cfg>
+    <servers>
+        <add name=""Sam"">
+            <databases>
+                <add name=""master"" backupfolder=""\\san\sql-backups"" backupstokeep=""5"" />
+                <add name=""msdb"" backupfolder=""\\san\sql-backups"" backupstokeep=""2"" />
+            </databases>
+        </add>
+        <add name=""Vinny"">
+            <databases>
+                <add name=""master"" backupfolder=""\\san\sql-backups\vinny\master"" backupstokeep=""3"" />
+                <add name=""model"" backupfolder=""\\san\sql-backups\vinny\model"" backupstokeep=""4"" />
+            </databases>
+        </add>
+    </servers>
+</cfg>";
+            var actual = cfg.Serialize();
+            Assert.AreEqual(expected, actual);
+
         }
 
         [Test]

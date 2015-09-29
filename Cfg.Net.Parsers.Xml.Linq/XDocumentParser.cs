@@ -6,5 +6,9 @@ namespace Cfg.Net.Parsers.Xml.Linq {
         public INode Parse(string cfg) {
             return new XDocumentNode(XDocument.Parse(cfg).Root);
         }
+
+        public string Decode(string value) {
+            return value;
+        }
     }
 }
