@@ -514,7 +514,6 @@ namespace Cfg.Net {
                         attribute.Value = maybe.ToString();
                     }
 
-                    attribute.Value = parser.Decode(attribute.Value);
                     attribute.Value = CheckParameters(parameters, attribute.Value);
 
                     if (item.Attribute.toLower) {

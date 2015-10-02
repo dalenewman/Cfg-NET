@@ -1,25 +1,17 @@
-namespace Cfg.Net.Parsers.nanoXML
-{
+namespace Cfg.Net.Parsers.nanoXML {
     /// <summary>
     ///     XML element attribute
     /// </summary>
-    public class NanoXmlAttribute
-    {
-        private readonly string _name;
-
-        internal NanoXmlAttribute(string name, string value)
-        {
-            _name = name;
+    public class NanoXmlAttribute {
+        internal NanoXmlAttribute(string name, string value) {
+            Name = name;
             Value = value;
         }
 
         /// <summary>
         ///     Attribute name
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
         /// <summary>
         ///     Attribtue value
