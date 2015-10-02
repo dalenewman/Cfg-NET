@@ -24,7 +24,7 @@ Released under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 Getting Started
 ---------------
 
-Your database adminstrator (DBA) is unhappy.  Every few days he 
+Your database administrator (DBA) is unhappy.  Every few days he 
 gets text alerts saying "**Gandalf's E drive has less than 10% free space!**"
 
 He wants a program to make this text go away.  In other words, he 
