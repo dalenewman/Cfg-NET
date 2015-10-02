@@ -97,14 +97,14 @@ If you like, you can update your root node's constructor to
 this:
 
 ```csharp
-    public class YourRootNode : CfgNode {
-        public YourRootNode(string cfg, string shorthand) {
-            LoadShorthand(shorthand);
-            Load(cfg);
-        }
-
-        // ...snip...
+public class YourRootNode : CfgNode {
+    public YourRootNode(string cfg, string shorthand) {
+        LoadShorthand(shorthand);
+        Load(cfg);
     }
+
+    // ...snip...
+}
 ```
 
 ### Updates

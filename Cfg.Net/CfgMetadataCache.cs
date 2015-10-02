@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -123,17 +125,19 @@ namespace Cfg.Net {
 
         public static string NormalizeName(Type type, string name) {
             var cache = NameCache[type];
-            if (cache.ContainsKey(name)) {
-                return cache[name];
+            string value;
+            if (cache.TryGetValue(name, out value)) {
+                return value;
             }
+
             var builder = new StringBuilder();
             for (var i = 0; i < name.Length; i++) {
                 var character = name[i];
-                if (char.IsLetterOrDigit(character)) {
-                    builder.Append(char.IsUpper(character) ? char.ToLowerInvariant(character) : character);
+                if (Char.IsLetterOrDigit(character)) {
+                    builder.Append(Char.IsUpper(character) ? Char.ToLowerInvariant(character) : character);
                 }
             }
-            string result = builder.ToString();
+            var result = builder.ToString();
             cache[name] = result;
             return result;
         }
@@ -145,6 +149,53 @@ namespace Cfg.Net {
 
         public static IEnumerable<string> ElementNames(Type type) {
             return ElementCache.ContainsKey(type) ? ElementCache[type] : new List<string>();
+        }
+        
+        public static void SetDefaults(object node, Dictionary<string, CfgMetadata> metadata) {
+            foreach (var pair in metadata) {
+                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
+                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                } else {
+                    if (!pair.Value.TypeMismatch) {
+                        pair.Value.Setter(node, pair.Value.Attribute.value);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clone any node that has a parameterless constructor defined.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public static object Clone(CfgNode node) {
+            var type = node.GetType();
+            var meta = GetMetadata(type);
+            var clone = Activator.CreateInstance(type);
+            CloneProperties(meta, node, clone);
+            CloneLists(meta, node, clone);
+            return clone;
+        }
+
+        private static void CloneProperties(Dictionary<string, CfgMetadata> meta, object node, object clone) {
+            foreach (var pair in meta.Where(kv => kv.Value.ListType == null)) {
+                pair.Value.Setter(clone, pair.Value.Getter(node));
+            }
+        }
+
+        private static void CloneLists(IDictionary<string, CfgMetadata> meta, object node, object clone) {
+            foreach (var pair in meta.Where(kv => kv.Value.ListType != null)) {
+                var items = (IList)meta[pair.Key].Getter(node);
+                var cloneItems = (IList) Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType);
+                foreach (var item in items) {
+                    var metaItem = GetMetadata(item.GetType());
+                    var cloneItem = Activator.CreateInstance(pair.Value.ListType);
+                    CloneProperties(metaItem, item, cloneItem);
+                    CloneLists(metaItem, item, cloneItem);
+                    cloneItems.Add(cloneItem);
+                }
+                meta[pair.Key].Setter(clone, cloneItems);
+            }
         }
     }
 }

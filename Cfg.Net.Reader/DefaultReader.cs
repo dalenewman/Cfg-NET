@@ -15,8 +15,8 @@
 // limitations under the License.
 #endregion
 
+using System;
 using Cfg.Net.Contracts;
-using Cfg.Net.Loggers;
 
 namespace Cfg.Net.Reader {
     public class DefaultReader : IReader {

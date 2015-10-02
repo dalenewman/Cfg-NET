@@ -21,7 +21,7 @@ namespace Cfg.Test {
     ]
 }".Replace("'", "\"");
 
-            var cfg = new TestDifferentJsonParser(json, new JsonNetParser());
+            var cfg = new TestDifferentJsonParser(json, new JsonNetParser(), new JsonNetSerializer());
 
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
@@ -33,24 +33,29 @@ namespace Cfg.Test {
             Assert.AreEqual(true, cfg.Parameters.First().Value);
             Assert.AreEqual(false, cfg.Parameters.Last().Value);
 
+            var backToJson = cfg.Serialize();
+            Assert.AreEqual("{\"parameters\":[{\"name\":\"p1\",\"value\":true},{\"name\":\"p2\",\"value\":false}]}", backToJson);
+
+        }
+
+
+        class TestDifferentJsonParser : CfgNode {
+            [Cfg]
+            public List<TestDifferentJsonParserParameter> Parameters { get; set; }
+
+            public TestDifferentJsonParser(string xml, params IDependency[] dependencies) : base(dependencies) {
+                Load(xml);
+            }
+        }
+
+        class TestDifferentJsonParserParameter : CfgNode {
+            [Cfg(required = true, toLower = true)]
+            public string Name { get; set; }
+
+            [Cfg(value = false)]
+            public bool Value { get; set; }
         }
 
     }
 
-    public sealed class TestDifferentJsonParser : CfgNode {
-        [Cfg]
-        public List<TestDifferentJsonParserParameter> Parameters { get; set; }
-
-        public TestDifferentJsonParser(string xml, IDependency parser):base(parser) {
-            Load(xml);
-        }
-    }
-
-    public class TestDifferentJsonParserParameter : CfgNode {
-        [Cfg(required = true, toLower = true)]
-        public string Name { get; set; }
-
-        [Cfg(value = false)]
-        public bool Value { get; set; }
-    }
 }

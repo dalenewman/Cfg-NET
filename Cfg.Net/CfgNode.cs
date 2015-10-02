@@ -41,13 +41,10 @@ namespace Cfg.Net {
         private ShorthandRoot _shorthand;
         private IDictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
 
-        //prefixed with Cfg to not interfer with parent property names
-        public string NodeName { get; set; } = string.Empty;
-        protected Source Source { get; set; } = Source.Unknown;
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
 
         /// <summary>
-        /// Fancy constructor for injecting anything marked as an IDependency
+        /// Constructor for injecting anything marked with IDependency
         /// </summary>
         /// <param name="dependencies"></param>
         protected CfgNode(params IDependency[] dependencies) {
@@ -87,7 +84,7 @@ namespace Cfg.Net {
             var obj = Activator.CreateInstance(typeof(T));
 
             var metadata = CfgMetadataCache.GetMetadata(typeof(T), Events);
-            SetDefaults(obj, metadata);
+            CfgMetadataCache.SetDefaults(obj, metadata);
 
             var typed = (T)obj;
             setter?.Invoke(typed);
@@ -100,7 +97,7 @@ namespace Cfg.Net {
             var obj = Activator.CreateInstance(typeof(T));
 
             var metadata = CfgMetadataCache.GetMetadata(typeof(T), Events);
-            SetDefaults(obj, metadata);
+            CfgMetadataCache.SetDefaults(obj, metadata);
 
             var typed = (T)obj;
             setter?.Invoke(typed);
@@ -119,18 +116,6 @@ namespace Cfg.Net {
             }
 
             return typed;
-        }
-
-        private static void SetDefaults(object node, Dictionary<string, CfgMetadata> metadata) {
-            foreach (var pair in metadata) {
-                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
-                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
-                } else {
-                    if (!pair.Value.TypeMismatch) {
-                        pair.Value.Setter(node, pair.Value.Attribute.value);
-                    }
-                }
-            }
         }
 
         protected void Error(string message, params object[] args) {
@@ -167,21 +152,22 @@ namespace Cfg.Net {
         /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, Dictionary<string, string> parameters = null) {
             _metadata = CfgMetadataCache.GetMetadata(_type, Events);
-            SetDefaults(this, _metadata);
+            CfgMetadataCache.SetDefaults(this, _metadata);
 
             INode node;
             try {
-
+                var sourceDetector = new CfgSourceDetector();
+                Source source;
                 if (_reader == null) {
-                    Source = new CfgSourceDetector().Detect(cfg, Events.Logger);
+                    source = sourceDetector.Detect(cfg, Events.Logger);
                 } else {
                     var result = _reader.Read(cfg, Events.Logger);
                     if (Events.Errors().Any()) {
                         return;
                     }
                     cfg = result.Content;
-                    Source = result.Source;
-                    if (Source != Source.Error && result.Parameters.Any()) {
+                    source = result.Source;
+                    if (result.Source != Source.Error && result.Parameters.Any()) {
                         if (parameters == null) {
                             parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         }
@@ -191,23 +177,14 @@ namespace Cfg.Net {
                     }
                 }
 
-                if (Source == Source.Error) {
+                if (source == Source.Error) {
                     return;
                 }
 
-                // see if built-in parser, serializer used
-                if (_parser == null) {
-                    if (Source == Source.Json) {
-                        _parser = new FastJsonParser();
-                        _serializer = new JsonSerializer();
-                    } else {
-                        _parser = new NanoXmlParser();
-                        _serializer = new XmlSerializer();
-                    }
-                }
+                SetDefaultParser(source);
+                SetDefaultSerializer(cfg, source, sourceDetector);
 
                 node = _parser.Parse(cfg);
-                NodeName = node.Name;
 
                 var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
                 if (environmentDefaults.Length > 0) {
@@ -231,6 +208,43 @@ namespace Cfg.Net {
             ValidateProperties(_metadata, null);
             Validate();
             PostValidate();
+        }
+
+        private void SetDefaultSerializer(string cfg, Source source, ISourceDetector sourceDetector) {
+
+            if (_serializer != null)
+                return;
+
+            switch (source) {
+                case Source.Json:
+                    _serializer = new JsonSerializer();
+                    break;
+                case Source.Xml:
+                    _serializer = new XmlSerializer();
+                    break;
+                case Source.File:
+                case Source.Url:
+                    if (sourceDetector.Detect(cfg, new NullLogger()) == Source.Json) {
+                        _serializer = new JsonSerializer();
+                    } else {
+                        _serializer = new XmlSerializer();
+                    }
+                    break;
+                default:
+                    _serializer = new XmlSerializer();
+                    break;
+            }
+        }
+
+        private void SetDefaultParser(Source source) {
+            if (_parser != null)
+                return;
+
+            if (source == Source.Json) {
+                _parser = new FastJsonParser();
+            } else {
+                _parser = new NanoXmlParser();
+            }
         }
 
         protected IEnumerable<string[]> LoadEnvironment(INode node, Dictionary<string, string> parameters) {
@@ -316,14 +330,13 @@ namespace Cfg.Net {
             Dictionary<string, string> parameters
         ) {
             Events = events;
-            NodeName = node.Name;
             _shorthand = shorthand;
             _validators = validators;
             _parser = parser;
             _serializer = serializer;
             _metadata = CfgMetadataCache.GetMetadata(_type, events);
 
-            SetDefaults(this, _metadata);
+            CfgMetadataCache.SetDefaults(this, _metadata);
             LoadProperties(node, parentName, parser, parameters);
             LoadCollections(node, parentName, parser, serializer, parameters);
             PreValidate();
@@ -355,6 +368,10 @@ namespace Cfg.Net {
 
         public string Serialize() {
             return _serializer.Serialize(this);
+        }
+
+        public object Clone() {
+            return CfgMetadataCache.Clone(this);
         }
 
         private void LoadCollections(INode node, string parentName, IParser parser, ISerializer serializer, Dictionary<string, string> parameters = null) {
@@ -792,6 +809,5 @@ namespace Cfg.Net {
                     .Where(s => !string.IsNullOrEmpty(s))
                     .ToArray();
         }
-
     }
 }

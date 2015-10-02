@@ -64,6 +64,7 @@ Currently, an `IDependency` may be:
 
 * an `IReader` - for passing in something other than `XML` or `JSON`.
 * an `IParser` - for a different parser
+* an `ISerializer` - for a different serializer
 * an `IValidators` - for custom validators
 * an `ILogger` - for additional logging
 
@@ -315,3 +316,8 @@ dependencies.
 
 * [Autofac](http://autofac.org/)
 * [Dependency Injection in .NET, by Mark Seemann](https://www.manning.com/books/dependency-injection-in-dot-net)
+
+
+#### Updates:
+
+* 2015-09-29: ISerializer introduced as optional dependency.

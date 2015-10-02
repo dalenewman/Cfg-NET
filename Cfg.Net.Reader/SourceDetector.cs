@@ -28,7 +28,7 @@ namespace Cfg.Net.Reader {
                 return Source.Error;
             }
 
-            resource = resource.TrimStart();
+            resource = resource.Trim();
 
             if (resource == string.Empty) {
                 logger.Error("The configuration passed in is empty");

@@ -11,23 +11,31 @@ namespace Cfg.Net.Serializers {
         }
 
         private string InnerSerialize(CfgNode node) {
-            var meta = CfgMetadataCache.GetMetadata(node.GetType());
-            var builder = new StringBuilder();
-            builder.Append("<");
-            builder.Append(node.NodeName);
-            SerializeAttributes(meta, node, builder);
 
-            if (meta.Any(kv => kv.Value.ListType != null)) {
+            var type = node.GetType();
+            var meta = CfgMetadataCache.GetMetadata(type);
+            var builder = new StringBuilder();
+
+            if (JustAttributes(meta)) {
+                builder.Append("<");
+                builder.Append(type.Name);
+                SerializeAttributes(meta, node, builder);
                 builder.AppendLine(">");
                 SerializeElements(meta, node, builder, 1);
                 builder.Append("</");
-                builder.Append(node.NodeName);
+                builder.Append(type.Name);
                 builder.Append(">");
             } else {
+                builder.Append("<add");
+                SerializeAttributes(meta, node, builder);
                 builder.Append(" />");
             }
 
             return builder.ToString();
+        }
+
+        private static bool JustAttributes(Dictionary<string, CfgMetadata> meta) {
+            return meta.Any(kv => kv.Value.ListType != null);
         }
 
         private void SerializeElements(IDictionary<string, CfgMetadata> meta, object node, StringBuilder builder, int level) {
@@ -40,7 +48,7 @@ namespace Cfg.Net.Serializers {
 
                 foreach (CfgNode item in (IList)meta[pair.Key].Getter(node)) {
                     var metaData = CfgMetadataCache.GetMetadata(item.GetType());
-                    Indent(builder, level+1);
+                    Indent(builder, level + 1);
                     builder.Append("<add");
                     SerializeAttributes(metaData, item, builder);
                     if (metaData.Any(kv => kv.Value.ListType != null)) {
@@ -61,10 +69,8 @@ namespace Cfg.Net.Serializers {
 
         }
 
-        private static void Indent(StringBuilder builder, int level)
-        {
-            for (var i = 0; i < level*4; i++)
-            {
+        private static void Indent(StringBuilder builder, int level) {
+            for (var i = 0; i < level * 4; i++) {
                 builder.Append(' ');
             }
         }

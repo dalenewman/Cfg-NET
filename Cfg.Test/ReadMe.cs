@@ -96,7 +96,7 @@ namespace Cfg.Test {
             Assert.AreEqual(@"\\san\sql-backups\vinny\model", cfg.Servers[1].Databases[1].BackupFolder);
             Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
 
-            const string expected = @"<cfg>
+            const string expected = @"<Cfg>
     <servers>
         <add name=""Sam"">
             <databases>
@@ -111,7 +111,7 @@ namespace Cfg.Test {
             </databases>
         </add>
     </servers>
-</cfg>";
+</Cfg>";
             var actual = cfg.Serialize();
             Assert.AreEqual(expected, actual);
 

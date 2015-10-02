@@ -6,26 +6,26 @@ using NUnit.Framework;
 namespace Cfg.Test {
 
     [TestFixture]
-    public class ToXml {
+    public class ToJson {
 
         [Test]
         public void TestSome() {
 
-            const string xml = @"<xml>
-    <parameters>
-        <add name='p1' value='true' />
-        <add name='p2' value='false' />
-    </parameters>
-</xml>";
+            const string json = @"{
+    ""parameters"":[
+        { ""name"":""p1"", ""value"":true },
+        { ""name"":""p2"", ""value"":false }
+    ]
+}";
 
-            const string expected = @"<TestToXml>
-    <parameters>
-        <add name=""p1"" value=""true"" />
-        <add name=""p2"" value=""false"" />
-    </parameters>
-</TestToXml>";
+            const string expected = @"{
+    ""parameters"":[
+        { ""name"":""p1"", ""value"":true },
+        { ""name"":""p2"", ""value"":false }
+    ]
+}";
 
-            var cfg = new TestToXml(xml);
+            var cfg = new TestToJson(json);
 
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
@@ -38,20 +38,21 @@ namespace Cfg.Test {
             Console.WriteLine(actual);
             Assert.AreEqual(expected, actual);
 
-            Assert.AreEqual("<add name=\"p1\" value=\"true\" />", cfg.Parameters[0].Serialize());
+            Assert.AreEqual(@"{ ""name"":""p1"", ""value"":true }", cfg.Parameters[0].Serialize());
 
         }
 
-        class TestToXml : CfgNode {
-            [Cfg]
-            public List<TestToXmlParameter> Parameters { get; set; }
 
-            public TestToXml(string xml) {
-                Load(xml);
+        class TestToJson : CfgNode {
+            [Cfg]
+            public List<TestToJsonParameter> Parameters { get; set; }
+
+            public TestToJson(string json) {
+                Load(json);
             }
         }
 
-        class TestToXmlParameter : CfgNode {
+        class TestToJsonParameter : CfgNode {
             [Cfg(required = true, toLower = true)]
             public string Name { get; set; }
 
