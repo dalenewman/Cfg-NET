@@ -16,7 +16,6 @@ namespace Cfg.Net {
 
         internal static Dictionary<string, CfgMetadata> GetMetadata(Type type, CfgEvents events = null) {
             Dictionary<string, CfgMetadata> metadata;
-
             if (MetadataCache.TryGetValue(type, out metadata))
                 return metadata;
 
@@ -89,9 +88,10 @@ namespace Cfg.Net {
                 PropertyCache[type] = keyCache;
                 ElementCache[type] = listCache;
                 MetadataCache[type] = metadata;
+
+                return metadata;
             }
 
-            return MetadataCache[type];
         }
 
         private static bool ResolveType(Func<bool> isSet, ref object input, string key, CfgMetadata metadata, CfgEvents events) {
@@ -124,22 +124,20 @@ namespace Cfg.Net {
         }
 
         public static string NormalizeName(Type type, string name) {
-            var cache = NameCache[type];
-            string value;
-            if (cache.TryGetValue(name, out value)) {
-                return value;
-            }
-
-            var builder = new StringBuilder();
-            for (var i = 0; i < name.Length; i++) {
-                var character = name[i];
-                if (Char.IsLetterOrDigit(character)) {
-                    builder.Append(Char.IsUpper(character) ? Char.ToLowerInvariant(character) : character);
+            lock (Locker) {
+                string value;
+                if (NameCache[type].TryGetValue(name, out value)) {
+                    return value;
                 }
+
+                var builder = new StringBuilder();
+                foreach (var character in name.ToCharArray().Where(char.IsLetterOrDigit)) {
+                    builder.Append(char.IsUpper(character) ? char.ToLowerInvariant(character) : character);
+                }
+                var result = builder.ToString();
+                NameCache[type][name] = result;
+                return result;
             }
-            var result = builder.ToString();
-            cache[name] = result;
-            return result;
         }
 
 
@@ -149,18 +147,6 @@ namespace Cfg.Net {
 
         public static IEnumerable<string> ElementNames(Type type) {
             return ElementCache.ContainsKey(type) ? ElementCache[type] : new List<string>();
-        }
-        
-        public static void SetDefaults(object node, Dictionary<string, CfgMetadata> metadata) {
-            foreach (var pair in metadata) {
-                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
-                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
-                } else {
-                    if (!pair.Value.TypeMismatch) {
-                        pair.Value.Setter(node, pair.Value.Attribute.value);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -186,7 +172,7 @@ namespace Cfg.Net {
         private static void CloneLists(IDictionary<string, CfgMetadata> meta, object node, object clone) {
             foreach (var pair in meta.Where(kv => kv.Value.ListType != null)) {
                 var items = (IList)meta[pair.Key].Getter(node);
-                var cloneItems = (IList) Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType);
+                var cloneItems = (IList)Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType);
                 foreach (var item in items) {
                     var metaItem = GetMetadata(item.GetType());
                     var cloneItem = Activator.CreateInstance(pair.Value.ListType);

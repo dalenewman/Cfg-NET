@@ -84,7 +84,7 @@ namespace Cfg.Net {
             var obj = Activator.CreateInstance(typeof(T));
 
             var metadata = CfgMetadataCache.GetMetadata(typeof(T), Events);
-            CfgMetadataCache.SetDefaults(obj, metadata);
+            SetDefaults(obj, metadata);
 
             var typed = (T)obj;
             setter?.Invoke(typed);
@@ -97,7 +97,7 @@ namespace Cfg.Net {
             var obj = Activator.CreateInstance(typeof(T));
 
             var metadata = CfgMetadataCache.GetMetadata(typeof(T), Events);
-            CfgMetadataCache.SetDefaults(obj, metadata);
+            SetDefaults(obj, metadata);
 
             var typed = (T)obj;
             setter?.Invoke(typed);
@@ -152,7 +152,7 @@ namespace Cfg.Net {
         /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, Dictionary<string, string> parameters = null) {
             _metadata = CfgMetadataCache.GetMetadata(_type, Events);
-            CfgMetadataCache.SetDefaults(this, _metadata);
+            SetDefaults(this, _metadata);
 
             INode node;
             try {
@@ -336,7 +336,7 @@ namespace Cfg.Net {
             _serializer = serializer;
             _metadata = CfgMetadataCache.GetMetadata(_type, events);
 
-            CfgMetadataCache.SetDefaults(this, _metadata);
+            SetDefaults(this, _metadata);
             LoadProperties(node, parentName, parser, parameters);
             LoadCollections(node, parentName, parser, serializer, parameters);
             PreValidate();
@@ -784,6 +784,18 @@ namespace Cfg.Net {
 
         public string[] Warnings() {
             return Events.Warnings();
+        }
+
+        internal static void SetDefaults(object node, Dictionary<string, CfgMetadata> metadata) {
+            foreach (var pair in metadata) {
+                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
+                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                } else {
+                    if (!pair.Value.TypeMismatch) {
+                        pair.Value.Setter(node, pair.Value.Attribute.value);
+                    }
+                }
+            }
         }
 
         internal static string[] Split(string arg, char splitter, int skip = 0) {
