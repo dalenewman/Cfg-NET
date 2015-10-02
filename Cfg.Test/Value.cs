@@ -16,6 +16,7 @@ namespace Cfg.Test {
             <add value='5' longValue='5' stringValue='1' />
             <add value='10' longValue='10' stringValue='2'/>
             <add value='15' longValue='15' stringValue='6'/>
+            <add value='10' longValue='10' stringValue='&quot;10&quot;' />
         </things>
     </test>
 ".Replace("'", "\"");
@@ -27,10 +28,11 @@ namespace Cfg.Test {
             }
 
             var problems = cfg.Errors();
-            Assert.AreEqual(3, problems.Length);
+            Assert.AreEqual(4, problems.Length);
             Assert.IsTrue(problems[0] == "The 'value' attribute value '5' is too small. The minimum value allowed is '6'.");
             Assert.IsTrue(problems[1] == "The 'longvalue' attribute value '5' is too small. The minimum value allowed is '6'.");
             Assert.IsTrue(problems[2] == "The 'stringvalue' attribute value '6' is too big. The maximum value allowed is '5'.");
+            Assert.IsTrue(problems[3] == "The 'stringvalue' attribute value '\"10\"' is too small. The minimum value allowed is '1'.");
 
         }
 
