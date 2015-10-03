@@ -17,6 +17,6 @@
 
 namespace Cfg.Net.Contracts {
     public interface IValidator {
-        ValidatorResult Validate(string parent, string name, object value);
+        ValidatorResult Validate(string name, object value);
     }
 }

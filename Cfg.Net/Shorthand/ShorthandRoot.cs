@@ -38,7 +38,7 @@ namespace Cfg.Net.Shorthand {
         [Cfg(required = true)]
         public List<Method> Methods { get; set; }
 
-        protected override void Validate() {
+        protected internal override void Validate() {
             IEnumerable<string> signatures = Methods.Select(f => f.Signature).Distinct();
             foreach (string signature in signatures.Where(signature => Signatures.All(s => s.Name != signature))) {
                 Error("The shorthand signature {0} is undefined.", signature);

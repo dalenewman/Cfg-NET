@@ -29,7 +29,7 @@ namespace Cfg.Test {
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
             Assert.AreEqual(
-                "The value 'bad-value' in the 'value' attribute, inside 'things' is no good! It does not have two dashes like we agreed on.",
+                "The value 'bad-value' in the 'value' attribute is no good! It does not have two dashes like we agreed on.",
                 problems[0]);
 
         }
@@ -52,7 +52,7 @@ namespace Cfg.Test {
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
             Assert.AreEqual(
-                "The value 'bad-value' in the 'value' attribute, inside 'things' is no good! It does not have two dashes like we agreed on.",
+                "The value 'bad-value' in the 'value' attribute is no good! It does not have two dashes like we agreed on.",
                 problems[0]);
 
         }
@@ -116,14 +116,12 @@ namespace Cfg.Test {
 
         public class Contains2Dashes : IValidator {
 
-            public ValidatorResult Validate(string parent, string name, object value) {
+            public ValidatorResult Validate(string name, object value) {
                 var result = new ValidatorResult();
                 var count = value.ToString().Split(new[] { '-' }, StringSplitOptions.None).Length - 1;
                 result.Valid = count == 2;
                 if (!result.Valid) {
-                    result.Error(
-                        "The value '{0}' in the '{1}' attribute, inside '{2}' is no good! It does not have two dashes like we agreed on.",
-                        value, name, parent);
+                    result.Error("The value '{0}' in the '{1}' attribute is no good! It does not have two dashes like we agreed on.", value, name);
                 }
                 return result;
             }
@@ -132,7 +130,7 @@ namespace Cfg.Test {
 
         public class ContainsGood : IValidator {
 
-            public ValidatorResult Validate(string parent, string name, object value) {
+            public ValidatorResult Validate(string name, object value) {
                 var result = new ValidatorResult { Valid = value.ToString().Contains("good") };
                 if (!result.Valid) {
                     result.Error("The value '{0}' is missing good! I am deeply offended.", value);

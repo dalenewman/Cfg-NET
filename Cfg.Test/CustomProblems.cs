@@ -89,7 +89,7 @@ namespace Cfg.Test {
          }
       }
 
-      // custom validation
+       // custom validation
       protected override void Validate() {
          if (Provider == "file" && string.IsNullOrEmpty(File)) {
             Error("file provider needs file attribute.");

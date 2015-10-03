@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Cfg.Net;
 using Cfg.Net.Contracts;
-using Cfg.Net.Loggers;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -37,7 +36,7 @@ namespace Cfg.Test {
         }
 
         private class TestProperty : CfgNode {
-            public TestProperty(string cfg, ILogger logger)
+            public TestProperty(string cfg, IDependency logger)
                 : base(logger) {
                 Load(cfg);
             }
@@ -48,6 +47,7 @@ namespace Cfg.Test {
         private class Thing : CfgNode {
             [Cfg]
             public string Name { get; set; }
+
             [Cfg(domain = "Something,Another", ignoreCase = false)]
             public string Value { get; set; }
 
@@ -67,7 +67,11 @@ namespace Cfg.Test {
             public List<Thing> Things { get; set; }
 
             protected override void PreValidate() {
-                Things.Add(GetValidatedOf<Thing>(thing => { thing.Name = "three"; thing.Value = "error"; }));
+                var thing = this.GetValidatedOf<Thing>(t => {
+                    t.Name = "three";
+                    t.Value = "error";
+                });
+                Things.Add(thing);
             }
         }
 

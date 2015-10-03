@@ -46,6 +46,8 @@
     <Compile Include="CfgMetadataCache.cs" />
     <Compile Include="CfgNode.cs" />
     <Compile Include="CfgEvents.cs" />
+    <Compile Include="CfgNodeExtensions.cs" />
+    <Compile Include="CfgUtility.cs" />
     <Compile Include="Contracts\IAttribute.cs" />
     <Compile Include="Contracts\IDependency.cs" />
     <Compile Include="Contracts\INode.cs" />

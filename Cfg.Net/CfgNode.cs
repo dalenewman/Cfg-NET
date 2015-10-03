@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,7 +27,6 @@ using Cfg.Net.Serializers;
 using Cfg.Net.Shorthand;
 
 namespace Cfg.Net {
-
     public abstract class CfgNode {
 
         private static readonly object Locker = new object();
@@ -37,7 +37,6 @@ namespace Cfg.Net {
         private readonly IReader _reader;
         private readonly Type _type;
         private CfgEvents _events;
-        private Dictionary<string, CfgMetadata> _metadata;
         private ShorthandRoot _shorthand;
         private IDictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
 
@@ -74,55 +73,11 @@ namespace Cfg.Net {
             set { _events = value; }
         }
 
-        /// <summary>
-        ///     Get any type that inherits from CfgNode with default values
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="setter"></param>
-        /// <returns></returns>
-        public T GetDefaultOf<T>(Action<T> setter = null) {
-            var obj = Activator.CreateInstance(typeof(T));
-
-            var metadata = CfgMetadataCache.GetMetadata(typeof(T), Events);
-            SetDefaults(obj, metadata);
-
-            var typed = (T)obj;
-            setter?.Invoke(typed);
-
-            ((CfgNode)obj).PreValidate();
-            return typed;
-        }
-
-        public T GetValidatedOf<T>(Action<T> setter = null) {
-            var obj = Activator.CreateInstance(typeof(T));
-
-            var metadata = CfgMetadataCache.GetMetadata(typeof(T), Events);
-            SetDefaults(obj, metadata);
-
-            var typed = (T)obj;
-            setter?.Invoke(typed);
-
-            var node = (CfgNode)obj;
-            node.PreValidate();
-            node.ValidateProperties(metadata, null);
-            node.Validate();
-            node.PostValidate();
-
-            if (!node.Errors().Any())
-                return typed;
-
-            foreach (var error in node.Errors()) {
-                Events.Error(error);
-            }
-
-            return typed;
-        }
-
-        protected void Error(string message, params object[] args) {
+        protected internal void Error(string message, params object[] args) {
             Events.Error(message, args);
         }
 
-        protected void Warn(string message, params object[] args) {
+        protected internal void Warn(string message, params object[] args) {
             Events.Warning(message, args);
         }
 
@@ -146,13 +101,12 @@ namespace Cfg.Net {
         }
 
         /// <summary>
-        /// This method is used to load the configuration into the root, or top-most node.
+        /// Load the configuration into the root (top-most) node.
         /// </summary>
         /// <param name="cfg">by default, cfg should be XML or JSON, but can be other things depending on what IParser is injected.</param>
         /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, Dictionary<string, string> parameters = null) {
-            _metadata = CfgMetadataCache.GetMetadata(_type, Events);
-            SetDefaults(this, _metadata);
+            SetDefaults();
 
             INode node;
             try {
@@ -202,12 +156,9 @@ namespace Cfg.Net {
                 return;
             }
 
-            LoadProperties(node, null, _parser, parameters);
-            LoadCollections(node, null, _parser, _serializer, parameters);
-            PreValidate();
-            ValidateProperties(_metadata, null);
-            Validate();
-            PostValidate();
+            LoadProperties(node, null, parameters);
+            LoadCollections(node, null, parameters);
+            this.ReValidate(node.Name);
         }
 
         private void SetDefaultSerializer(string cfg, Source source, ISourceDetector sourceDetector) {
@@ -321,8 +272,7 @@ namespace Cfg.Net {
 
         private CfgNode Load(
             INode node,
-            string parentName,
-            IParser parser,
+            string parent,
             ISerializer serializer,
             CfgEvents events,
             IDictionary<string, IValidator> validators,
@@ -332,66 +282,54 @@ namespace Cfg.Net {
             Events = events;
             _shorthand = shorthand;
             _validators = validators;
-            _parser = parser;
             _serializer = serializer;
-            _metadata = CfgMetadataCache.GetMetadata(_type, events);
-
-            SetDefaults(this, _metadata);
-            LoadProperties(node, parentName, parser, parameters);
-            LoadCollections(node, parentName, parser, serializer, parameters);
-            PreValidate();
-            ValidateProperties(_metadata, parentName);
-            Validate();
-            PostValidate();
+            SetDefaults();
+            LoadProperties(node, parent, parameters);
+            LoadCollections(node, parent, parameters);
+            this.ReValidate(node.Name);
             return this;
         }
 
         /// <summary>
         ///     Override to add custom validation.  Use `Error()` or `Warn()` to record issues.
         /// </summary>
-        protected virtual void Validate() {
-        }
+        protected internal virtual void Validate() { }
 
         /// <summary>
         ///     Allows for modification of configuration before validation.
         ///     Note: You are not protected from `null` here.
         /// </summary>
-        protected virtual void PreValidate() {
-        }
+        protected internal virtual void PreValidate() { }
 
         /// <summary>
         ///     Allows for modification of configuration after validation.
         ///     Note: You can check for Errors() here and modify accordingly.
         /// </summary>
-        protected virtual void PostValidate() {
-        }
+        protected internal virtual void PostValidate() { }
 
         public string Serialize() {
             return _serializer.Serialize(this);
         }
 
-        public object Clone() {
-            return CfgMetadataCache.Clone(this);
-        }
-
-        private void LoadCollections(INode node, string parentName, IParser parser, ISerializer serializer, Dictionary<string, string> parameters = null) {
-            var keys = CfgMetadataCache.ElementNames(_type).ToList();
+        private void LoadCollections(INode node, string parentName, Dictionary<string, string> parameters = null) {
+            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
+            var elementNames = CfgMetadataCache.ElementNames(_type).ToList();
             var elements = new Dictionary<string, IList>();
             var elementHits = new HashSet<string>();
             var addHits = new HashSet<string>();
 
             //initialize all the lists
-            for (var i = 0; i < keys.Count; i++) {
-                var key = keys[i];
-                elements.Add(key, (IList)_metadata[key].Getter(this));
+            for (var i = 0; i < elementNames.Count; i++) {
+                var key = elementNames[i];
+                elements.Add(key, (IList)metadata[key].Getter(this));
             }
 
             for (var i = 0; i < node.SubNodes.Count; i++) {
                 var subNode = node.SubNodes[i];
                 var subNodeKey = CfgMetadataCache.NormalizeName(_type, subNode.Name);
-                if (_metadata.ContainsKey(subNodeKey)) {
+                if (metadata.ContainsKey(subNodeKey)) {
                     elementHits.Add(subNodeKey);
-                    var item = _metadata[subNodeKey];
+                    var item = metadata[subNodeKey];
 
                     for (var j = 0; j < subNode.SubNodes.Count; j++) {
                         var add = subNode.SubNodes[j];
@@ -423,7 +361,7 @@ namespace Cfg.Net {
                                     }
                                 }
                             } else {
-                                var loaded = item.Loader().Load(add, subNode.Name, parser, serializer, Events, _validators, _shorthand, parameters);
+                                var loaded = item.Loader().Load(add, subNode.Name, _serializer, Events, _validators, _shorthand, parameters);
                                 elements[addKey].Add(loaded);
                             }
                         } else {
@@ -438,56 +376,61 @@ namespace Cfg.Net {
                     }
                 }
             }
+        }
 
-            // check for duplicates of unique properties required to be unique in collections
-            for (int i = 0; i < keys.Count; i++) {
-                var key = keys[i];
-                var item = _metadata[key];
-                var list = elements[key];
-
-                if (list.Count > 1) {
-                    lock (Locker) {
-                        if (item.UniquePropertiesInList == null) {
-                            item.UniquePropertiesInList = CfgMetadataCache.GetMetadata(item.ListType, Events)
-                                .Where(p => p.Value.Attribute.unique)
-                                .Select(p => p.Key)
-                                .ToArray();
-                        }
-                    }
-
-                    if (item.UniquePropertiesInList.Length <= 0)
-                        continue;
-
-                    for (var j = 0; j < item.UniquePropertiesInList.Length; j++) {
-                        var unique = item.UniquePropertiesInList[j];
-                        var duplicates = list
-                            .Cast<CfgNode>()
-                            .Where(n => n.UniqueProperties.ContainsKey(unique))
-                            .Select(n => n.UniqueProperties[unique])
-                            .GroupBy(n => n)
-                            .Where(group => @group.Count() > 1)
-                            .Select(group => @group.Key)
-                            .ToArray();
-
-                        for (var l = 0; l < duplicates.Length; l++) {
-                            Events.DuplicateSet(unique, duplicates[l], key);
-                        }
-                    }
-                } else if (list.Count == 0 && item.Attribute.required) {
-                    if (elementHits.Contains(key) && !addHits.Contains(key)) {
-                        Events.MissingAddElement(key);
-                    } else {
-                        if (parentName == null) {
-                            Events.MissingElement(node.Name, key);
-                        } else {
-                            Events.MissingNestedElement(parentName, node.Name, key);
-                        }
-                    }
-                }
+        protected internal void ValidateListsBasedOnAttributes(string parent) {
+            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
+            var elementNames = CfgMetadataCache.ElementNames(_type).ToList();
+            foreach (var listName in elementNames) {
+                var listMetadata = metadata[listName];
+                var list = (IList)metadata[listName].Getter(this);
+                ValidateUniqueAndRequiredProperties(parent, listName, listMetadata, list);
             }
         }
 
-        private void LoadProperties(INode node, string parentName, IParser parser, IDictionary<string, string> parameters = null) {
+        private void ValidateUniqueAndRequiredProperties(
+            string parent,
+            string listName,
+            CfgMetadata listMetadata,
+            ICollection list
+        ) {
+
+            //if more than one then uniqueness comes into question
+            if (list.Count > 1) {
+                lock (Locker) {
+                    if (listMetadata.UniquePropertiesInList == null) {
+                        listMetadata.UniquePropertiesInList = CfgMetadataCache.GetMetadata(listMetadata.ListType, Events)
+                            .Where(p => p.Value.Attribute.unique)
+                            .Select(p => p.Key)
+                            .ToArray();
+                    }
+                }
+
+                if (listMetadata.UniquePropertiesInList.Length <= 0)
+                    return;
+
+                for (var j = 0; j < listMetadata.UniquePropertiesInList.Length; j++) {
+                    var unique = listMetadata.UniquePropertiesInList[j];
+                    var duplicates = list
+                        .Cast<CfgNode>()
+                        .Where(n => n.UniqueProperties.ContainsKey(unique))
+                        .Select(n => n.UniqueProperties[unique])
+                        .GroupBy(n => n)
+                        .Where(group => @group.Count() > 1)
+                        .Select(group => @group.Key)
+                        .ToArray();
+
+                    for (var l = 0; l < duplicates.Length; l++) {
+                        Events.DuplicateSet(unique, duplicates[l], listName);
+                    }
+                }
+            } else if (list.Count == 0 && listMetadata.Attribute.required) {
+                Events.MissingRequiredAdd(parent, listName);
+            }
+        }
+
+        private void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
+            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
             var keys = CfgMetadataCache.PropertyNames(_type).ToArray();
 
             if (!keys.Any())
@@ -499,8 +442,8 @@ namespace Cfg.Net {
             for (var i = 0; i < node.Attributes.Count; i++) {
                 var attribute = node.Attributes[i];
                 var attributeKey = CfgMetadataCache.NormalizeName(_type, attribute.Name);
-                if (_metadata.ContainsKey(attributeKey)) {
-                    var item = _metadata[attributeKey];
+                if (metadata.ContainsKey(attributeKey)) {
+                    var item = metadata[attributeKey];
 
                     // if attribute is null and no default is set, try the getter
                     if (attribute.Value == null && item.Attribute.value == null) {
@@ -548,7 +491,7 @@ namespace Cfg.Net {
 
             // missing any required attributes?
             foreach (var key in keys.Except(keyHits)) {
-                var item = _metadata[key];
+                var item = metadata[key];
                 if (item.Attribute.required) {
                     Events.MissingAttribute(parentName, node.Name, key);
                 }
@@ -556,7 +499,8 @@ namespace Cfg.Net {
 
         }
 
-        private void ValidateProperties(IDictionary<string, CfgMetadata> metadata, string parentName) {
+        internal void ValidateBasedOnAttributes() {
+            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
             var keys = CfgMetadataCache.PropertyNames(_type).ToArray();
 
             if (!keys.Any())
@@ -578,11 +522,7 @@ namespace Cfg.Net {
 
                 if (item.Attribute.DomainSet) {
                     if (!item.IsInDomain(stringValue)) {
-                        if (parentName == null) {
-                            Events.RootValueNotInDomain(stringValue, key, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
-                        } else {
-                            Events.ValueNotInDomain(parentName, key, stringValue, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
-                        }
+                        Events.ValueNotInDomain(key, stringValue, item.Attribute.domain.Replace(item.Attribute.domainDelimiter.ToString(), ", "));
                     }
                 }
 
@@ -590,18 +530,18 @@ namespace Cfg.Net {
 
                 CheckValueBoundaries(item.Attribute, key, objectValue);
 
-                CheckValidators(item, parentName, key, objectValue);
+                CheckValidators(item, key, objectValue);
             }
         }
 
-        private void CheckValidators(CfgMetadata item, string parent, string name, object value) {
+        private void CheckValidators(CfgMetadata item, string name, object value) {
             if (!item.Attribute.ValidatorsSet)
                 return;
 
             foreach (var validator in item.Validators()) {
                 if (_validators.ContainsKey(validator)) {
                     try {
-                        var result = _validators[validator].Validate(parent, name, value);
+                        var result = _validators[validator].Validate(name, value);
                         if (result.Valid)
                             continue;
 
@@ -619,7 +559,7 @@ namespace Cfg.Net {
                         Events.ValidatorException(validator, ex, value);
                     }
                 } else {
-                    Events.MissingValidator(parent, name, validator);
+                    Events.MissingValidator(name, validator);
                 }
             }
         }
@@ -628,43 +568,40 @@ namespace Cfg.Net {
             var expressions = new Expressions(stringValue);
             var shorthandNodes = new Dictionary<string, List<INode>>();
 
-            for (int j = 0; j < expressions.Count; j++) {
-                Expression expression = expressions[j];
-                if (_shorthand.MethodDataLookup.ContainsKey(expression.Method)) {
-                    MethodData methodData = _shorthand.MethodDataLookup[expression.Method];
+            for (var j = 0; j < expressions.Count; j++) {
+                var expression = expressions[j];
+                MethodData methodData;
+                if (_shorthand.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
                     var shorthandNode = new ShorthandNode("add");
                     shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
 
-                    List<Parameter> signatureParameters =
-                        methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value })
-                            .ToList();
-                    string[] passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
+                    var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
+                    var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
 
                     // single parameters
                     if (methodData.Signature.Parameters.Count == 1 && expression.SingleParameter != string.Empty) {
-                        string name = methodData.Signature.Parameters[0].Name;
-                        string value = expression.SingleParameter.StartsWith(name + ":",
+                        var name = methodData.Signature.Parameters[0].Name;
+                        var value = expression.SingleParameter.StartsWith(name + ":",
                             StringComparison.OrdinalIgnoreCase)
                             ? expression.SingleParameter.Remove(0, name.Length + 1)
                             : expression.SingleParameter;
                         shorthandNode.Attributes.Add(new ShorthandAttribute(name, value));
                     } else {
                         // named parameters
-                        for (int i = 0; i < passedParameters.Length; i++) {
-                            string parameter = passedParameters[i];
-                            string[] split = Split(parameter, CfgConstants.NamedParameterSplitter);
+                        for (var i = 0; i < passedParameters.Length; i++) {
+                            var parameter = passedParameters[i];
+                            var split = CfgUtility.Split(parameter, CfgConstants.NamedParameterSplitter);
                             if (split.Length == 2) {
-                                string name = CfgMetadataCache.NormalizeName(typeof(Parameter), split[0]);
+                                var name = CfgMetadataCache.NormalizeName(typeof(Parameter), split[0]);
                                 shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
-                                signatureParameters.RemoveAll(
-                                    p => CfgMetadataCache.NormalizeName(typeof(Parameter), p.Name) == name);
+                                signatureParameters.RemoveAll(p => CfgMetadataCache.NormalizeName(typeof(Parameter), p.Name) == name);
                                 expression.Parameters.RemoveAll(p => p == parameter);
                             }
                         }
 
                         // ordered nameless parameters
-                        for (int m = 0; m < signatureParameters.Count; m++) {
-                            Parameter signatureParameter = signatureParameters[m];
+                        for (var m = 0; m < signatureParameters.Count; m++) {
+                            var signatureParameter = signatureParameters[m];
                             shorthandNode.Attributes.Add(m < expression.Parameters.Count
                                 ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
                                 : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
@@ -680,7 +617,7 @@ namespace Cfg.Net {
             }
 
             foreach (var pair in shorthandNodes) {
-                INode shorthandCollection = node.SubNodes.FirstOrDefault(sn => sn.Name == pair.Key);
+                var shorthandCollection = node.SubNodes.FirstOrDefault(sn => sn.Name == pair.Key);
                 if (shorthandCollection == null) {
                     shorthandCollection = new ShorthandNode(pair.Key);
                     shorthandCollection.SubNodes.AddRange(pair.Value);
@@ -742,16 +679,16 @@ namespace Cfg.Net {
         private static Tuple<string, string[]> ReplaceParameters(string value, IDictionary<string, string> parameters) {
             var builder = new StringBuilder();
             List<string> badKeys = null;
-            for (int j = 0; j < value.Length; j++) {
+            for (var j = 0; j < value.Length; j++) {
                 if (value[j] == CfgConstants.PlaceHolderFirst &&
                     value.Length > j + 1 &&
                     value[j + 1] == CfgConstants.PlaceHolderSecond) {
-                    int length = 2;
+                    var length = 2;
                     while (value.Length > j + length && value[j + length] != CfgConstants.PlaceHolderLast) {
                         length++;
                     }
                     if (length > 2) {
-                        string key = value.Substring(j + 2, length - 2);
+                        var key = value.Substring(j + 2, length - 2);
                         if (parameters.ContainsKey(key)) {
                             builder.Append(parameters[key]);
                         } else {
@@ -785,40 +722,17 @@ namespace Cfg.Net {
             return Events.Warnings();
         }
 
-        internal static void SetDefaults(object node, Dictionary<string, CfgMetadata> metadata) {
+        internal void SetDefaults() {
+            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
             foreach (var pair in metadata) {
                 if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
-                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                    pair.Value.Setter(this, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
                 } else {
                     if (!pair.Value.TypeMismatch) {
-                        pair.Value.Setter(node, pair.Value.Attribute.value);
+                        pair.Value.Setter(this, pair.Value.Attribute.value);
                     }
                 }
             }
-        }
-
-        internal static string[] Split(string arg, char splitter, int skip = 0) {
-            if (arg.Equals(string.Empty))
-                return new string[0];
-
-            string[] split = arg.Replace("\\" + splitter, CfgConstants.ControlString).Split(splitter);
-            return
-                split.Select(s => s.Replace(CfgConstants.ControlChar, splitter))
-                    .Skip(skip)
-                    .Where(s => !string.IsNullOrEmpty(s))
-                    .ToArray();
-        }
-
-        internal static string[] Split(string arg, string[] splitter, int skip = 0) {
-            if (arg.Equals(string.Empty))
-                return new string[0];
-
-            string[] split = arg.Replace("\\" + splitter[0], CfgConstants.ControlString).Split(splitter, StringSplitOptions.None);
-            return
-                split.Select(s => s.Replace(CfgConstants.ControlString, splitter[0]))
-                    .Skip(skip)
-                    .Where(s => !string.IsNullOrEmpty(s))
-                    .ToArray();
         }
     }
 }

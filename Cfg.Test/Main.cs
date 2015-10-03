@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Xml.Linq;
+using Cfg.Net;
 using Cfg.Test.TestClasses;
 using NUnit.Framework;
 
@@ -13,14 +14,14 @@ namespace Cfg.Test {
         public void TestEmptyXmlCfg() {
             var cfg = new AttributeCfg(@"<cfg></cfg>");
             Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("The 'cfg' element is missing a 'sites' element.", cfg.Errors()[0]);
+            Assert.AreEqual("A 'sites' element with at least one item is required in cfg.", cfg.Errors()[0]);
         }
 
         [Test]
         public void TestEmptyJsonCfg() {
             var cfg = new AttributeCfg(@"{}");
             Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("The root element is missing a 'sites' element.", cfg.Errors()[0]);
+            Assert.AreEqual("A 'sites' element with at least one item is required.", cfg.Errors()[0]);
         }
 
         [Test]
@@ -67,14 +68,14 @@ namespace Cfg.Test {
         public void TestEmptySites() {
             var cfg = new AttributeCfg(@"<cfg><sites/></cfg>");
             Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("A 'sites' element is missing a child element.", cfg.Errors()[0]);
+            Assert.AreEqual("A 'sites' element with at least one item is required in cfg.", cfg.Errors()[0]);
         }
 
         [Test]
         public void TestEmptyJsonSites() {
             var cfg = new AttributeCfg("{\"sites\":[]}");
             Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("A 'sites' element is missing a child element.", cfg.Errors()[0]);
+            Assert.AreEqual("A 'sites' element with at least one item is required.", cfg.Errors()[0]);
         }
 
         [Test]

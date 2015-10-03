@@ -55,17 +55,17 @@ namespace Cfg.Net {
                     }
 
                     // type safety for value, min value, and max value
-                    object defaultValue = attribute.value;
+                    var defaultValue = attribute.value;
                     if (ResolveType(() => attribute.ValueIsSet, ref defaultValue, key, item, events)) {
                         attribute.value = defaultValue;
                     }
 
-                    object minValue = attribute.minValue;
+                    var minValue = attribute.minValue;
                     if (ResolveType(() => attribute.MinValueSet, ref minValue, key, item, events)) {
                         attribute.minValue = minValue;
                     }
 
-                    object maxValue = attribute.maxValue;
+                    var maxValue = attribute.maxValue;
                     if (ResolveType(() => attribute.MaxValueSet, ref maxValue, key, item, events)) {
                         attribute.maxValue = maxValue;
                     }
@@ -103,7 +103,7 @@ namespace Cfg.Net {
             if (input.GetType() == type)
                 return true;
 
-            object value = input;
+            var value = input;
             if (TryConvertValue(ref value, type)) {
                 input = value;
                 return true;
@@ -123,7 +123,7 @@ namespace Cfg.Net {
             }
         }
 
-        public static string NormalizeName(Type type, string name) {
+        internal static string NormalizeName(Type type, string name) {
             lock (Locker) {
                 string value;
                 if (NameCache[type].TryGetValue(name, out value)) {
@@ -142,11 +142,13 @@ namespace Cfg.Net {
 
 
         public static IEnumerable<string> PropertyNames(Type type) {
-            return PropertyCache.ContainsKey(type) ? PropertyCache[type] : new List<string>();
+            List<string> names;
+            return PropertyCache.TryGetValue(type, out names) ? names : new List<string>();
         }
 
         public static IEnumerable<string> ElementNames(Type type) {
-            return ElementCache.ContainsKey(type) ? ElementCache[type] : new List<string>();
+            List<string> names;
+            return ElementCache.TryGetValue(type, out names) ? names : new List<string>();
         }
 
         /// <summary>
@@ -154,7 +156,7 @@ namespace Cfg.Net {
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public static object Clone(CfgNode node) {
+        internal static object Clone(CfgNode node) {
             var type = node.GetType();
             var meta = GetMetadata(type);
             var clone = Activator.CreateInstance(type);

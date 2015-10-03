@@ -25,7 +25,7 @@ namespace Cfg.Net.Shorthand
 
         public Expressions(string value)
         {
-            AddRange(CfgNode.Split(value, ExpressionSplitter).Select(e => new Expression(e)));
+            AddRange(CfgUtility.Split(value, ExpressionSplitter).Select(e => new Expression(e)));
         }
     }
 }

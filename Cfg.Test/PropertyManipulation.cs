@@ -22,7 +22,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("The root element has an invalid value of 'System.Int16' in the 'thing1' attribute.  The valid domain is: int16.", problems[0]);
+            Assert.AreEqual("An invalid value of 'System.Int16' is in the 'thing1' attribute.  The valid domain is: int16.", problems[0]);
             Assert.AreEqual("System.Int16", cfg.Thing1);
             Assert.AreEqual("int16", cfg.Thing2);
 

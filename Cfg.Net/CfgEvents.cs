@@ -59,8 +59,8 @@ namespace Cfg.Net {
             Logger.Error("A{1} '{0}' element is missing a child element.", elementName, Suffix(elementName));
         }
 
-        public void MissingValidator(string parentName, string nodeName, string validatorName) {
-            Logger.Warn("A '{1}' attribute in {0} can not find the {2} validator.  Please make it's passed in to your Cfg-Net root constructor.", parentName, nodeName, validatorName);
+        public void MissingValidator(string nodeName, string validatorName) {
+            Logger.Warn("A '{0}' attribute can not find the {1} validator.  Please make it's passed in to your Cfg-Net root constructor.", nodeName, validatorName);
         }
 
         public void ValidatorException(string validatorName, Exception ex, object value) {
@@ -70,6 +70,10 @@ namespace Cfg.Net {
         public void MissingNestedElement(string parentName, string nodeName, string elementName) {
             Logger.Error("A{3} '{0}' '{1}' element is missing a{4} '{2}' element.", parentName, nodeName, elementName,
                 Suffix(parentName), Suffix(elementName));
+        }
+
+        public void MissingRequiredAdd(string parent, string key) {
+            Logger.Error($"A{Suffix(key)} '{key}' element with at least one item is required{(string.IsNullOrEmpty(parent) ? "." : " in " + parent + ".")}");
         }
 
         public void MissingPlaceHolderValues(string[] keys) {
@@ -91,12 +95,8 @@ namespace Cfg.Net {
                 Suffix(parentName));
         }
 
-        public void ValueNotInDomain(string parentName, string propertyName, object value, string validValues) {
-            Logger.Error("A{4} '{0}' element has an invalid value of '{2}' in the '{1}' attribute.  The valid domain is: {3}.", parentName, propertyName, value, validValues, Suffix(parentName));
-        }
-
-        public void RootValueNotInDomain(object value, string propertyName, string validValues) {
-            Logger.Error("The root element has an invalid value of '{0}' in the '{1}' attribute.  The valid domain is: {2}.", value, propertyName, validValues);
+        public void ValueNotInDomain(string name, object value, string validValues) {
+            Logger.Error("An invalid value of '{0}' is in the '{1}' attribute.  The valid domain is: {2}.", value, name, validValues);
         }
 
         public void ParseException(string message) {

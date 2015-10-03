@@ -18,32 +18,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Cfg.Net.Shorthand
-{
-    public class Expression
-    {
+namespace Cfg.Net.Shorthand {
+    public class Expression {
         private const char ParameterSplitter = ',';
         private const char Open = '(';
         private const string Close = ")";
 
-        public Expression(string expression)
-        {
+        public Expression(string expression) {
             OriginalExpression = expression;
             int openIndex = expression.IndexOf(Open);
 
-            if (openIndex > 0)
-            {
+            if (openIndex > 0) {
                 Method = expression.Substring(0, openIndex).ToLower();
                 string parameters = expression.Remove(0, openIndex + 1);
-                if (parameters.EndsWith(Close, StringComparison.Ordinal))
-                {
+                if (parameters.EndsWith(Close, StringComparison.Ordinal)) {
                     parameters = parameters.Substring(0, parameters.Length - 1);
                 }
                 SingleParameter = parameters;
-                Parameters = CfgNode.Split(parameters, ParameterSplitter).ToList();
-            }
-            else
-            {
+                Parameters = CfgUtility.Split(parameters, ParameterSplitter).ToList();
+            } else {
                 Method = expression;
                 SingleParameter = string.Empty;
                 Parameters = new List<string>();
