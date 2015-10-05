@@ -122,9 +122,14 @@ In our model, the `Server` class has a `Name` property that is `required`, and m
 
 ### The Order of Things
 
-For each node in your configuration, the `Cfg` attribute, the .NET `PropertyInfo`, 
-the `get`, and the `set` is loaded (and cached). With this metadata, 
-an instance is created. Each property in the instance is defaulted to `value` and 
+For each node in your configuration, four things are cached:
+
+1. the `Cfg` attribute
+2. the .NET `PropertyInfo` 
+3. the `get`
+4. the `set` 
+
+With this, an instance is created. Each property in the instance is defaulted to `value` and 
 each collection is initialized.
 
 Per the metadata, Cfg-Net tries to read each attribute. If a 
@@ -132,17 +137,18 @@ value is found, it is `set`. Then, `get` is invoked.
 
 Then:
 
+1. [`PreValidate()`](#PreValidate) is executed
+1. `required` confirms a value exists
 1. `toLower` or `toUpper` may modify the value
 1. `shorthand` may check for [translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-1. `required` confirms a value exists
-1. `unique` confirms the value is unique in it's collection
-1. [`PreValidate()`](#PreValidate) is executed
 1. `domain` checks value against valid values
 1. `minLength` checks value against a minimum length
 1. `maxLength` checks value against a maximum length
 1. `minValue` checks value against a minimum value
 1. `maxValue` checks value against a maximum value
 1. `validators` checks value against injected validators
+1. `unique` confirms attributes are unique within a collection
+1. `required` confirms an item exists in a collection
 1. [`Validate`](#Validate) is executed
 1. [`PostValidate`](#PostValidate) is executed
 
@@ -477,3 +483,13 @@ default parsers.  There is a constructor on `CfgNode` that allows you to inject
 * [Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
 * [Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
 * [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
+
+### Updates
+* a `Serialize` method was added to `CfgNode`.  XML and JSON serializers are 
+built in, or you may inject an `ISerializer` implementation of you own.
+* some extension methods are now available for working with nodes after they are loaded:
+ * `SetDefaults()` applies the default values from the `Cfg` attribute and initializes the lists
+ * `Clone()` produces a (deep) clone of everything inheriting from `CfgNode` and/or decorated with the `Cfg` attribute
+ * `GetDefaultOf<>()` allows you to create and set a node considering default values, and runs `PreValidate`
+ * `GetValidatedOf<>()` allows you to create, set, and validate a node considring default values and will populate `Errors` and/or `Warnings` in the creator (the node you call it from) and itself
+ * `ReValidate()` re-validates the node and populates `Errors` and/or `Warnings` appropriately

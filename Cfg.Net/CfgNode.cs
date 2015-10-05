@@ -106,7 +106,7 @@ namespace Cfg.Net {
         /// <param name="cfg">by default, cfg should be XML or JSON, but can be other things depending on what IParser is injected.</param>
         /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, Dictionary<string, string> parameters = null) {
-            SetDefaults();
+            this.SetDefaults();
 
             INode node;
             try {
@@ -283,7 +283,7 @@ namespace Cfg.Net {
             _shorthand = shorthand;
             _validators = validators;
             _serializer = serializer;
-            SetDefaults();
+            this.SetDefaults();
             LoadProperties(node, parent, parameters);
             LoadCollections(node, parent, parameters);
             this.ReValidate(node.Name);
@@ -722,17 +722,5 @@ namespace Cfg.Net {
             return Events.Warnings();
         }
 
-        internal void SetDefaults() {
-            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
-            foreach (var pair in metadata) {
-                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
-                    pair.Value.Setter(this, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
-                } else {
-                    if (!pair.Value.TypeMismatch) {
-                        pair.Value.Setter(this, pair.Value.Attribute.value);
-                    }
-                }
-            }
-        }
     }
 }

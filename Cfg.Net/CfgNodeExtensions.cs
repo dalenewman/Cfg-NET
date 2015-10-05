@@ -5,6 +5,20 @@ namespace Cfg.Net {
 
     public static class CfgNodeExtensions {
 
+
+        public static void SetDefaults(this CfgNode node) {
+            var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
+            foreach (var pair in metadata) {
+                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
+                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                } else {
+                    if (!pair.Value.TypeMismatch) {
+                        pair.Value.Setter(node, pair.Value.Attribute.value);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// When you want to clone yourself 
         /// </summary>
@@ -30,6 +44,7 @@ namespace Cfg.Net {
                 return null;
             node.SetDefaults();
             setter?.Invoke(node);
+            node.PreValidate();
             return node;
         }
 
