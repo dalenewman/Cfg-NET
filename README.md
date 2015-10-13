@@ -483,13 +483,8 @@ default parsers.  There is a constructor on `CfgNode` that allows you to inject
 * [Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
 * [Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
 * [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
+* [Extension Methods](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Methods.md) 
 
 ### Updates
 * a `Serialize` method was added to `CfgNode`.  XML and JSON serializers are 
 built in, or you may inject an `ISerializer` implementation of you own.
-* some extension methods are now available for working with nodes after they are loaded:
- * `SetDefaults()` applies the default values from the `Cfg` attribute and initializes the lists
- * `Clone()` produces a (deep) clone of everything inheriting from `CfgNode` and/or decorated with the `Cfg` attribute
- * `GetDefaultOf<>()` allows you to create and set a node considering default values, and runs `PreValidate`
- * `GetValidatedOf<>()` allows you to create, set, and validate a node considring default values and will populate `Errors` and/or `Warnings` in the creator (the node you call it from) and itself
- * `ReValidate()` re-validates the node and populates `Errors` and/or `Warnings` appropriately
