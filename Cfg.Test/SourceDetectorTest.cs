@@ -1,4 +1,6 @@
 ﻿using Cfg.Net;
+using Cfg.Net.Contracts;
+using Cfg.Net.Ext;
 using Cfg.Net.Loggers;
 using Cfg.Net.Reader;
 using NUnit.Framework;

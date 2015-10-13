@@ -17,6 +17,7 @@
 
 using System;
 using Cfg.Net.Contracts;
+using Cfg.Net.Ext;
 
 namespace Cfg.Net.Reader {
     public class DefaultReader : IReader {

@@ -18,6 +18,7 @@ using System;
 using System.IO;
 using System.Net;
 using Cfg.Net.Contracts;
+using Cfg.Net.Ext;
 
 namespace Cfg.Net.Reader {
     public class WebReader : IReader {

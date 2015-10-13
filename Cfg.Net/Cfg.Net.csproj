@@ -46,7 +46,11 @@
     <Compile Include="CfgMetadataCache.cs" />
     <Compile Include="CfgNode.cs" />
     <Compile Include="CfgEvents.cs" />
-    <Compile Include="CfgNodeExtensions.cs" />
+    <Compile Include="Contracts\ReaderResult.cs" />
+    <Compile Include="Contracts\Source.cs" />
+    <Compile Include="Contracts\ValidatorResult.cs" />
+    <Compile Include="Contracts\Validators.cs" />
+    <Compile Include="Ext\Extensions.cs" />
     <Compile Include="CfgUtility.cs" />
     <Compile Include="Contracts\IAttribute.cs" />
     <Compile Include="Contracts\IDependency.cs" />
@@ -59,10 +63,7 @@
     <Compile Include="Contracts\IValidators.cs" />
     <Compile Include="Serializers\JsonSerializer.cs" />
     <Compile Include="Serializers\XmlSerializer.cs" />
-    <Compile Include="ReaderResult.cs" />
-    <Compile Include="Source.cs" />
     <Compile Include="CfgSourceDetector.cs" />
-    <Compile Include="ValidatorResult.cs" />
     <Compile Include="Loggers\MemoryLogger.cs" />
     <Compile Include="Loggers\CfgLogger.cs" />
     <Compile Include="Contracts\ILogger.cs" />
@@ -90,7 +91,6 @@
     <Compile Include="Shorthand\ShorthandAttribute.cs" />
     <Compile Include="Shorthand\ShorthandNode.cs" />
     <Compile Include="Shorthand\Signature.cs" />
-    <Compile Include="Validators.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <PropertyGroup>

@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 // Cfg-NET An alternative .NET configuration handler.
 // Copyright 2015 Dale Newman
 // 
@@ -14,28 +14,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
 using System.Collections.Generic;
 
-namespace Cfg.Net {
+namespace Cfg.Net.Contracts {
+    public class ReaderResult {
 
-    public class ValidatorResult {
+        public Source Source { get; set; }
+        public string Content { get; set; }
+        public Dictionary<string, string> Parameters { get; set; }
 
-        public ValidatorResult() {
-            Valid = true;
-            Warnings = new List<string>();
-            Errors = new List<string>();
-        }
-
-        public bool Valid { get; set; }
-        public IList<string> Warnings { get; set; }
-        public IList<string> Errors { get; set; }
-
-        public void Error(string format, params object[] args) {
-            Errors.Add(string.Format(format, args));
-        }
-
-        public void Warn(string format, params object[] args) {
-            Warnings.Add(string.Format(format, args));
+        public ReaderResult() {
+            Source = Source.Error;
+            Content = string.Empty;
+            Parameters = new Dictionary<string, string>();
         }
     }
 }

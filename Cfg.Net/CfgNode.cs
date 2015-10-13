@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Cfg.Net.Contracts;
+using Cfg.Net.Ext;
 using Cfg.Net.Loggers;
 using Cfg.Net.Parsers;
 using Cfg.Net.Serializers;
@@ -200,7 +201,7 @@ namespace Cfg.Net {
 
         protected IEnumerable<string[]> LoadEnvironment(INode node, Dictionary<string, string> parameters) {
             for (var i = 0; i < node.SubNodes.Count; i++) {
-                var environmentsNode = node.SubNodes.FirstOrDefault(n => n.Name == CfgConstants.EnvironmentsElementName);
+                var environmentsNode = node.SubNodes.FirstOrDefault(n => n.Name.Equals(CfgConstants.EnvironmentsElementName, StringComparison.OrdinalIgnoreCase));
                 if (environmentsNode == null)
                     continue;
 
@@ -211,7 +212,7 @@ namespace Cfg.Net {
 
                 if (environmentsNode.SubNodes.Count > 1) {
                     IAttribute defaultEnvironment;
-                    if (!node.TryAttribute(CfgConstants.EnvironmentsDefaultName, out defaultEnvironment))
+                    if (!node.TryAttribute(CfgConstants.EnvironmentDefaultName, out defaultEnvironment))
                         continue;
 
                     for (var j = 0; j < environmentsNode.SubNodes.Count; j++) {

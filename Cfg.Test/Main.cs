@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Xml.Linq;
 using Cfg.Net;
+using Cfg.Net.Ext;
 using Cfg.Test.TestClasses;
 using NUnit.Framework;
 

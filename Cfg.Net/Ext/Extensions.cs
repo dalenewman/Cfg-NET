@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
 
-namespace Cfg.Net {
+namespace Cfg.Net.Ext {
 
-    public static class CfgNodeExtensions {
-
+    public static class Extensions {
 
         public static void SetDefaults(this CfgNode node) {
             var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);

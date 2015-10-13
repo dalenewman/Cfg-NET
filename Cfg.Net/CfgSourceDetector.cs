@@ -16,6 +16,7 @@
 #endregion
 
 using Cfg.Net.Contracts;
+using Cfg.Net.Ext;
 
 namespace Cfg.Net {
 

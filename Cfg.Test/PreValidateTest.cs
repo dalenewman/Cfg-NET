@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cfg.Net;
 using Cfg.Net.Contracts;
+using Cfg.Net.Ext;
 using NUnit.Framework;
 
 namespace Cfg.Test {

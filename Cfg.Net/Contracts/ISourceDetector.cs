@@ -14,6 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using Cfg.Net.Ext;
+
 namespace Cfg.Net.Contracts {
     public interface ISourceDetector {
         Source Detect(string resource, ILogger logger);

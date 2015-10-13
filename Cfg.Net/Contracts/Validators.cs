@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Cfg.Net.Contracts;
 
-namespace Cfg.Net {
+namespace Cfg.Net.Contracts {
     public class Validators : IValidators {
 
         private readonly Dictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
