@@ -30,7 +30,7 @@ namespace Cfg.Test {
 
             var original = new CloneRoot(xml);
 
-            foreach (var error in original.Errors()) {
+           foreach (var error in original.Errors()) {
                 Console.Error.WriteLine(error);
             }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Cfg.Net;
 using Cfg.Net.Contracts;
 using Cfg.Net.Ext;
@@ -68,10 +69,12 @@ namespace Cfg.Test {
             public List<Thing> Things { get; set; }
 
             protected override void PreValidate() {
-                var thing = this.GetValidatedOf<Thing>(t => {
-                    t.Name = "three";
-                    t.Value = "error";
-                });
+                var thing = new Thing { Name = "three", Value = "error" }.WithValidation();
+                if (thing.Errors().Any()) {
+                    foreach (var error in thing.Errors()) {
+                        Error(error);
+                    }
+                }
                 Things.Add(thing);
             }
         }

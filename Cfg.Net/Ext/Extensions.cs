@@ -1,17 +1,27 @@
 using System;
-using System.Linq;
 
 namespace Cfg.Net.Ext {
 
     public static class Extensions {
 
+        [Obsolete("Use .WithDefaults() instead.  This method will be made internal in next version.")]
         public static void SetDefaults(this CfgNode node) {
             var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
             foreach (var pair in metadata) {
                 if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
-                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                    var value = pair.Value.Getter(node);
+                    if (value == null) {
+                        pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                    }
                 } else {
-                    if (!pair.Value.TypeMismatch) {
+                    if (pair.Value.TypeMismatch || pair.Value.Attribute.value == null)
+                        continue;
+
+                    var value = pair.Value.Getter(node);
+
+                    if (value == null) {
+                        pair.Value.Setter(node, pair.Value.Attribute.value);
+                    } else if (value.Equals(pair.Value.Default) && !pair.Value.Default.Equals(pair.Value.Attribute.value)) {
                         pair.Value.Setter(node, pair.Value.Attribute.value);
                     }
                 }
@@ -23,74 +33,41 @@ namespace Cfg.Net.Ext {
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public static object Clone(this CfgNode node) {
+        public static T Clone<T>(this T node) {
             return CfgMetadataCache.Clone(node);
         }
 
-        /// <summary>
-        /// When you want to:
-        /// * create
-        /// * set defaults
-        /// * and set a node
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="creator"></param>
-        /// <param name="setter"></param>
-        /// <returns></returns>
+
+        [Obsolete("Use new T() or T{} .WithDefaults() instead.  GetDefaultOf<T> will be removed in next version.")]
         public static T GetDefaultOf<T>(this CfgNode creator, Action<T> setter = null) where T : CfgNode {
             var node = Activator.CreateInstance(typeof(T)) as T;
             if (node == null)
                 return null;
             node.SetDefaults();
             setter?.Invoke(node);
-            node.PreValidate();
             return node;
         }
 
-        /// <summary>
-        /// When you want to:
-        /// * create
-        /// * set defaults
-        /// * set
-        /// * pre-validate
-        /// * validate based on attributes
-        /// * validate
-        /// * and post-validate a node
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="creator"></param>
-        /// <param name="setter"></param>
-        /// <returns></returns>
+        public static T WithDefaults<T>(this T node) where T : CfgNode {
+            node.SetDefaults();
+            return node;
+        }
+
+        public static T WithValidation<T>(this T host, string parent = "") where T : CfgNode {
+            host.WithDefaults();
+            host.ValidateBasedOnAttributes();
+            host.ValidateListsBasedOnAttributes(parent);
+            return host;
+        }
+
+        [Obsolete("Use new T().WithValidation() instead.  GetValidatedOf<T> will be removed.")]
         public static T GetValidatedOf<T>(this CfgNode creator, Action<T> setter = null) where T : CfgNode {
-
-            var node = GetDefaultOf(creator, setter);
-            if (node == null)
-                return null;
-
-            ReValidate(node);
-
-            if (node.Errors().Any()) {
-                foreach (var error in node.Errors()) {
-                    creator.Error(error);
-                }
-            }
-
-            if (!node.Warnings().Any())
-                return node;
-
-            foreach (var warning in node.Warnings()) {
-                creator.Warn(warning);
-            }
-
-            return node;
+            return GetDefaultOf(creator, setter).WithValidation();
         }
 
+        [Obsolete("Use .WithValidation() instead.  This method only validates based on Cfg[] attributes, it does not run over-ridable methods: PreValidate, Validate, and PostValidate, because that would be a recipe for infinite loops.")]
         public static void ReValidate(this CfgNode node, string parent = "") {
-            node.PreValidate();
-            node.ValidateBasedOnAttributes();
-            node.ValidateListsBasedOnAttributes(parent);
-            node.Validate();
-            node.PostValidate();
+            node.WithValidation();
         }
 
     }

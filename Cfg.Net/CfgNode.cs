@@ -107,7 +107,6 @@ namespace Cfg.Net {
         /// <param name="cfg">by default, cfg should be XML or JSON, but can be other things depending on what IParser is injected.</param>
         /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, Dictionary<string, string> parameters = null) {
-            this.SetDefaults();
 
             INode node;
             try {
@@ -157,9 +156,14 @@ namespace Cfg.Net {
                 return;
             }
 
+            this.SetDefaults();
             LoadProperties(node, null, parameters);
             LoadCollections(node, null, parameters);
-            this.ReValidate(node.Name);
+            PreValidate();
+            ValidateBasedOnAttributes();
+            ValidateListsBasedOnAttributes(node.Name);
+            Validate();
+            PostValidate();
         }
 
         private void SetDefaultSerializer(string cfg, Source source, ISourceDetector sourceDetector) {
@@ -287,7 +291,11 @@ namespace Cfg.Net {
             this.SetDefaults();
             LoadProperties(node, parent, parameters);
             LoadCollections(node, parent, parameters);
-            this.ReValidate(node.Name);
+            PreValidate();
+            ValidateBasedOnAttributes();
+            ValidateListsBasedOnAttributes(node.Name);
+            Validate();
+            PostValidate();
             return this;
         }
 

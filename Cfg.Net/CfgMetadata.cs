@@ -34,6 +34,7 @@ namespace Cfg.Net {
         public Action<object, object> Setter { get; set; }
         public Func<object, object> Getter { get; set; }
         public bool TypeMismatch { get; set; }
+        public object Default { get; set; }
 
         public CfgMetadata(PropertyInfo propertyInfo, CfgAttribute attribute) {
             PropertyInfo = propertyInfo;

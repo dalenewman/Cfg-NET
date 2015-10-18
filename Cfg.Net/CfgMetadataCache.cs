@@ -24,11 +24,11 @@ namespace Cfg.Net {
 
                 var keyCache = new List<string>();
                 var listCache = new List<string>();
-                PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
                 metadata = new Dictionary<string, CfgMetadata>(StringComparer.Ordinal);
-                for (int i = 0; i < propertyInfos.Length; i++) {
-                    PropertyInfo propertyInfo = propertyInfos[i];
+                for (var i = 0; i < propertyInfos.Length; i++) {
+                    var propertyInfo = propertyInfos[i];
 
                     if (!propertyInfo.CanRead)
                         continue;
@@ -39,12 +39,14 @@ namespace Cfg.Net {
                         continue;
 
                     var key = NormalizeName(type, propertyInfo.Name);
-                    var item = new CfgMetadata(propertyInfo, attribute);
+                    var item = new CfgMetadata(propertyInfo, attribute) {
+                        Default = GetDefaultValue(propertyInfo.PropertyType)
+                    };
 
                     // check default value for type mismatch
                     if (attribute.ValueIsSet) {
                         if (attribute.value.GetType() != propertyInfo.PropertyType) {
-                            object value = attribute.value;
+                            var value = attribute.value;
                             if (TryConvertValue(ref value, propertyInfo.PropertyType)) {
                                 attribute.value = value;
                             } else {
@@ -114,6 +116,10 @@ namespace Cfg.Net {
             return false;
         }
 
+        private static object GetDefaultValue(Type t) {
+            return t.IsValueType ? Activator.CreateInstance(t) : null;
+        }
+
         private static bool TryConvertValue(ref object value, Type conversionType) {
             try {
                 value = Convert.ChangeType(value, conversionType, null);
@@ -156,10 +162,9 @@ namespace Cfg.Net {
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        internal static object Clone(CfgNode node) {
-            var type = node.GetType();
-            var meta = GetMetadata(type);
-            var clone = Activator.CreateInstance(type);
+        internal static T Clone<T>(T node) {
+            var meta = GetMetadata(typeof(T));
+            var clone = Activator.CreateInstance<T>();
             CloneProperties(meta, node, clone);
             CloneLists(meta, node, clone);
             return clone;
