@@ -4,41 +4,30 @@ Methods
 Some experimental extension methods 
 are available in the `Cfg.Net.Ext` name space.
 
-* GetDefaultOf&lt;T&gt;
-* GetValidatedOf&lt;T&gt;
-* Clone
-* SetDefaults
-* ReValidate
+* Clone()
+* WithDefaults()
+* WithValidation()
 
-### GetDefaultOf&lt;T&gt;
-
-You could *new* up your nodes instead of loading them from 
-your root node.  But, they wouldn't have defaults or initialized 
-collections.  So, if you want to manually create a `CfgNode` 
-based instance, you can use `GetDefaultOf`.  It sets 
-the default values (as indicated in your `Cfg` attribute) and 
-initializes your `CfgNode` based collections.
-
-It also runs `PreValidate` if overridden.
-
-### GetValidatedOf&lt;T&gt;
-
-Building off of `GetDefaultOf`, `GetValidatedOf` goes one step 
-further by validating your object and passing any errors or warnings 
-it finds back to the instance you called `GetValidateOf` on.
-
-### Clone
+### Clone()
 
 `Clone()` makes a deep copy of your `CfgNode` based instance.
 
-### SetDefaults
+### WithDefaults()
 
-Sets the default values (as indicated in your `Cfg` attribute) and 
-initializes your `CfgNode` based collections.
+If you construct your nodes instead of loading them from 
+a configuration, they won't have defaults according to your 
+`Cfg[]` attribute.  To assist with creating 
+nodes manually, you may use `WithDefaults()`.  This will set 
+defaults and initialize collections.
 
-### ReValidate
+**Note**: If a value is already present, `WithDefaults()` will not 
+over-write it.
 
-Re-runs validation on your instance.  This is the same method 
-called on all your nodes when you use the `Load` method.
+### WithValidation()
 
+If you construct your nodes instead of loading them from 
+a configuration, they are not validated according to your `Cfg[]` 
+attribute. To assist with creating nodes manually, you may 
+use `WithValidation()`. This will validate and add `Errors` if 
+it finds any.
 
