@@ -454,8 +454,8 @@ namespace Cfg.Net {
                 if (metadata.ContainsKey(attributeKey)) {
                     var item = metadata[attributeKey];
 
-                    // if attribute is null and no default is set, try the getter
-                    if (attribute.Value == null && item.Attribute.value == null) {
+                    if (attribute.Value == null) {
+                        // if attribute is null, use the getter
                         var maybe = item.Getter(this);
                         if (maybe == null) {
                             if (nullWarnings.Add(attribute.Name)) {
