@@ -41,12 +41,16 @@ namespace Cfg.Net.Serializers {
         private void SerializeElements(IDictionary<string, CfgMetadata> meta, object node, StringBuilder builder, int level) {
 
             foreach (var pair in meta.Where(kv => kv.Value.ListType != null)) {
+                var items = (IList)meta[pair.Key].Getter(node);
+                if (items == null || items.Count == 0)
+                    continue;
+
                 Indent(builder, level);
                 builder.Append("<");
                 builder.Append(pair.Key);
                 builder.AppendLine(">");
 
-                foreach (CfgNode item in (IList)meta[pair.Key].Getter(node)) {
+                foreach (var item in items) {
                     var metaData = CfgMetadataCache.GetMetadata(item.GetType());
                     Indent(builder, level + 1);
                     builder.Append("<add");
@@ -76,17 +80,32 @@ namespace Cfg.Net.Serializers {
         }
 
         private void SerializeAttributes(Dictionary<string, CfgMetadata> meta, object obj, StringBuilder builder) {
-            foreach (var pair in meta.Where(kv => kv.Value.ListType == null)) {
-                builder.Append(" ");
-                builder.Append(pair.Key);
-                builder.Append("=\"");
-                var value = pair.Value.Getter(obj);
-                var stringValue = pair.Value.PropertyInfo.PropertyType == typeof(string) ? (string)value : value.ToString();
-                if (pair.Value.PropertyInfo.PropertyType == typeof(bool)) {
-                    stringValue = stringValue.ToLower();
+            if (meta.Count > 0) {
+                foreach (var pair in meta.Where(kv => kv.Value.ListType == null)) {
+                    var value = pair.Value.Getter(obj);
+                    if (value == null || value.Equals(pair.Value.Attribute.value) || (!pair.Value.Attribute.ValueIsSet && pair.Value.Default != null && pair.Value.Default.Equals(value))) {
+                        continue;
+                    }
+
+                    builder.Append(" ");
+                    builder.Append(pair.Key);
+                    builder.Append("=\"");
+
+                    var stringValue = pair.Value.PropertyInfo.PropertyType == typeof(string) ? (string)value : value.ToString();
+                    if (pair.Value.PropertyInfo.PropertyType == typeof(bool)) {
+                        stringValue = stringValue.ToLower();
+                    }
+                    builder.Append(Encode(stringValue));
+                    builder.Append("\"");
                 }
-                builder.Append(value == null ? string.Empty : Encode(stringValue));
-                builder.Append("\"");
+            } else if (obj is Dictionary<string, string>) {
+                foreach (var pair in (Dictionary<string, string>)obj) {
+                    builder.Append(" ");
+                    builder.Append(pair.Key);
+                    builder.Append("=\"");
+                    builder.Append(pair.Value == null ? string.Empty : Encode(pair.Value));
+                    builder.Append("\"");
+                }
             }
         }
 

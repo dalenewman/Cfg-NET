@@ -21,7 +21,7 @@ namespace Cfg.Test {
             const string expected = @"<TestToXml>
     <parameters>
         <add name=""p1"" value=""true"" />
-        <add name=""p2"" value=""false"" />
+        <add name=""p2"" />
     </parameters>
 </TestToXml>";
 

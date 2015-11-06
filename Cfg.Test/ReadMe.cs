@@ -75,14 +75,14 @@ namespace Cfg.Test {
     <servers>
         <add name=""Sam"">
             <databases>
-                <add name=""master"" backupfolder=""\\san\sql-backups"" backupstokeep=""5"" />
-                <add name=""msdb"" backupfolder=""\\san\sql-backups"" backupstokeep=""2"" />
+                <add name=""master"" backupstokeep=""5"" />
+                <add name=""msdb"" backupstokeep=""2"" />
             </databases>
         </add>
         <add name=""Vinny"">
             <databases>
                 <add name=""master"" backupfolder=""\\san\sql-backups\vinny\master"" backupstokeep=""3"" />
-                <add name=""model"" backupfolder=""\\san\sql-backups\vinny\model"" backupstokeep=""4"" />
+                <add name=""model"" backupfolder=""\\san\sql-backups\vinny\model"" />
             </databases>
         </add>
     </servers>

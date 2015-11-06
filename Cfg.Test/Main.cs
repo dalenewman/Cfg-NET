@@ -32,7 +32,7 @@ namespace Cfg.Test {
             Assert.IsNotNull(cfg.Sites);
             Assert.AreEqual(0, cfg.Sites.Count);
 
-            var sites = cfg.GetDefaultOf<AttributeSite>();
+            var sites = new AttributeSite().WithDefaults();
             Assert.IsNotNull(sites);
             Assert.IsNotNull(sites.Something);
         }
@@ -44,7 +44,7 @@ namespace Cfg.Test {
             Assert.IsNotNull(cfg.Sites);
             Assert.AreEqual(0, cfg.Sites.Count);
 
-            var sites = cfg.GetDefaultOf<AttributeSite>();
+            var sites = new AttributeSite().WithDefaults();
             Assert.IsNotNull(sites);
             Assert.IsNotNull(sites.Something);
         }
