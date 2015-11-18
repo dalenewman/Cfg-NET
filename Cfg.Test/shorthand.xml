@@ -17,10 +17,12 @@
         <add name="script" />
       </parameters>
     </add>
+    <add name="none"/>
   </signatures>
 
   <targets>
     <add name="t" collection="transforms" property="method" />
+    <add name="none" collection="" property="" />
   </targets>
 
   <methods>
@@ -29,6 +31,7 @@
     <add name="padleft" signature="padding" target="t" />
     <add name="padright" signature="padding" target="t" />
     <add name="javascript" signature="script" target="t" />
+    <add name="copy" signature="none" target="none" />
   </methods>
 
 </cfg>

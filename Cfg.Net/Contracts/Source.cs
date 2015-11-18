@@ -20,7 +20,6 @@ namespace Cfg.Net.Contracts {
         Error,
         File,
         Json,
-        Unknown,
         Url,
         Xml
     }

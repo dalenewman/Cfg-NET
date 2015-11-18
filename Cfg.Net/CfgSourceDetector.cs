@@ -16,7 +16,6 @@
 #endregion
 
 using Cfg.Net.Contracts;
-using Cfg.Net.Ext;
 
 namespace Cfg.Net {
 
@@ -35,10 +34,10 @@ namespace Cfg.Net {
                 return Source.Error;
             }
 
-            if (resource.StartsWith("<"))
+            if (resource.StartsWith("<", System.StringComparison.Ordinal))
                 return Source.Xml;
 
-            if (resource.StartsWith("{")) {
+            if (resource.StartsWith("{", System.StringComparison.Ordinal)) {
                 return Source.Json;
             }
 

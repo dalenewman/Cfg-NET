@@ -30,16 +30,16 @@ using Cfg.Net.Shorthand;
 namespace Cfg.Net {
     public abstract class CfgNode {
 
-        private static readonly object Locker = new object();
+        static readonly object Locker = new object();
 
-        private readonly ILogger _logger;
-        private IParser _parser;
-        private ISerializer _serializer;
-        private readonly IReader _reader;
-        private readonly Type _type;
-        private CfgEvents _events;
-        private ShorthandRoot _shorthand;
-        private IDictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
+        readonly ILogger _logger;
+        IParser _parser;
+        ISerializer _serializer;
+        readonly IReader _reader;
+        readonly Type _type;
+        CfgEvents _events;
+        ShorthandRoot _shorthand;
+        IDictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
 
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
 
@@ -99,6 +99,18 @@ namespace Cfg.Net {
             }
 
             _shorthand.InitializeMethodDataLookup();
+        }
+
+        /// <summary>
+        /// Load short-hand configuration, and then load the 
+        /// configuration into the root (top-most) node.
+        /// </summary>
+        /// <param name="cfg">the configuration</param>
+        /// <param name="shortHand">the short-hand configuration</param>
+        /// <param name="parameters">optional parmeters that replace @(place-holders)</param>
+        public void Load(string cfg, string shortHand, Dictionary<string, string> parameters = null) {
+            LoadShorthand(shortHand);
+            Load(cfg, parameters);
         }
 
         /// <summary>
@@ -166,7 +178,7 @@ namespace Cfg.Net {
             PostValidate();
         }
 
-        private void SetDefaultSerializer(string cfg, Source source, ISourceDetector sourceDetector) {
+        void SetDefaultSerializer(string cfg, Source source, ISourceDetector sourceDetector) {
 
             if (_serializer != null)
                 return;
@@ -192,7 +204,7 @@ namespace Cfg.Net {
             }
         }
 
-        private void SetDefaultParser(Source source) {
+        void SetDefaultParser(Source source) {
             if (_parser != null)
                 return;
 
@@ -250,7 +262,7 @@ namespace Cfg.Net {
             return Enumerable.Empty<string[]>();
         }
 
-        private static IEnumerable<string[]> GetParameters(INode parametersNode) {
+        static IEnumerable<string[]> GetParameters(INode parametersNode) {
             var parameters = new List<string[]>();
 
             for (var j = 0; j < parametersNode.SubNodes.Count; j++) {
@@ -275,7 +287,7 @@ namespace Cfg.Net {
             return parameters;
         }
 
-        private CfgNode Load(
+        CfgNode Load(
             INode node,
             string parent,
             ISerializer serializer,
@@ -317,10 +329,10 @@ namespace Cfg.Net {
         protected internal virtual void PostValidate() { }
 
         public string Serialize() {
-            return _serializer.Serialize(this);
+            return (_serializer ?? (_serializer = new XmlSerializer())).Serialize(this);
         }
 
-        private void LoadCollections(INode node, string parentName, Dictionary<string, string> parameters = null) {
+        void LoadCollections(INode node, string parentName, Dictionary<string, string> parameters = null) {
             var metadata = CfgMetadataCache.GetMetadata(_type, Events);
             var elementNames = CfgMetadataCache.ElementNames(_type).ToList();
             var elements = new Dictionary<string, IList>();
@@ -397,7 +409,7 @@ namespace Cfg.Net {
             }
         }
 
-        private void ValidateUniqueAndRequiredProperties(
+        void ValidateUniqueAndRequiredProperties(
             string parent,
             string listName,
             CfgMetadata listMetadata,
@@ -438,7 +450,7 @@ namespace Cfg.Net {
             }
         }
 
-        private void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
+        void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
             var metadata = CfgMetadataCache.GetMetadata(_type, Events);
             var keys = CfgMetadataCache.PropertyNames(_type).ToArray();
 
@@ -543,7 +555,7 @@ namespace Cfg.Net {
             }
         }
 
-        private void CheckValidators(CfgMetadata item, string name, object value) {
+        void CheckValidators(CfgMetadata item, string name, object value) {
             if (!item.Attribute.ValidatorsSet)
                 return;
 
@@ -573,7 +585,7 @@ namespace Cfg.Net {
             }
         }
 
-        private void TranslateShorthand(INode node, string stringValue) {
+        void TranslateShorthand(INode node, string stringValue) {
             var expressions = new Expressions(stringValue);
             var shorthandNodes = new Dictionary<string, List<INode>>();
 
@@ -581,6 +593,9 @@ namespace Cfg.Net {
                 var expression = expressions[j];
                 MethodData methodData;
                 if (_shorthand.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
+                    if (methodData.Target.Collection == string.Empty || methodData.Target.Property == string.Empty)
+                        continue;
+
                     var shorthandNode = new ShorthandNode("add");
                     shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
 
@@ -603,7 +618,8 @@ namespace Cfg.Net {
                             if (split.Length == 2) {
                                 var name = CfgMetadataCache.NormalizeName(typeof(Parameter), split[0]);
                                 shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
-                                signatureParameters.RemoveAll(p => CfgMetadataCache.NormalizeName(typeof(Parameter), p.Name) == name);
+                                signatureParameters.RemoveAll(
+                                    p => CfgMetadataCache.NormalizeName(typeof(Parameter), p.Name) == name);
                                 expression.Parameters.RemoveAll(p => p == parameter);
                             }
                         }
@@ -622,6 +638,8 @@ namespace Cfg.Net {
                     } else {
                         shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
                     }
+                } else {
+                    Warn($"The short-hand expression method {expression.Method} is undefined.");
                 }
             }
 
@@ -637,7 +655,7 @@ namespace Cfg.Net {
             }
         }
 
-        private void CheckValueLength(CfgAttribute itemAttributes, string name, string value) {
+        void CheckValueLength(CfgAttribute itemAttributes, string name, string value) {
             if (itemAttributes.MinLengthSet) {
                 if (value.Length < itemAttributes.minLength) {
                     Events.ValueTooShort(name, value, itemAttributes.minLength);
@@ -652,7 +670,7 @@ namespace Cfg.Net {
             }
         }
 
-        private void CheckValueBoundaries(CfgAttribute itemAttributes, string name, object value) {
+        void CheckValueBoundaries(CfgAttribute itemAttributes, string name, object value) {
             if (!itemAttributes.MinValueSet && !itemAttributes.MaxValueSet)
                 return;
 
@@ -675,7 +693,7 @@ namespace Cfg.Net {
             }
         }
 
-        private string CheckParameters(IDictionary<string, string> parameters, string input) {
+        string CheckParameters(IDictionary<string, string> parameters, string input) {
             if (parameters == null || input.IndexOf('@') < 0)
                 return input;
             var response = ReplaceParameters(input, parameters);
@@ -685,7 +703,7 @@ namespace Cfg.Net {
             return response.Item1;
         }
 
-        private static Tuple<string, string[]> ReplaceParameters(string value, IDictionary<string, string> parameters) {
+        static Tuple<string, string[]> ReplaceParameters(string value, IDictionary<string, string> parameters) {
             var builder = new StringBuilder();
             List<string> badKeys = null;
             for (var j = 0; j < value.Length; j++) {

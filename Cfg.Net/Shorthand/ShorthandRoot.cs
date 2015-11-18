@@ -51,12 +51,12 @@ namespace Cfg.Net.Shorthand {
 
         public void InitializeMethodDataLookup() {
             MethodDataLookup = new Dictionary<string, MethodData>(StringComparer.OrdinalIgnoreCase);
-            foreach (Method method in Methods) {
+            foreach (var method in Methods) {
                 MethodDataLookup[method.Name] = new MethodData(
                     method,
                     Signatures.First(s => s.Name == method.Signature),
                     Targets.First(t => t.Name == method.Target)
-                    );
+                );
             }
         }
     }

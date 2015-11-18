@@ -21,7 +21,7 @@ namespace Cfg.Test {
             const string expected = @"{
     ""parameters"":[
         { ""name"":""p1"", ""value"":true },
-        { ""name"":""p2"", ""value"":false }
+        { ""name"":""p2"" }
     ]
 }";
 

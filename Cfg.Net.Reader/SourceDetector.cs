@@ -36,10 +36,10 @@ namespace Cfg.Net.Reader {
                 return Source.Error;
             }
 
-            if (resource.StartsWith("<"))
+            if (resource.StartsWith("<", StringComparison.Ordinal))
                 return Source.Xml;
 
-            if (resource.StartsWith("{"))
+            if (resource.StartsWith("{", StringComparison.Ordinal))
                 return Source.Json;
 
             try {

@@ -10,13 +10,17 @@ namespace Cfg.Net.Serializers {
             return InnerSerialize(node);
         }
 
-        private string InnerSerialize(CfgNode node) {
+        string InnerSerialize(CfgNode node) {
 
             var type = node.GetType();
             var meta = CfgMetadataCache.GetMetadata(type);
             var builder = new StringBuilder();
 
-            if (JustAttributes(meta)) {
+            if (JustAttributes(meta, node)) {
+                builder.Append("<add");
+                SerializeAttributes(meta, node, builder);
+                builder.Append(" />");
+            } else {
                 builder.Append("<");
                 builder.Append(type.Name);
                 SerializeAttributes(meta, node, builder);
@@ -25,20 +29,25 @@ namespace Cfg.Net.Serializers {
                 builder.Append("</");
                 builder.Append(type.Name);
                 builder.Append(">");
-            } else {
-                builder.Append("<add");
-                SerializeAttributes(meta, node, builder);
-                builder.Append(" />");
             }
 
             return builder.ToString();
         }
 
-        private static bool JustAttributes(Dictionary<string, CfgMetadata> meta) {
-            return meta.Any(kv => kv.Value.ListType != null);
+        static bool JustAttributes(Dictionary<string, CfgMetadata> meta, object node) {
+            var result = meta.All(kv => kv.Value.ListType == null);
+            if (!result) {
+                foreach(var pair in meta.Where(kv=>kv.Value.ListType != null)){
+                    var list = (IList)meta[pair.Key].Getter(node);
+                    if (list.Count > 0)
+                        return false;
+                }
+                return true;
+            }
+            return result;
         }
 
-        private void SerializeElements(IDictionary<string, CfgMetadata> meta, object node, StringBuilder builder, int level) {
+        void SerializeElements(IDictionary<string, CfgMetadata> meta, object node, StringBuilder builder, int level) {
 
             foreach (var pair in meta.Where(kv => kv.Value.ListType != null)) {
                 var items = (IList)meta[pair.Key].Getter(node);
@@ -55,13 +64,14 @@ namespace Cfg.Net.Serializers {
                     Indent(builder, level + 1);
                     builder.Append("<add");
                     SerializeAttributes(metaData, item, builder);
-                    if (metaData.Any(kv => kv.Value.ListType != null)) {
+
+                    if(JustAttributes(metaData, item)) {
+                        builder.AppendLine(" />");
+                    } else {
                         builder.AppendLine(">");
                         SerializeElements(metaData, item, builder, level + 2);
                         Indent(builder, level + 1);
                         builder.AppendLine("</add>");
-                    } else {
-                        builder.AppendLine(" />");
                     }
                 }
 

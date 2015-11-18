@@ -14,14 +14,22 @@ namespace Cfg.Test {
             const string xml = @"<xml>
     <parameters>
         <add name='p1' value='true' />
-        <add name='p2' value='false' />
+        <add name='p2' value='false'>
+            <alternatives>
+                <add idea='an idea' />
+            </alternatives>
+        </add>
     </parameters>
 </xml>";
 
             const string expected = @"<TestToXml>
     <parameters>
         <add name=""p1"" value=""true"" />
-        <add name=""p2"" />
+        <add name=""p2"">
+            <alternatives>
+                <add idea=""an idea"" />
+            </alternatives>
+        </add>
     </parameters>
 </TestToXml>";
 
@@ -57,6 +65,14 @@ namespace Cfg.Test {
 
             [Cfg(value = false)]
             public bool Value { get; set; }
+
+            [Cfg()]
+            public List<TestToXmlAlt> Alternatives { get; set; }
+        }
+
+        class TestToXmlAlt : CfgNode {
+            [Cfg(value="")]
+            public string Idea { get; set; }
         }
 
     }
