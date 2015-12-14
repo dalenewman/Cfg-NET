@@ -61,11 +61,14 @@ namespace Cfg.Net.Reader {
                     return Source.Error;
                 }
 
+                if (!Path.IsPathRooted(resource)) {
+                    resource = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, resource);
+                }
                 if (new FileInfo(resource).Exists) {
                     return Source.File;
                 }
 
-                logger.Error("This source detector can not detect your configuration source.  The configuration you passed in does not appear to be JSON, XML, a Uri, or a file name.");
+                logger.Error("This source detector cannot detect your configuration source.  The configuration you passed in does not appear to be JSON, XML, a Uri, or a file name.");
                 return Source.Error;
             }
 

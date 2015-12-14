@@ -6,6 +6,8 @@ namespace Cfg.Net.Contracts {
 
         private readonly Dictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
 
+        public Validators() { }
+
         public Validators(KeyValuePair<string, IValidator> validator) {
             Add(validator.Key, validator.Value);
         }

@@ -20,7 +20,7 @@ using System.Text;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Loggers {
-    internal sealed class MemoryLogger : ILogger {
+    public class MemoryLogger : ILogger {
         private readonly StringBuilder _errors;
         private readonly StringBuilder _warnings;
         private string[] _errorCache;

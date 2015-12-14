@@ -137,8 +137,9 @@ namespace Cfg.Net.Serializers {
                 foreach (var pair in dict) {
                     sb.Append(" \"");
                     sb.Append(pair.Key);
-                    sb.Append("\":");
+                    sb.Append("\":\"");
                     sb.Append(Encode(pair.Value));
+                    sb.Append("\"");
                     if (count < last) {
                         sb.Append(",");
                     }

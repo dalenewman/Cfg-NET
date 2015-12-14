@@ -32,14 +32,19 @@ namespace Cfg.Net {
 
         static readonly object Locker = new object();
 
-        readonly ILogger _logger;
-        IParser _parser;
-        ISerializer _serializer;
-        readonly IReader _reader;
-        readonly Type _type;
+        internal ILogger Logger { get; set; }
+        internal IParser Parser { get; set; }
+        internal ISerializer Serializer { get; set; }
+        internal IReader Reader { get; set; }
+        internal ShorthandRoot Shorthand { get; set; }
+        internal IDictionary<string, IValidator> Validators { get; set; } = new Dictionary<string, IValidator>();
+        internal Type Type { get; set; }
+
         CfgEvents _events;
-        ShorthandRoot _shorthand;
-        IDictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
+        internal CfgEvents Events {
+            get { return _events ?? (_events = new CfgEvents(new DefaultLogger(new MemoryLogger(), Logger))); }
+            set { _events = value; }
+        }
 
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
 
@@ -51,27 +56,22 @@ namespace Cfg.Net {
             if (dependencies != null) {
                 foreach (var dependency in dependencies.Where(dependency => dependency != null)) {
                     if (dependency is IReader) {
-                        _reader = dependency as IReader;
+                        Reader = dependency as IReader;
                     } else if (dependency is IParser) {
-                        _parser = dependency as IParser;
+                        Parser = dependency as IParser;
                     } else if (dependency is ISerializer) {
-                        _serializer = dependency as ISerializer;
+                        Serializer = dependency as ISerializer;
                     } else if (dependency is ILogger) {
-                        _logger = dependency as ILogger;
+                        Logger = dependency as ILogger;
                     } else if (dependency is IValidators) {
                         foreach (var pair in dependency as IValidators) {
-                            _validators[pair.Key] = pair.Value;
+                            Validators[pair.Key] = pair.Value;
                         }
                     }
                 }
             }
 
-            _type = GetType();
-        }
-
-        internal CfgEvents Events {
-            get { return _events ?? (_events = new CfgEvents(new CfgLogger(new MemoryLogger(), _logger))); }
-            set { _events = value; }
+            Type = GetType();
         }
 
         protected internal void Error(string message, params object[] args) {
@@ -83,22 +83,22 @@ namespace Cfg.Net {
         }
 
         protected void LoadShorthand(string cfg) {
-            _shorthand = new ShorthandRoot(cfg, _reader, _parser);
+            Shorthand = new ShorthandRoot(cfg, Reader, Parser);
 
-            if (_shorthand.Warnings().Any()) {
-                foreach (var warning in _shorthand.Warnings()) {
+            if (Shorthand.Warnings().Any()) {
+                foreach (var warning in Shorthand.Warnings()) {
                     Events.Warning(warning);
                 }
             }
 
-            if (_shorthand.Errors().Any()) {
-                foreach (var error in _shorthand.Errors()) {
+            if (Shorthand.Errors().Any()) {
+                foreach (var error in Shorthand.Errors()) {
                     Events.Error(error);
                 }
                 return;
             }
 
-            _shorthand.InitializeMethodDataLookup();
+            Shorthand.InitializeMethodDataLookup();
         }
 
         /// <summary>
@@ -124,10 +124,10 @@ namespace Cfg.Net {
             try {
                 var sourceDetector = new CfgSourceDetector();
                 Source source;
-                if (_reader == null) {
+                if (Reader == null) {
                     source = sourceDetector.Detect(cfg, Events.Logger);
                 } else {
-                    var result = _reader.Read(cfg, Events.Logger);
+                    var result = Reader.Read(cfg, Events.Logger);
                     if (Events.Errors().Any()) {
                         return;
                     }
@@ -150,7 +150,7 @@ namespace Cfg.Net {
                 SetDefaultParser(source);
                 SetDefaultSerializer(cfg, source, sourceDetector);
 
-                node = _parser.Parse(cfg);
+                node = Parser.Parse(cfg);
 
                 var environmentDefaults = LoadEnvironment(node, parameters).ToArray();
                 if (environmentDefaults.Length > 0) {
@@ -180,38 +180,38 @@ namespace Cfg.Net {
 
         void SetDefaultSerializer(string cfg, Source source, ISourceDetector sourceDetector) {
 
-            if (_serializer != null)
+            if (Serializer != null)
                 return;
 
             switch (source) {
                 case Source.Json:
-                    _serializer = new JsonSerializer();
+                    Serializer = new JsonSerializer();
                     break;
                 case Source.Xml:
-                    _serializer = new XmlSerializer();
+                    Serializer = new XmlSerializer();
                     break;
                 case Source.File:
                 case Source.Url:
                     if (sourceDetector.Detect(cfg, new NullLogger()) == Source.Json) {
-                        _serializer = new JsonSerializer();
+                        Serializer = new JsonSerializer();
                     } else {
-                        _serializer = new XmlSerializer();
+                        Serializer = new XmlSerializer();
                     }
                     break;
                 default:
-                    _serializer = new XmlSerializer();
+                    Serializer = new XmlSerializer();
                     break;
             }
         }
 
         void SetDefaultParser(Source source) {
-            if (_parser != null)
+            if (Parser != null)
                 return;
 
             if (source == Source.Json) {
-                _parser = new FastJsonParser();
+                Parser = new FastJsonParser();
             } else {
-                _parser = new NanoXmlParser();
+                Parser = new NanoXmlParser();
             }
         }
 
@@ -297,9 +297,9 @@ namespace Cfg.Net {
             Dictionary<string, string> parameters
         ) {
             Events = events;
-            _shorthand = shorthand;
-            _validators = validators;
-            _serializer = serializer;
+            Shorthand = shorthand;
+            Validators = validators;
+            Serializer = serializer;
             this.SetDefaults();
             LoadProperties(node, parent, parameters);
             LoadCollections(node, parent, parameters);
@@ -329,12 +329,12 @@ namespace Cfg.Net {
         protected internal virtual void PostValidate() { }
 
         public string Serialize() {
-            return (_serializer ?? (_serializer = new XmlSerializer())).Serialize(this);
+            return (Serializer ?? (Serializer = new XmlSerializer())).Serialize(this);
         }
 
         void LoadCollections(INode node, string parentName, Dictionary<string, string> parameters = null) {
-            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
-            var elementNames = CfgMetadataCache.ElementNames(_type).ToList();
+            var metadata = CfgMetadataCache.GetMetadata(Type, Events);
+            var elementNames = CfgMetadataCache.ElementNames(Type).ToList();
             var elements = new Dictionary<string, IList>();
             var elementHits = new HashSet<string>();
             var addHits = new HashSet<string>();
@@ -347,7 +347,7 @@ namespace Cfg.Net {
 
             for (var i = 0; i < node.SubNodes.Count; i++) {
                 var subNode = node.SubNodes[i];
-                var subNodeKey = CfgMetadataCache.NormalizeName(_type, subNode.Name);
+                var subNodeKey = CfgMetadataCache.NormalizeName(Type, subNode.Name);
                 if (metadata.ContainsKey(subNodeKey)) {
                     elementHits.Add(subNodeKey);
                     var item = metadata[subNodeKey];
@@ -355,7 +355,7 @@ namespace Cfg.Net {
                     for (var j = 0; j < subNode.SubNodes.Count; j++) {
                         var add = subNode.SubNodes[j];
                         if (add.Name.Equals("add", StringComparison.Ordinal)) {
-                            var addKey = CfgMetadataCache.NormalizeName(_type, subNode.Name);
+                            var addKey = CfgMetadataCache.NormalizeName(Type, subNode.Name);
                             addHits.Add(addKey);
                             if (item.Loader == null) {
                                 if (item.ListType == typeof(Dictionary<string, string>)) {
@@ -382,7 +382,7 @@ namespace Cfg.Net {
                                     }
                                 }
                             } else {
-                                var loaded = item.Loader().Load(add, subNode.Name, _serializer, Events, _validators, _shorthand, parameters);
+                                var loaded = item.Loader().Load(add, subNode.Name, Serializer, Events, Validators, Shorthand, parameters);
                                 elements[addKey].Add(loaded);
                             }
                         } else {
@@ -400,8 +400,8 @@ namespace Cfg.Net {
         }
 
         protected internal void ValidateListsBasedOnAttributes(string parent) {
-            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
-            var elementNames = CfgMetadataCache.ElementNames(_type).ToList();
+            var metadata = CfgMetadataCache.GetMetadata(Type, Events);
+            var elementNames = CfgMetadataCache.ElementNames(Type).ToList();
             foreach (var listName in elementNames) {
                 var listMetadata = metadata[listName];
                 var list = (IList)metadata[listName].Getter(this);
@@ -451,8 +451,8 @@ namespace Cfg.Net {
         }
 
         void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
-            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
-            var keys = CfgMetadataCache.PropertyNames(_type).ToArray();
+            var metadata = CfgMetadataCache.GetMetadata(Type, Events);
+            var keys = CfgMetadataCache.PropertyNames(Type).ToArray();
 
             if (!keys.Any())
                 return;
@@ -462,7 +462,7 @@ namespace Cfg.Net {
 
             for (var i = 0; i < node.Attributes.Count; i++) {
                 var attribute = node.Attributes[i];
-                var attributeKey = CfgMetadataCache.NormalizeName(_type, attribute.Name);
+                var attributeKey = CfgMetadataCache.NormalizeName(Type, attribute.Name);
                 if (metadata.ContainsKey(attributeKey)) {
                     var item = metadata[attributeKey];
 
@@ -471,7 +471,7 @@ namespace Cfg.Net {
                         var maybe = item.Getter(this);
                         if (maybe == null) {
                             if (nullWarnings.Add(attribute.Name)) {
-                                _logger.Warn("'{0}' in '{1}' is susceptible to nulls.", attribute.Name, parentName);
+                                Logger.Warn("'{0}' in '{1}' is susceptible to nulls.", attribute.Name, parentName);
                             }
                             continue;
                         }
@@ -487,7 +487,7 @@ namespace Cfg.Net {
                     }
 
                     if (item.Attribute.shorthand) {
-                        if (_shorthand?.MethodDataLookup == null) {
+                        if (Shorthand?.MethodDataLookup == null) {
                             Events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
                         } else {
                             TranslateShorthand(node, attribute.Value);
@@ -521,8 +521,8 @@ namespace Cfg.Net {
         }
 
         internal void ValidateBasedOnAttributes() {
-            var metadata = CfgMetadataCache.GetMetadata(_type, Events);
-            var keys = CfgMetadataCache.PropertyNames(_type).ToArray();
+            var metadata = CfgMetadataCache.GetMetadata(Type, Events);
+            var keys = CfgMetadataCache.PropertyNames(Type).ToArray();
 
             if (!keys.Any())
                 return;
@@ -560,9 +560,9 @@ namespace Cfg.Net {
                 return;
 
             foreach (var validator in item.Validators()) {
-                if (_validators.ContainsKey(validator)) {
+                if (Validators.ContainsKey(validator)) {
                     try {
-                        var result = _validators[validator].Validate(name, value);
+                        var result = Validators[validator].Validate(name, value);
                         if (result.Valid)
                             continue;
 
@@ -592,7 +592,7 @@ namespace Cfg.Net {
             for (var j = 0; j < expressions.Count; j++) {
                 var expression = expressions[j];
                 MethodData methodData;
-                if (_shorthand.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
+                if (Shorthand.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
                     if (methodData.Target.Collection == string.Empty || methodData.Target.Property == string.Empty)
                         continue;
 

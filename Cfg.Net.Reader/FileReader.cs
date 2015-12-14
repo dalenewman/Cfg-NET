@@ -17,7 +17,6 @@
 using System;
 using System.IO;
 using Cfg.Net.Contracts;
-using Cfg.Net.Ext;
 
 namespace Cfg.Net.Reader {
     public class FileReader : IReader {
@@ -32,6 +31,11 @@ namespace Cfg.Net.Reader {
             }
 
             if (Path.HasExtension(resource)) {
+
+                if (!Path.IsPathRooted(resource)) {
+                    resource = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, resource);
+                }
+
                 var fileInfo = new FileInfo(resource);
                 try {
                     result.Content = File.ReadAllText(fileInfo.FullName);

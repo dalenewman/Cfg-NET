@@ -16,14 +16,10 @@
 #endregion
 
 using Cfg.Net.Contracts;
-using Cfg.Net.Parsers;
 
-namespace Cfg.Net.Shorthand
-{
-    internal class ShorthandAttribute : IAttribute
-    {
-        public ShorthandAttribute(string name, string value)
-        {
+namespace Cfg.Net.Shorthand {
+    internal class ShorthandAttribute : IAttribute {
+        public ShorthandAttribute(string name, string value) {
             Name = name;
             Value = value;
         }

@@ -18,11 +18,11 @@ using System.Collections.Generic;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Loggers {
-    internal sealed class CfgLogger : ILogger {
+    internal sealed class DefaultLogger : ILogger {
         private readonly List<ILogger> _loggers = new List<ILogger>();
         private readonly MemoryLogger _memorylogger;
 
-        public CfgLogger(MemoryLogger memorylogger, ILogger logger) {
+        public DefaultLogger(MemoryLogger memorylogger, ILogger logger) {
             _memorylogger = memorylogger;
 
             _loggers.Add(memorylogger);

@@ -34,17 +34,16 @@ namespace Cfg.Net.Serializers {
             return builder.ToString();
         }
 
-        static bool JustAttributes(Dictionary<string, CfgMetadata> meta, object node) {
-            var result = meta.All(kv => kv.Value.ListType == null);
-            if (!result) {
-                foreach(var pair in meta.Where(kv=>kv.Value.ListType != null)){
-                    var list = (IList)meta[pair.Key].Getter(node);
-                    if (list.Count > 0)
-                        return false;
-                }
+        static bool JustAttributes(IDictionary<string, CfgMetadata> meta, object node) {
+            if(meta.All(kv => kv.Value.ListType == null))
                 return true;
+
+            foreach(var pair in meta.Where(kv=>kv.Value.ListType != null)){
+                var list = (IList)meta[pair.Key].Getter(node);
+                if (list != null && list.Count > 0)
+                    return false;
             }
-            return result;
+            return true;
         }
 
         void SerializeElements(IDictionary<string, CfgMetadata> meta, object node, StringBuilder builder, int level) {

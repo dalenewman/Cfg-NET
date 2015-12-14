@@ -162,9 +162,19 @@ namespace Cfg.Net {
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        internal static T Clone<T>(T node) {
-            var meta = GetMetadata(typeof(T));
+        internal static T Clone<T>(T node) where T : CfgNode {
+
             var clone = Activator.CreateInstance<T>();
+            clone.Serializer = node.Serializer;
+            clone.Logger = node.Logger;
+            clone.Parser = node.Parser;
+            clone.Reader = node.Reader;
+            clone.Validators = node.Validators;
+            clone.Shorthand = node.Shorthand;
+            clone.Type = node.Type;
+            clone.Events = node.Events;
+
+            var meta = GetMetadata(typeof(T));
             CloneProperties(meta, node, clone);
             CloneLists(meta, node, clone);
             return clone;

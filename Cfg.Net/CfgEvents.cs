@@ -21,9 +21,9 @@ using Cfg.Net.Loggers;
 namespace Cfg.Net {
     internal sealed class CfgEvents {
 
-        public CfgLogger Logger { get; set; }
+        public DefaultLogger Logger { get; set; }
 
-        public CfgEvents(CfgLogger logger) {
+        public CfgEvents(DefaultLogger logger) {
             Logger = logger;
         }
 

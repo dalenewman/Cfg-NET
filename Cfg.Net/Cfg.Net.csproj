@@ -61,11 +61,12 @@
     <Compile Include="Contracts\ISourceDetector.cs" />
     <Compile Include="Contracts\IValidator.cs" />
     <Compile Include="Contracts\IValidators.cs" />
+    <Compile Include="Loggers\NullLogger.cs" />
     <Compile Include="Serializers\JsonSerializer.cs" />
     <Compile Include="Serializers\XmlSerializer.cs" />
     <Compile Include="CfgSourceDetector.cs" />
     <Compile Include="Loggers\MemoryLogger.cs" />
-    <Compile Include="Loggers\CfgLogger.cs" />
+    <Compile Include="Loggers\DefaultLogger.cs" />
     <Compile Include="Contracts\ILogger.cs" />
     <Compile Include="Parsers\fastJSON\JSON.cs" />
     <Compile Include="Parsers\fastJSON\JsonParser.cs" />

@@ -5,6 +5,7 @@ namespace Cfg.Net.Ext {
     public static class Extensions {
 
         internal static void SetDefaults(this CfgNode node) {
+
             var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
             foreach (var pair in metadata) {
                 if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
@@ -20,8 +21,14 @@ namespace Cfg.Net.Ext {
 
                     if (value == null) {
                         pair.Value.Setter(node, pair.Value.Attribute.value);
-                    } else if (value.Equals(pair.Value.Default) && !pair.Value.Default.Equals(pair.Value.Attribute.value)) {
-                        pair.Value.Setter(node, pair.Value.Attribute.value);
+                    } else if (value.Equals(pair.Value.Default)) {
+                        if (pair.Value.Default.Equals(pair.Value.Attribute.value)) {
+                            if (!pair.Value.Attribute.ValueIsSet) {
+                                pair.Value.Setter(node, pair.Value.Attribute.value);
+                            }
+                        } else {
+                            pair.Value.Setter(node, pair.Value.Attribute.value);
+                        }
                     }
                 }
             }
@@ -32,7 +39,7 @@ namespace Cfg.Net.Ext {
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public static T Clone<T>(this T node) where T: CfgNode {
+        public static T Clone<T>(this T node) where T : CfgNode {
             return CfgMetadataCache.Clone(node);
         }
 
