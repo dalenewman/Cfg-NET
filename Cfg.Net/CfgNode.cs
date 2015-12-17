@@ -1,20 +1,19 @@
-﻿#region License
-// Cfg-NET An alternative .NET configuration handler.
+﻿#region license
+// Cfg.Net
 // Copyright 2015 Dale Newman
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//  
+//      http://www.apache.org/licenses/LICENSE-2.0
+//  
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,20 +31,13 @@ namespace Cfg.Net {
 
         static readonly object Locker = new object();
 
-        internal ILogger Logger { get; set; }
         internal IParser Parser { get; set; }
         internal ISerializer Serializer { get; set; }
         internal IReader Reader { get; set; }
         internal ShorthandRoot Shorthand { get; set; }
         internal IDictionary<string, IValidator> Validators { get; set; } = new Dictionary<string, IValidator>();
         internal Type Type { get; set; }
-
-        CfgEvents _events;
-        internal CfgEvents Events {
-            get { return _events ?? (_events = new CfgEvents(new DefaultLogger(new MemoryLogger(), Logger))); }
-            set { _events = value; }
-        }
-
+        internal CfgEvents Events { get; set; }
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
 
         /// <summary>
@@ -62,7 +54,12 @@ namespace Cfg.Net {
                     } else if (dependency is ISerializer) {
                         Serializer = dependency as ISerializer;
                     } else if (dependency is ILogger) {
-                        Logger = dependency as ILogger;
+                        var composite = new DefaultLogger(new MemoryLogger(), dependency as ILogger);
+                        if (Events == null) {
+                            Events = new CfgEvents(composite);
+                        } else {
+                            Events.Logger = composite;
+                        }
                     } else if (dependency is IValidators) {
                         foreach (var pair in dependency as IValidators) {
                             Validators[pair.Key] = pair.Value;
@@ -83,6 +80,8 @@ namespace Cfg.Net {
         }
 
         protected void LoadShorthand(string cfg) {
+            this.Clear(Events);
+
             Shorthand = new ShorthandRoot(cfg, Reader, Parser);
 
             if (Shorthand.Warnings().Any()) {
@@ -120,10 +119,12 @@ namespace Cfg.Net {
         /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, Dictionary<string, string> parameters = null) {
 
+            this.Clear(Events);
+
             INode node;
             try {
-                var sourceDetector = new CfgSourceDetector();
                 Source source;
+                var sourceDetector = new CfgSourceDetector();
                 if (Reader == null) {
                     source = sourceDetector.Detect(cfg, Events.Logger);
                 } else {
@@ -168,7 +169,6 @@ namespace Cfg.Net {
                 return;
             }
 
-            this.SetDefaults();
             LoadProperties(node, null, parameters);
             LoadCollections(node, null, parameters);
             PreValidate();
@@ -296,11 +296,10 @@ namespace Cfg.Net {
             ShorthandRoot shorthand,
             Dictionary<string, string> parameters
         ) {
-            Events = events;
+            this.Clear(events);
             Shorthand = shorthand;
             Validators = validators;
             Serializer = serializer;
-            this.SetDefaults();
             LoadProperties(node, parent, parameters);
             LoadCollections(node, parent, parameters);
             PreValidate();
@@ -471,7 +470,7 @@ namespace Cfg.Net {
                         var maybe = item.Getter(this);
                         if (maybe == null) {
                             if (nullWarnings.Add(attribute.Name)) {
-                                Logger.Warn("'{0}' in '{1}' is susceptible to nulls.", attribute.Name, parentName);
+                                Events.Logger.Warn("'{0}' in '{1}' is susceptible to nulls.", attribute.Name, parentName);
                             }
                             continue;
                         }
@@ -742,11 +741,11 @@ namespace Cfg.Net {
         }
 
         public string[] Errors() {
-            return Events.Errors();
+            return Events == null ? new string[0] : Events.Errors();
         }
 
         public string[] Warnings() {
-            return Events.Warnings();
+            return Events == null ? new string[0] : Events.Warnings();
         }
 
     }

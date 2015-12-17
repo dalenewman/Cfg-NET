@@ -1,4 +1,24 @@
+#region license
+// Cfg.Net
+// Copyright 2015 Dale Newman
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//  
+//      http://www.apache.org/licenses/LICENSE-2.0
+//  
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#endregion
 using System;
+using System.Linq;
+using System.Text;
+using Cfg.Net.Contracts;
+using Cfg.Net.Loggers;
 
 namespace Cfg.Net.Ext {
 
@@ -34,6 +54,18 @@ namespace Cfg.Net.Ext {
             }
         }
 
+        internal static void Clear(this CfgNode node, CfgEvents events) {
+            var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
+            foreach (var pair in metadata) {
+                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
+                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                } else {
+                    pair.Value.Setter(node, pair.Value.TypeMismatch ? pair.Value.Default : pair.Value.Attribute.value);
+                }
+            }
+            node.Events = events ?? new CfgEvents(new DefaultLogger(new MemoryLogger(), null));
+        }
+
         /// <summary>
         /// When you want to clone yourself 
         /// </summary>
@@ -49,12 +81,38 @@ namespace Cfg.Net.Ext {
             return node;
         }
 
-        public static T WithValidation<T>(this T host, string parent = "") where T : CfgNode {
-            host.WithDefaults();
-            host.ValidateBasedOnAttributes();
-            host.ValidateListsBasedOnAttributes(parent);
-            return host;
+        public static T WithValidation<T>(this T node, string parent = "") where T : CfgNode {
+            node.WithDefaults();
+            if (node.Events == null) {
+                node.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), null));
+            }
+            node.ValidateBasedOnAttributes();
+            node.ValidateListsBasedOnAttributes(parent);
+            return node;
         }
+
+        public static void TrimEnd(this StringBuilder sb, string trimChars) {
+            var length = sb.Length;
+            if (length != 0) {
+                var chars = trimChars.ToCharArray();
+                var i = length - 1;
+
+                if (trimChars.Length == 1) {
+                    while (i > -1 && sb[i] == trimChars[0]) {
+                        i--;
+                    }
+                } else {
+                    while (i > -1 && chars.Any(c => c.Equals(sb[i]))) {
+                        i--;
+                    }
+                }
+
+                if (i < (length - 1)) {
+                    sb.Remove(i + 1, (length - i) - 1);
+                }
+            }
+        }
+
 
     }
 }
