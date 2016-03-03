@@ -137,7 +137,7 @@ namespace Cfg.Test {
     }
 
     public class TestThing2 : CfgNode {
-        [Cfg(domain = "GOOD-VALUE-ANOTHER-GOOD-VALUE", domainDelimiter = '-', ignoreCase = true)]
+        [Cfg(domain = "GOOD-VALUE-ANOTHER-GOOD-VALUE", delimiter = '-', ignoreCase = true)]
         public string Value { get; set; }
     }
 

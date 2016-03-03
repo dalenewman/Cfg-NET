@@ -3,7 +3,32 @@
 Environments, parameters, and place-holders work together in order
 to provide configuration flexibility at run-time.
 
-###Environments
+### Update 0.6.x
+This feature is no longer built into Cfg-Net.  Instead, it is
+injectable.  I have left default implementations in Cfg-Net 
+that may be used to provide the same functionality:
+
+```csharp
+// an Autofac example...
+
+builder.RegisterType<ReplacePlaceHolders>().As<IGlobalModifier>();
+builder.RegisterType<ValidatePlaceHolders>().As<IGlobalValidator>();
+builder.RegisterType<MergeParameters>().Named<IMergeParameters>("parameters");
+
+builder.Register(ctx => new MergeInternalParameters(
+    ctx.Resolve<IGlobalModifier>(), 
+    ctx.ResolveNamed<IMergeParameters>("parameters"))
+).Named<IMergeParameters>("environments");
+
+builder.Register((ctx) => new MyCfg(
+    ctx.Resolve<IGlobalModifier>(),
+    ctx.ResolveNamed<IMergeParameters>("environments"),
+    ctx.Resolve<IGlobalValidator>()
+)).As<MyCfg>();
+```
+
+
+### Environments
 It may be necessary for values in your configuration to
 change depending on the program's environment (i.e. `production`, or `test`).
 
@@ -84,7 +109,7 @@ public class MyParameter : CfgNode {
 }
 ```
 
-###Parameters and Place-Holders
+### Parameters and Place-Holders
 Environments use collections of parameters, but parameters don't do anything
 without matching place-holders. Place-holders tell Cfg-NET where the parameter
 values must be inserted.

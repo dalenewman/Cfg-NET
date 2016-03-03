@@ -17,6 +17,9 @@
 using System;
 using System.Collections.Generic;
 using Cfg.Net;
+using Cfg.Net.MergeParameters;
+using Cfg.Net.Modifiers;
+using Cfg.Net.Validators;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -44,7 +47,7 @@ namespace Cfg.Test {
         </environments>
         <things>
             <add name='thing-1' value='@(p1)' />
-            <add name='thing-2' value='@(p2)' />
+            <add name='thing-2' value='@(p2)' invalid='@(p3)' />
         </things>
     </cfg>
 ".Replace("'", "\"");
@@ -59,7 +62,9 @@ namespace Cfg.Test {
                 Console.WriteLine(problem);
             }
 
-            Assert.AreEqual(0, cfg.Errors().Length);
+            Assert.AreEqual(1, cfg.Errors().Length);
+
+            Assert.AreEqual("Missing a parameter value for @(p3).", cfg.Errors()[0]);
 
             Assert.AreEqual(2, cfg.Environments.Count);
             Assert.AreEqual(false, cfg.Environment == cfg.Environments[0].Name);
@@ -121,9 +126,17 @@ namespace Cfg.Test {
 
     }
 
+    /// <summary>
+    /// Should be composed at composition root.
+    /// </summary>
     public class MyCfg : CfgNode {
-        public MyCfg(string xml, Dictionary<string, string> parameters = null) {
-            this.Load(xml, parameters);
+        public MyCfg(string xml, IDictionary<string, string> parameters = null)
+            : base(
+                  new MergeInternalParameters(new ReplacePlaceHolders(), new MergeParameters()), 
+                  new ReplacePlaceHolders(),
+                  new ValidatePlaceHolders()
+            ) {
+            Load(xml, parameters);
         }
 
         [Cfg(value = "")]
@@ -143,6 +156,9 @@ namespace Cfg.Test {
 
         [Cfg(required = true)]
         public string Value { get; set; }
+
+        [Cfg(value="hi")]
+        public string Invalid { get; set; }
     }
 
     public class MyEnvironment : CfgNode {

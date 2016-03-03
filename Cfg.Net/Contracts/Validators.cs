@@ -14,26 +14,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace Cfg.Net.Contracts {
+
+    /// <summary>
+    /// A default IValidators implementation
+    /// </summary>
+    [Obsolete]
     public class Validators : IValidators {
 
         private readonly Dictionary<string, IValidator> _validators = new Dictionary<string, IValidator>();
 
         public Validators() { }
 
+
         public Validators(KeyValuePair<string, IValidator> validator) {
             Add(validator.Key, validator.Value);
         }
 
+        /// <summary>
+        /// Create a Validators with one validator in it (to start with).
+        /// </summary>
+        /// <param name="name">The name of the validator that matches the name in validators attribute.</param>
+        /// <param name="validator">The validator implementation.</param>
         public Validators(string name, IValidator validator) {
             Add(name, validator);
         }
 
+        /// <summary>
+        /// Create a Validators with one or more validators in it (to start with).
+        /// </summary>
+        /// <param name="validators"></param>
         public Validators(IEnumerable<KeyValuePair<string, IValidator>> validators) {
-            AddRange(validators);
+            if (validators == null)
+                return;
+            foreach (var validator in validators) {
+                Add(validator.Key, validator.Value);
+            }
         }
 
         public IEnumerator<KeyValuePair<string, IValidator>> GetEnumerator() {
@@ -46,6 +67,7 @@ namespace Cfg.Net.Contracts {
             _validators[name] = validator;
         }
 
+        [Obsolete("This goes un-used 99% of the time.")]
         public void AddRange(IEnumerable<KeyValuePair<string, IValidator>> validators) {
             if (validators == null)
                 return;
@@ -54,6 +76,7 @@ namespace Cfg.Net.Contracts {
             }
         }
 
+        [Obsolete("This goes un-used 99% of the time.")]
         public void Remove(string name) {
             if (name == null)
                 return;

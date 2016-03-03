@@ -186,6 +186,9 @@ namespace Cfg.Net {
             clone.Parser = node.Parser;
             clone.Reader = node.Reader;
             clone.Validators = node.Validators;
+            clone.Modifiers = node.Modifiers;
+            clone.GlobalModifiers = node.GlobalModifiers;
+            clone.GlobalValidators = node.GlobalValidators;
             clone.Shorthand = node.Shorthand;
             clone.Type = node.Type;
             clone.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), node.Events.Logger));

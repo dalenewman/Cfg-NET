@@ -86,7 +86,7 @@ namespace Cfg.Net.Ext {
             if (node.Events == null) {
                 node.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), null));
             }
-            node.ValidateBasedOnAttributes();
+            node.ValidateBasedOnAttributes(null);
             node.ValidateListsBasedOnAttributes(parent);
             return node;
         }

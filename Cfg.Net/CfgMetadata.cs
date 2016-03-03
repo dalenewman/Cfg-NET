@@ -22,7 +22,7 @@ using System.Reflection;
 namespace Cfg.Net {
     sealed class CfgMetadata {
 
-        private const char DefaultDelimiter = ',';
+
         private readonly HashSet<string> _domainSet;
         private readonly HashSet<string> _validatorSet;
 
@@ -41,22 +41,15 @@ namespace Cfg.Net {
             Attribute = attribute;
 
             if (!string.IsNullOrEmpty(attribute.domain)) {
-                if (attribute.domainDelimiter == default(char)) {
-                    attribute.domainDelimiter = DefaultDelimiter;
-                }
                 var comparer = attribute.ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-                _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.domainDelimiter }, StringSplitOptions.None).Distinct(), comparer);
+                _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.delimiter }, StringSplitOptions.None).Distinct(), comparer);
             }
 
             if (string.IsNullOrEmpty(attribute.validators)) return;
 
-            if (attribute.validatorDelimiter == default(char)) {
-                attribute.validatorDelimiter = DefaultDelimiter;
-            }
-
             _validatorSet =
                 new HashSet<string>(
-                    attribute.validators.Split(new[] { attribute.validatorDelimiter }, StringSplitOptions.None).Distinct(),
+                    attribute.validators.Split(new[] { attribute.delimiter }, StringSplitOptions.None).Distinct(),
                     attribute.ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         }
 

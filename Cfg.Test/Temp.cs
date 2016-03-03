@@ -14,18 +14,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-
 using System;
 using System.Collections.Generic;
+using Cfg.Net;
+using NUnit.Framework;
+using Pipeline.Configuration;
 
-namespace Cfg.Net.Contracts {
+namespace Cfg.Test {
 
-    [Obsolete]
-    public interface IValidators : IDependency, IEnumerable<KeyValuePair<string, IValidator>> {
-        void Add(string name, IValidator validator);
-        [Obsolete("This goes un-used 99% of the time.")]
-        void AddRange(IEnumerable<KeyValuePair<string, IValidator>> validators);
-        [Obsolete("This goes un-used 99% of the time.")]
-        void Remove(string name);
+    [TestFixture]
+    public class Temp {
+
+        [Test]
+        public void TempTest() {
+            var cfg = new Cfg.Net.Reader.WebReader().Read("", new TraceLogger()).Content;
+            var sh = new Cfg.Net.Reader.WebReader().Read("", new TraceLogger()).Content;
+
+            Assert.AreEqual(1,1);
+
+        }
+
+
     }
+
+
 }

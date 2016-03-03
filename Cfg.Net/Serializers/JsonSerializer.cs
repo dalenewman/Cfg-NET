@@ -40,6 +40,7 @@ namespace Cfg.Net.Serializers {
                 builder.AppendLine("{");
                 SerializeAttributes(meta, node, builder);
                 SerializeElements(meta, node, builder, 1);
+                builder.TrimEnd(", ");
                 builder.AppendLine();
                 builder.Append("}");
             }

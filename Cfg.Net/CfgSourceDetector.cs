@@ -40,7 +40,7 @@ namespace Cfg.Net {
                 return Source.Json;
             }
 
-            logger.Error("Can not determine source for configuration. This source detector looks for XML and/or JSON.  The XML should start with <, and the JSON should start with {.  Your configuration starts with {0}.", resource.Substring(0, 1));
+            logger.Error("Can not determine source for configuration. This source detector looks for XML and/or JSON.  The XML should start with <, and the JSON should start with {{.  Your configuration starts with {0}.", resource.Substring(0, 1).Replace("{","{{").Replace("}","}}"));
             return Source.Error;
 
         }

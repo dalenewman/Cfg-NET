@@ -113,10 +113,11 @@ built-in options:
 * `shorthand`, to be explained later...
 * `required`
 * `unique`
-* `domain` with `domainDelimiter` and `ignoreCase` options
+* `domain` with `delimiter` and `ignoreCase` options
 * `minLength` and/or `maxLength`
 * `minValue` and/or `maxValue`
-* `validators` with `validatorDelimiter` option
+* `validators` with `delimiter` option
+* `modifiers` with `delimiter` option
 
 In our model, the `Server` class has a `Name` property that is `required`, and must be `unique`.
 
@@ -139,6 +140,7 @@ Then:
 
 1. [`PreValidate()`](#PreValidate) is executed
 1. `required` confirms a value exists
+1. `modifiers` runs injected modifiers
 1. `toLower` or `toUpper` may modify the value
 1. `shorthand` may check for [translation](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
 1. `domain` checks value against valid values
@@ -323,7 +325,8 @@ If it's not enough, you have 5 ways to extend:
 1. Overriding [`PreValidate()`](#PreValidate)
 1. Overriding [`Validate()`](#Validate)
 1. Overriding [`PostValidate()`](#PostValidate)
-1. [Injecting `IValidator` into Model's Contructor](#InjectingValidators)
+1. [Injecting `IValidator` and/or `IGlobalValidator` into Model's Contructor](#InjectingValidators)
+1. Injecting `IModifier` and/or `IGlobalModifier` into Model's Constructor
 
 <a name="InYourProperty"></a>
 
@@ -368,7 +371,7 @@ you may override `PreValidate()` like this:
 protected override void PreValidate() {
     if (Provider == "Bad Words") {
         Provider = "Good Words. Ha!";
-        Warn("I'm warning you man. You know what you did.");
+        Warn("I corrected your language.");
     }
 }
 ```
@@ -431,7 +434,7 @@ protected override void PostValidate() {
 
 <a name="InjectingValidators"></a>
 
-### Injecting IValidator into Model's Contructor
+### Injecting I(Global)Validator(s), and/or I(Global)Modifier(s) into Model's Contructor
 
 You may want to inject a validator into Cfg-NET instead
 of coding it up in one of the above methods.

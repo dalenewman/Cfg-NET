@@ -14,10 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-using Cfg.Net.Ext;
+
+using System.Collections.Generic;
 
 namespace Cfg.Net.Contracts {
-    public interface IValidator {
-        ValidatorResult Validate(string name, object value);
+    public interface IValidator : INamedDependency {
+        ValidatorResult Validate(string name, string value, IDictionary<string, string> parameters);
     }
 }

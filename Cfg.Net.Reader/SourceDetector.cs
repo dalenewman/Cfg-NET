@@ -17,7 +17,6 @@
 using System;
 using System.IO;
 using Cfg.Net.Contracts;
-using Cfg.Net.Ext;
 
 namespace Cfg.Net.Reader {
     public class SourceDetector : ISourceDetector {
@@ -68,7 +67,7 @@ namespace Cfg.Net.Reader {
                     return Source.File;
                 }
 
-                logger.Error("This source detector cannot detect your configuration source.  The configuration you passed in does not appear to be JSON, XML, a Uri, or a file name.");
+                logger.Error($"This source detector cannot detect your configuration source.  The configuration does not appear to be JSON, XML, a Uri, or a file name. {resource.Replace("}","}}").Replace("{","{{")}");
                 return Source.Error;
             }
 

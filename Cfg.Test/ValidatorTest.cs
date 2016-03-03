@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using Cfg.Net;
 using Cfg.Net.Contracts;
-using Cfg.Net.Ext;
+using Cfg.Net.Validators;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -85,12 +85,7 @@ namespace Cfg.Test {
     </test>
 ".Replace("'", "\"");
 
-            var validators = new Dictionary<string, IValidator> {
-                {"2dashes", new Contains2Dashes()},
-                {"contains,good", new ContainsGood()}
-            };
-            var cfg = new TestValidatorCfg2(xml, new Validators(validators));
-
+            var cfg = new TestValidatorCfg2(xml, new Contains2Dashes("2dashes"), new ContainsGood("contains,good"));
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
@@ -106,7 +101,7 @@ namespace Cfg.Test {
             public List<TestValidatorThing> Things { get; set; }
 
             public TestValidatorCfg(string xml)
-                : base(new Validators("2dashes", new Contains2Dashes())) {
+                : base(new Contains2Dashes("2dashes")) {
                 Load(xml);
             }
         }
@@ -121,21 +116,26 @@ namespace Cfg.Test {
             [Cfg]
             public List<TestValidatorThing2> Things { get; set; }
 
-            public TestValidatorCfg2(string xml, IValidators validators) : base(validators) {
+            public TestValidatorCfg2(string xml, params IDependency[] validators) : base(validators) {
                 Load(xml);
             }
         }
 
         public class TestValidatorThing2 : CfgNode {
-            [Cfg(validators = "2dashes|contains,good", validatorDelimiter = '|', toLower = true)]
+            [Cfg(validators = "2dashes|contains,good", delimiter = '|', toLower = true)]
             public string Value { get; set; }
         }
 
         public class Contains2Dashes : IValidator {
 
-            public ValidatorResult Validate(string name, object value) {
+            public Contains2Dashes(string name) {
+                Name = name;
+            }
+
+            public string Name { get; set; }
+            public ValidatorResult Validate(string name, string value, IDictionary<string,string> parameters) {
                 var result = new ValidatorResult();
-                var count = value.ToString().Split(new[] { '-' }, StringSplitOptions.None).Length - 1;
+                var count = value.Split(new[] { '-' }, StringSplitOptions.None).Length - 1;
                 result.Valid = count == 2;
                 if (!result.Valid) {
                     result.Error("The value '{0}' in the '{1}' attribute is no good! It does not have two dashes like we agreed on.", value, name);
@@ -147,8 +147,13 @@ namespace Cfg.Test {
 
         public class ContainsGood : IValidator {
 
-            public ValidatorResult Validate(string name, object value) {
-                var result = new ValidatorResult { Valid = value.ToString().Contains("good") };
+            public ContainsGood(string name) {
+                Name = name;
+            }
+
+            public string Name { get; set; }
+            public ValidatorResult Validate(string name, string value, IDictionary<string,string> parameters) {
+                var result = new ValidatorResult { Valid = value.Contains("good") };
                 if (!result.Valid) {
                     result.Error("The value '{0}' is missing good! I am deeply offended.", value);
                 }

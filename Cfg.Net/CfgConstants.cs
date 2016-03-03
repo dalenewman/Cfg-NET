@@ -22,12 +22,6 @@ namespace Cfg.Net {
 
     internal static class CfgConstants {
 
-        internal static char PlaceHolderFirst = '@';
-        internal static char PlaceHolderLast = ')';
-        internal static char PlaceHolderSecond = '(';
-        internal static string EnvironmentDefaultName = "environment";
-        internal static string EnvironmentsElementName = "environments";
-        internal static string ParametersElementName = "parameters";
         internal static string ControlString = ((char)31).ToString();
         internal static char ControlChar = (char)31;
         internal static char NamedParameterSplitter = ':';

@@ -51,6 +51,9 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Pipeline.Portable">
+      <HintPath>..\..\..\Users\dnewman\Code\pipeline.net\Pipeline.Portable\bin\Debug\Pipeline.Portable.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -64,6 +67,7 @@
     <Compile Include="PreValidateTest.cs" />
     <Compile Include="QueryStringTest.cs" />
     <Compile Include="SourceDetectorTest.cs" />
+    <Compile Include="ModifierTest.cs" />
     <Compile Include="ValidatorTest.cs" />
     <Compile Include="PassInLogger.cs" />
     <Compile Include="DifferentXmlParser.cs" />
@@ -71,6 +75,7 @@
     <Compile Include="Case.cs" />
     <Compile Include="ShorthandTest.cs" />
     <Compile Include="TraceLogger.cs" />
+    <Compile Include="Temp.cs" />
     <Compile Include="Value.cs" />
     <Compile Include="Length.cs" />
     <Compile Include="ElementNameVariations.cs" />

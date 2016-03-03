@@ -17,7 +17,6 @@
 using System.Collections.Generic;
 
 namespace Cfg.Net.Contracts {
-
     public class ValidatorResult {
 
         public ValidatorResult() {

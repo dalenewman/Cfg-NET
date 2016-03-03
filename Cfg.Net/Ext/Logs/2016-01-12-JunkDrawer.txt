@@ -1,0 +1,1 @@
+2016-01-12 17:06:49 | ExcelInspector | Excel |             |          | warn  | The Created field in Excel expects a System.String, but is reading a System.DateTime.

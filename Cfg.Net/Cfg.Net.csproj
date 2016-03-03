@@ -46,6 +46,11 @@
     <Compile Include="CfgMetadataCache.cs" />
     <Compile Include="CfgNode.cs" />
     <Compile Include="CfgEvents.cs" />
+    <Compile Include="Contracts\IGlobalModifier.cs" />
+    <Compile Include="Contracts\IGlobalValidator.cs" />
+    <Compile Include="Contracts\IModifier.cs" />
+    <Compile Include="Contracts\INamedDependency.cs" />
+    <Compile Include="Contracts\IMergeParameters.cs" />
     <Compile Include="Contracts\ReaderResult.cs" />
     <Compile Include="Contracts\Source.cs" />
     <Compile Include="Contracts\ValidatorResult.cs" />
@@ -62,6 +67,10 @@
     <Compile Include="Contracts\IValidator.cs" />
     <Compile Include="Contracts\IValidators.cs" />
     <Compile Include="Loggers\NullLogger.cs" />
+    <Compile Include="Modifiers\ReplacePlaceHolders.cs" />
+    <Compile Include="MergeParameters\MergeInternalParameters.cs" />
+    <Compile Include="MergeParameters\MergeParameters.cs" />
+    <Compile Include="Validators\ValidatePlaceHolders.cs" />
     <Compile Include="Serializers\JsonSerializer.cs" />
     <Compile Include="Serializers\XmlSerializer.cs" />
     <Compile Include="CfgSourceDetector.cs" />

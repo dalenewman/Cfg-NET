@@ -14,9 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-using System;
 using Cfg.Net.Contracts;
-using Cfg.Net.Ext;
 
 namespace Cfg.Net.Reader {
     public class DefaultReader : IReader {
@@ -35,7 +33,7 @@ namespace Cfg.Net.Reader {
         }
 
         public ReaderResult Read(string resource, ILogger logger) {
-            var result = new ReaderResult() { Source = _sourceDetector.Detect(resource, logger) };
+            var result = new ReaderResult { Source = _sourceDetector.Detect(resource, logger) };
             switch (result.Source) {
                 case Source.File:
                     return _fileReader.Read(resource, logger);

@@ -65,7 +65,10 @@ Currently, an `IDependency` may be:
 * an `IReader` - for passing in something other than `XML` or `JSON`.
 * an `IParser` - for a different parser
 * an `ISerializer` - for a different serializer
-* an `IValidators` - for custom validators
+* an `IValidator` - for targeted property validation
+* an `IGlobalValidator` - for global property validation
+* an `IModifier` - for targeted property modification
+* an `IGlobalModifer` - for global property validation
 * an `ILogger` - for additional logging
 
 ### An IReader
@@ -122,13 +125,17 @@ var dba = new DatabaseAdmin("DatabaseAdmin.xml");
 
 ### VIOLATION!
 
-I instantiated a reader inside my `DatabaseAdmin` class. 
-This tightly couples the reader to `DatabaseAdmin`, which is bad. 
-When you practice dependency injection, you do not *new up* 
-dependencies internally. Instead, you instantiate dependencies 
-in one place; which is referred to as a *composition root*.
+I instantiated `FileReader` inside my `DatabaseAdmin`. 
+If I do this, I have to modify `DatabaseAdmin` in 
+order to change the `IReader`.  This violates
+the open closed principle (open for extension, closed for modification).
 
-Add `IReader` to the `DatabaseAdmin` constructor instead:
+Instead, I should instantiate dependencies in one place. 
+This "place" is referred to as the *composition root*, 
+and it provides a single place to *wire up* dependency 
+implementations.
+
+So, I add `IReader` to the `DatabaseAdmin` constructor instead:
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
@@ -148,16 +155,15 @@ Exposing `IReader` like this allows injection from
 the composition root.
 
 Unfortunately, the constructor is more complicated, but it 
-necessary to maintain a loose coupling between `Database` 
+necessary to maintain a loose coupling between `DatabaseAdmin` 
 and it's `IReader` implementation.
 
-Just in case it's not clear; loose coupling makes our code more 
-flexible (aka composable), which is desirable for software 
-since requirements are likely to change.
+This loose coupling makes our code more flexible (aka composable), 
+which is desirable for software since requirements are likely to change.
 
 In this example, `FileReader` has no dependencies 
 of it's own. The next example demonstrates using a reader 
-with dependencies.
+with it's own dependencies.
 
 ### An IReader with Dependencies
 
@@ -199,8 +205,8 @@ public class DatabaseAdmin : CfgNode {
         string cfg, 
         IReader reader,
         IParser parser,
-        IValidators validators,
-        ILogger logger) :base(reader, parser, validators, logger) {
+        IValidator validator,
+        ILogger logger) :base(reader, parser, validator, logger) {
         this.Load(cfg);
     }
     
@@ -215,10 +221,10 @@ var reader = new DefaultReader(
     new WebReader()
 );
 var parser = new XDocumentParser();
-var validators = new Validators("js", new JintParser());
+var validator = new JintParser("js");
 var logger = new TraceLogger();
 
-var dba = new DatabaseAdmin("DatabaseAdmin.xml", reader, parser, validators, logger);
+var dba = new DatabaseAdmin("DatabaseAdmin.xml", reader, parser, validator, logger);
 ```
 
 The example above uses:

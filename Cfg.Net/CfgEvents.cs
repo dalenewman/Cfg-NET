@@ -15,6 +15,7 @@
 // limitations under the License.
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
@@ -42,13 +43,11 @@ namespace Cfg.Net {
         }
 
         public void InvalidNestedElement(string parentName, string nodeName, string subNodeName) {
-            Logger.Error("A{3} '{0}' '{1}' element has an invalid '{2}' element.", parentName, nodeName, subNodeName,
-                Suffix(parentName));
+            Logger.Error("A{3} '{0}' '{1}' element has an invalid '{2}' element.", parentName, nodeName, subNodeName, Suffix(parentName));
         }
 
         public void MissingAttribute(string parentName, string nodeName, string attributeName) {
-            Logger.Error("A{3} '{0}' '{1}' element is missing a '{2}' attribute.", parentName, nodeName, attributeName,
-                Suffix(parentName));
+            Logger.Error("A{3} '{0}' '{1}' element is missing a '{2}' attribute.", parentName, nodeName, attributeName, Suffix(parentName));
         }
 
         public void MissingElement(string nodeName, string elementName) {
@@ -75,12 +74,6 @@ namespace Cfg.Net {
 
         public void MissingRequiredAdd(string parent, string key) {
             Logger.Error($"A{Suffix(key)} '{key}' element with at least one item is required{(string.IsNullOrEmpty(parent) ? "." : " in " + parent + ".")}");
-        }
-
-        public void MissingPlaceHolderValues(string[] keys) {
-            string formatted = "@(" + string.Join("), @(", keys) + ")";
-            Logger.Error("Missing {0} for {1}.", keys.Length == 1 ? "a value" : "values",
-                formatted);
         }
 
         public void SettingValue(string propertyName, object value, string parentName, string nodeName, string message) {

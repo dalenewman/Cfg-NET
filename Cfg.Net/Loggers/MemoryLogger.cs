@@ -17,6 +17,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Loggers {
@@ -25,6 +26,9 @@ namespace Cfg.Net.Loggers {
         private readonly StringBuilder _warnings;
         private string[] _errorCache;
         private string[] _warningCache;
+        private static Regex LeftBracket = new Regex("[^{][{]{1}[^{]");
+        private static Regex RightBracket = new Regex("[^}][}]{1}[^}]");
+
 
         public MemoryLogger() {
             _errors = new StringBuilder();
@@ -32,13 +36,25 @@ namespace Cfg.Net.Loggers {
         }
 
         public void Warn(string message, params object[] args) {
-            _warnings.AppendFormat(message, args);
+            try {
+                _warnings.AppendFormat(message, args);
+            } catch (FormatException) {
+                message = LeftBracket.Replace(message, "{{");
+                message = RightBracket.Replace(message, "}}");
+                _warnings.AppendFormat(message, args);
+            }
             _warnings.AppendLine();
             _warningCache = null;
         }
 
         public void Error(string message, params object[] args) {
-            _errors.AppendFormat(message, args);
+            try {
+                _errors.AppendFormat(message, args);
+            } catch (FormatException) {
+                message = LeftBracket.Replace(message, "{{");
+                message = RightBracket.Replace(message, "}}");
+                _errors.AppendFormat(message, args);
+            }
             _errors.AppendLine();
             _errorCache = null;
         }
@@ -54,5 +70,6 @@ namespace Cfg.Net.Loggers {
                 .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
                 .ToArray());
         }
+
     }
 }
