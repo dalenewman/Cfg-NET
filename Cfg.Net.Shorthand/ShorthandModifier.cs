@@ -1,0 +1,84 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Cfg.Net.Contracts;
+
+namespace Cfg.Net.Shorthand {
+    public class ShorthandModifier : INodeModifier {
+        private readonly ShorthandRoot _root;
+        internal static char NamedParameterSplitter = ':';
+
+        public ShorthandModifier(ShorthandRoot root, string name) {
+            _root = root;
+            Name = name;
+        }
+
+        public string Name { get; set; }
+        public void Modify(INode node, string value, IDictionary<string, string> parameters) {
+            var expressions = new Expressions(value);
+            var shorthandNodes = new Dictionary<string, List<INode>>();
+
+            for (var j = 0; j < expressions.Count; j++) {
+                var expression = expressions[j];
+                MethodData methodData;
+                if (_root.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
+                    if (methodData.Target.Collection == string.Empty || methodData.Target.Property == string.Empty)
+                        continue;
+
+                    var shorthandNode = new Node("add");
+                    shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
+
+                    var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
+                    var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
+
+                    // single parameters
+                    if (methodData.Signature.Parameters.Count == 1 && expression.SingleParameter != string.Empty) {
+                        var name = methodData.Signature.Parameters[0].Name;
+                        var val = expression.SingleParameter.StartsWith(name + ":",
+                            StringComparison.OrdinalIgnoreCase)
+                            ? expression.SingleParameter.Remove(0, name.Length + 1)
+                            : expression.SingleParameter;
+                        shorthandNode.Attributes.Add(new ShorthandAttribute(name, val));
+                    } else {
+                        // named parameters
+                        for (var i = 0; i < passedParameters.Length; i++) {
+                            var parameter = passedParameters[i];
+                            var split = Utility.Split(parameter, NamedParameterSplitter);
+                            if (split.Length == 2) {
+                                var name = Utility.NormalizeName(split[0]);
+                                shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
+                                signatureParameters.RemoveAll(p => Utility.NormalizeName(p.Name) == name);
+                                expression.Parameters.RemoveAll(p => p == parameter);
+                            }
+                        }
+
+                        // ordered nameless parameters
+                        for (var m = 0; m < signatureParameters.Count; m++) {
+                            var signatureParameter = signatureParameters[m];
+                            shorthandNode.Attributes.Add(m < expression.Parameters.Count
+                                ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
+                                : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
+                        }
+                    }
+
+                    if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
+                        shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
+                    } else {
+                        shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
+                    }
+                }
+            }
+
+            foreach (var pair in shorthandNodes) {
+                var shorthandCollection = node.SubNodes.FirstOrDefault(sn => sn.Name == pair.Key);
+                if (shorthandCollection == null) {
+                    shorthandCollection = new Node(pair.Key);
+                    shorthandCollection.SubNodes.AddRange(pair.Value);
+                    node.SubNodes.Add(shorthandCollection);
+                } else {
+                    shorthandCollection.SubNodes.InsertRange(0, pair.Value);
+                }
+            }
+        }
+    }
+}

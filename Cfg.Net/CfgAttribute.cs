@@ -43,8 +43,6 @@ namespace Cfg.Net {
         public bool unique { get; set; }
         public bool toUpper { get; set; }
         public bool toLower { get; set; }
-        public bool shorthand { get; set; }
-
         public bool serialize { get; set; } = true;
 
         public string domain {

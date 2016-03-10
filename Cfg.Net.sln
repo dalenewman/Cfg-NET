@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Test", "Cfg.Test\Cfg.Test.csproj", "{65A5B885-7F66-4438-9D25-DD4D2E2B48EA}"
 EndProject
@@ -26,6 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Parsers.Json.Net", "Cfg.Net.Parsers.Json.Net\Cfg.Net.Parsers.Json.Net.csproj", "{D64515C8-95B0-459B-BF6C-9F54E170211F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Parsers.Xml.Linq", "Cfg.Net.Parsers.Xml.Linq\Cfg.Net.Parsers.Xml.Linq.csproj", "{093898FA-64E6-4E71-8DFF-141C8888BFBE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Shorthand", "Cfg.Net.Shorthand\Cfg.Net.Shorthand.csproj", "{52F94335-252E-4926-A916-D6684218FEAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +56,10 @@ Global
 		{093898FA-64E6-4E71-8DFF-141C8888BFBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{093898FA-64E6-4E71-8DFF-141C8888BFBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{093898FA-64E6-4E71-8DFF-141C8888BFBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52F94335-252E-4926-A916-D6684218FEAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52F94335-252E-4926-A916-D6684218FEAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52F94335-252E-4926-A916-D6684218FEAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52F94335-252E-4926-A916-D6684218FEAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

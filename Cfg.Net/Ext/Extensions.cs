@@ -19,6 +19,7 @@ using System.Linq;
 using System.Text;
 using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
+using Cfg.Net.Parsers;
 
 namespace Cfg.Net.Ext {
 
@@ -86,7 +87,7 @@ namespace Cfg.Net.Ext {
             if (node.Events == null) {
                 node.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), null));
             }
-            node.ValidateBasedOnAttributes(null);
+            node.ValidateBasedOnAttributes(new XmlNode(), null);
             node.ValidateListsBasedOnAttributes(parent);
             return node;
         }

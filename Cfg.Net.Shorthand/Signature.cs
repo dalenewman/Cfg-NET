@@ -14,29 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-using System;
+
 using System.Collections.Generic;
-using Cfg.Net.Contracts;
-using Cfg.Net.Parsers;
 
 namespace Cfg.Net.Shorthand
 {
-    internal class ShorthandNode : INode
+    public class Signature : CfgNode
     {
-        public ShorthandNode(string name)
-        {
-            Name = name;
-            Attributes = new List<IAttribute>();
-            SubNodes = new List<INode>();
-        }
+        [Cfg(required = true, unique = true, toLower = true)]
+        public string Name { get; set; }
 
-        public string Name { get; private set; }
-        public List<IAttribute> Attributes { get; private set; }
-        public List<INode> SubNodes { get; private set; }
-
-        public bool TryAttribute(string name, out IAttribute attr)
-        {
-            throw new NotImplementedException();
-        }
+        [Cfg(required = false)]
+        public List<Parameter> Parameters { get; set; }
     }
 }

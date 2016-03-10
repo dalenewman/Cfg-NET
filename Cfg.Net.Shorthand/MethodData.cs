@@ -14,16 +14,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-using Cfg.Net.Contracts;
 
-namespace Cfg.Net.Shorthand {
-    internal class ShorthandAttribute : IAttribute {
-        public ShorthandAttribute(string name, string value) {
-            Name = name;
-            Value = value;
+namespace Cfg.Net.Shorthand
+{
+    public class MethodData
+    {
+        public MethodData(Method method, Signature signature, Target target)
+        {
+            Method = method;
+            Signature = signature;
+            Target = target;
         }
 
-        public string Name { get; set; }
-        public string Value { get; set; }
+        public Method Method { get; set; }
+        public Signature Signature { get; set; }
+        public Target Target { get; set; }
     }
 }

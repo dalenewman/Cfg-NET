@@ -14,16 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-using System.Collections.Generic;
 
-namespace Cfg.Net.Shorthand
-{
-    public class Signature : CfgNode
-    {
-        [Cfg(required = true, unique = true, toLower = true)]
+using Cfg.Net.Contracts;
+
+namespace Cfg.Net.Shorthand {
+    internal class ShorthandAttribute : IAttribute {
+        public ShorthandAttribute(string name, string value) {
+            Name = name;
+            Value = value;
+        }
+
         public string Name { get; set; }
-
-        [Cfg(required = false)]
-        public List<Parameter> Parameters { get; set; }
+        public string Value { get; set; }
     }
 }

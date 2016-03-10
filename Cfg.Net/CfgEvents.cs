@@ -15,12 +15,9 @@
 // limitations under the License.
 #endregion
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
-
 namespace Cfg.Net {
+
     internal sealed class CfgEvents {
 
         public DefaultLogger Logger { get; set; }
@@ -85,8 +82,7 @@ namespace Cfg.Net {
         }
 
         public void ShorthandNotLoaded(string parentName, string nodeName, string attributeName) {
-            Logger.Error("A{3} '{0}' '{1}' element's '{2}' attribute needs a shorthand configuration, but none was loaded.", parentName, nodeName, attributeName,
-                Suffix(parentName));
+            Logger.Error("A{3} '{0}' '{1}' element's '{2}' attribute needs a shorthand configuration, but none was loaded.", parentName, nodeName, attributeName, Suffix(parentName));
         }
 
         public void ValueNotInDomain(string name, object value, string validValues) {

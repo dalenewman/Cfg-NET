@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +23,15 @@ using Cfg.Net.Contracts;
 namespace Cfg.Net.Shorthand {
     public class ShorthandRoot : CfgNode {
 
-        public ShorthandRoot(string cfg, IReader reader = null, IParser parser = null)
-            : base(reader, parser) {
+        public ShorthandRoot(string cfg, params IDependency[] dependencies)
+            : base(dependencies) {
             Load(cfg);
+            if (!Errors().Any()) {
+                InitializeMethodDataLookup();
+            }
         }
 
-        public Dictionary<string, MethodData> MethodDataLookup { get; set; }
+        public Dictionary<string, MethodData> MethodDataLookup { get; set; } = new Dictionary<string, MethodData>(StringComparer.OrdinalIgnoreCase);
 
         [Cfg(required = true)]
         public List<Signature> Signatures { get; set; }
@@ -38,19 +42,18 @@ namespace Cfg.Net.Shorthand {
         [Cfg(required = true)]
         public List<Method> Methods { get; set; }
 
-        protected internal override void Validate() {
-            IEnumerable<string> signatures = Methods.Select(f => f.Signature).Distinct();
-            foreach (string signature in signatures.Where(signature => Signatures.All(s => s.Name != signature))) {
+        protected override void Validate() {
+            var signatures = Methods.Select(f => f.Signature).Distinct();
+            foreach (var signature in signatures.Where(signature => Signatures.All(s => s.Name != signature))) {
                 Error("The shorthand signature {0} is undefined.", signature);
             }
-            IEnumerable<string> targets = Methods.Select(f => f.Target).Distinct();
-            foreach (string target in targets.Where(target => Targets.All(t => t.Name != target))) {
+            var targets = Methods.Select(f => f.Target).Distinct();
+            foreach (var target in targets.Where(target => Targets.All(t => t.Name != target))) {
                 Error("The shorthand target {0} is undefined.", target);
             }
         }
 
-        public void InitializeMethodDataLookup() {
-            MethodDataLookup = new Dictionary<string, MethodData>(StringComparer.OrdinalIgnoreCase);
+        private void InitializeMethodDataLookup() {
             foreach (var method in Methods) {
                 MethodDataLookup[method.Name] = new MethodData(
                     method,

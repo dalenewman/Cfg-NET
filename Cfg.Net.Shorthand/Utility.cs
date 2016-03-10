@@ -14,18 +14,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-using System;
-using System.Linq;
 
-namespace Cfg.Net {
-    internal static class CfgUtility {
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Cfg.Net.Shorthand {
+    internal static class Utility {
+
+        internal static string ControlString = ((char)31).ToString();
+        internal static char ControlChar = (char)31;
+
         internal static string[] Split(string arg, char splitter, int skip = 0) {
             if (arg.Equals(string.Empty))
                 return new string[0];
 
-            string[] split = arg.Replace("\\" + splitter, CfgConstants.ControlString).Split(splitter);
+            string[] split = arg.Replace("\\" + splitter, ControlString).Split(splitter);
             return
-                split.Select(s => s.Replace(CfgConstants.ControlChar, splitter))
+                split.Select(s => s.Replace(ControlChar, splitter))
                     .Skip(skip)
                     .Where(s => !string.IsNullOrEmpty(s))
                     .ToArray();
@@ -35,12 +42,16 @@ namespace Cfg.Net {
             if (arg.Equals(string.Empty))
                 return new string[0];
 
-            var split = arg.Replace("\\" + splitter[0], CfgConstants.ControlString).Split(splitter, StringSplitOptions.None);
+            var split = arg.Replace("\\" + splitter[0], ControlString).Split(splitter, StringSplitOptions.None);
             return
-                split.Select(s => s.Replace(CfgConstants.ControlString, splitter[0]))
+                split.Select(s => s.Replace(ControlString, splitter[0]))
                     .Skip(skip)
                     .Where(s => !string.IsNullOrEmpty(s))
                     .ToArray();
+        }
+
+        public static string NormalizeName(string name) {
+            return string.Concat(name.ToCharArray().Where(char.IsLetterOrDigit).Select(character => char.IsUpper(character) ? char.ToLowerInvariant(character) : character));
         }
     }
 }

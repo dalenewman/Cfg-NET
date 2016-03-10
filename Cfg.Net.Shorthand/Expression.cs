@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ namespace Cfg.Net.Shorthand {
                     parameters = parameters.Substring(0, parameters.Length - 1);
                 }
                 SingleParameter = parameters;
-                Parameters = CfgUtility.Split(parameters, ParameterSplitter).ToList();
+                Parameters = Utility.Split(parameters, ParameterSplitter).ToList();
             } else {
                 Method = expression;
                 SingleParameter = string.Empty;

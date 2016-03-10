@@ -17,24 +17,12 @@
 using System.Collections.Generic;
 
 namespace Cfg.Net.Contracts {
-    public class ValidatorResult {
-
+    public class ValidatorResult : Result {
         public ValidatorResult() {
             Valid = true;
             Warnings = new List<string>();
             Errors = new List<string>();
         }
-
         public bool Valid { get; set; }
-        public IList<string> Warnings { get; set; }
-        public IList<string> Errors { get; set; }
-
-        public void Error(string format, params object[] args) {
-            Errors.Add(string.Format(format, args));
-        }
-
-        public void Warn(string format, params object[] args) {
-            Warnings.Add(string.Format(format, args));
-        }
     }
 }

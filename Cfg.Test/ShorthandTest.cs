@@ -19,7 +19,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Cfg.Net;
+using Cfg.Net.Contracts;
+using Cfg.Net.Modifiers;
+using Cfg.Net.Reader;
 using Cfg.Net.Shorthand;
+using Cfg.Net.Validators;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -54,7 +58,8 @@ namespace Cfg.Test {
                 </cfg>
             ";
 
-            var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+            var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -95,7 +100,8 @@ namespace Cfg.Test {
                 </cfg>
             ";
 
-            var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+            var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -131,7 +137,8 @@ namespace Cfg.Test {
                     </fields>
                 </cfg>";
 
-            var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+            var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -143,9 +150,9 @@ namespace Cfg.Test {
             Assert.AreEqual("x === y ? x : ,", transform.Script);
         }
 
-      [Test]
-      public void TestEscapedComma() {
-         const string xml = @"
+        [Test]
+        public void TestEscapedComma() {
+            const string xml = @"
                 <cfg>
                     <fields>
                         <add name='name' 
@@ -153,41 +160,43 @@ namespace Cfg.Test {
                     </fields>
                 </cfg>";
 
-         var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+            var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
 
-         foreach (var error in sample.Errors()) {
-            Console.WriteLine(error);
-         }
+            foreach (var error in sample.Errors()) {
+                Console.WriteLine(error);
+            }
 
-         Assert.AreEqual(0, sample.Errors().Count());
-         var transform = sample.Fields[0].Transforms[0];
-         Assert.AreEqual("padleft", transform.Method);
-         Assert.AreEqual(10, transform.TotalWidth);
-         Assert.AreEqual(",", transform.PaddingChar);
-      }
+            Assert.AreEqual(0, sample.Errors().Count());
+            var transform = sample.Fields[0].Transforms[0];
+            Assert.AreEqual("padleft", transform.Method);
+            Assert.AreEqual(10, transform.TotalWidth);
+            Assert.AreEqual(",", transform.PaddingChar);
+        }
 
-      [Test]
-      public void TestSingleParameterThatEndsWithParenthesis() {
-         const string xml = @"
+        [Test]
+        public void TestSingleParameterThatEndsWithParenthesis() {
+            const string xml = @"
                 <cfg>
                     <fields>
                         <add name='javascript' t='javascript(OrderDetailsQuantity * (OrderDetailsUnitPrice * (1-OrderDetailsDiscount)))' />
                     </fields>
                 </cfg>";
 
-         var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+            var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
 
-         foreach (var error in sample.Errors()) {
-            Console.WriteLine(error);
-         }
+            foreach (var error in sample.Errors()) {
+                Console.WriteLine(error);
+            }
 
-         Assert.AreEqual(0, sample.Errors().Count());
-         var transform = sample.Fields[0].Transforms[0];
-         Assert.AreEqual("javascript", transform.Method);
-         Assert.AreEqual("OrderDetailsQuantity * (OrderDetailsUnitPrice * (1-OrderDetailsDiscount))", transform.Script);
-      }
+            Assert.AreEqual(0, sample.Errors().Count());
+            var transform = sample.Fields[0].Transforms[0];
+            Assert.AreEqual("javascript", transform.Method);
+            Assert.AreEqual("OrderDetailsQuantity * (OrderDetailsUnitPrice * (1-OrderDetailsDiscount))", transform.Script);
+        }
 
-      [Test]
+        [Test]
         public void TestMixedParameters() {
             const string xml = @"
                 <cfg>
@@ -199,7 +208,8 @@ namespace Cfg.Test {
                 </cfg>
             ";
 
-            var sample = new ShTestCfg(xml, File.ReadAllText(@"shorthand.xml"));
+            var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -239,8 +249,7 @@ namespace Cfg.Test {
     }
 
     public class ShTestCfg : CfgNode {
-        public ShTestCfg(string cfg, string shorthand) {
-            LoadShorthand(shorthand);
+        public ShTestCfg(string cfg, params IDependency[] dependencies) : base(dependencies) {
             Load(cfg);
         }
 
@@ -253,7 +262,7 @@ namespace Cfg.Test {
         [Cfg(required = true)]
         public string Name { get; set; }
 
-        [Cfg(required = true, shorthand = true)]
+        [Cfg(required = true, modifiers = "sh", validators = "sh")]
         public string T { get; set; }
 
         [Cfg]
@@ -271,7 +280,7 @@ namespace Cfg.Test {
         [Cfg]
         public int Length { get; set; }
 
-        [Cfg(value="")]
+        [Cfg(value = "")]
         public string Script { get; set; }
     }
 }

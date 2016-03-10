@@ -23,7 +23,6 @@ using Cfg.Net.Ext;
 using Cfg.Net.Loggers;
 using Cfg.Net.Parsers;
 using Cfg.Net.Serializers;
-using Cfg.Net.Shorthand;
 
 namespace Cfg.Net {
     public abstract class CfgNode {
@@ -31,14 +30,19 @@ namespace Cfg.Net {
         static readonly object Locker = new object();
 
         internal IParser Parser { get; set; }
-        internal ISerializer Serializer { get; set; }
         internal IReader Reader { get; set; }
-        internal ShorthandRoot Shorthand { get; set; }
+        internal ISerializer Serializer { get; set; }
+
         internal IDictionary<string, IValidator> Validators { get; set; } = new Dictionary<string, IValidator>();
-        internal IDictionary<string, IModifier> Modifiers { get; set; } = new Dictionary<string, IModifier>();
-        internal IList<IGlobalModifier> GlobalModifiers { get; set; } = new List<IGlobalModifier>();
+        internal IDictionary<string, INodeValidator> NodeValidators { get; set; } = new Dictionary<string, INodeValidator>();
         internal IList<IGlobalValidator> GlobalValidators { get; set; } = new List<IGlobalValidator>();
+
+        internal IDictionary<string, IModifier> Modifiers { get; set; } = new Dictionary<string, IModifier>();
+        internal IDictionary<string, INodeModifier> NodeModifiers { get; set; } = new Dictionary<string, INodeModifier>();
+        internal IList<IGlobalModifier> GlobalModifiers { get; set; } = new List<IGlobalModifier>();
+
         internal IMergeParameters MergeParameters { get; set; }
+
         internal Type Type { get; set; }
         internal CfgEvents Events { get; set; }
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
@@ -66,6 +70,12 @@ namespace Cfg.Net {
                         }
                     } else if (dependency is IGlobalModifier) {
                         GlobalModifiers.Add(dependency as IGlobalModifier);
+                    } else if (dependency is INodeModifier) {
+                        var nodeModifier = dependency as INodeModifier;
+                        NodeModifiers[nodeModifier.Name] = nodeModifier;
+                    } else if (dependency is INodeValidator) {
+                        var nodeValidator = dependency as INodeValidator;
+                        NodeValidators[nodeValidator.Name] = nodeValidator;
                     } else if (dependency is IGlobalValidator) {
                         GlobalValidators.Add(dependency as IGlobalValidator);
                     } else if (dependency is INamedDependency) {
@@ -78,10 +88,6 @@ namespace Cfg.Net {
                         }
                     } else if (dependency is IMergeParameters) {
                         MergeParameters = dependency as IMergeParameters;
-                    } else if (dependency is IValidators) {
-                        foreach (var pair in dependency as IValidators) {
-                            Validators[pair.Key] = pair.Value;
-                        }
                     }
                 }
             }
@@ -95,39 +101,6 @@ namespace Cfg.Net {
 
         protected internal void Warn(string message, params object[] args) {
             Events.Warning(message, args);
-        }
-
-        protected void LoadShorthand(string cfg) {
-            this.Clear(Events);
-
-            Shorthand = new ShorthandRoot(cfg, Reader, Parser);
-
-            if (Shorthand.Warnings().Any()) {
-                foreach (var warning in Shorthand.Warnings()) {
-                    Events.Warning(warning);
-                }
-            }
-
-            if (Shorthand.Errors().Any()) {
-                foreach (var error in Shorthand.Errors()) {
-                    Events.Error(error);
-                }
-                return;
-            }
-
-            Shorthand.InitializeMethodDataLookup();
-        }
-
-        /// <summary>
-        /// Load short-hand configuration, and then load the 
-        /// configuration into the root (top-most) node.
-        /// </summary>
-        /// <param name="cfg">the configuration</param>
-        /// <param name="shortHand">the short-hand configuration</param>
-        /// <param name="parameters">optional parmeters that replace @(place-holders)</param>
-        public void Load(string cfg, string shortHand, Dictionary<string, string> parameters = null) {
-            LoadShorthand(shortHand);
-            Load(cfg, parameters);
         }
 
         /// <summary>
@@ -195,7 +168,7 @@ namespace Cfg.Net {
             LoadProperties(node, null, parameters);
             LoadCollections(node, null, parameters);
             PreValidate();
-            ValidateBasedOnAttributes(parameters);
+            ValidateBasedOnAttributes(node, parameters);
             ValidateListsBasedOnAttributes(node.Name);
             Validate();
             PostValidate();
@@ -228,23 +201,31 @@ namespace Cfg.Net {
             ISerializer serializer,
             CfgEvents events,
             IDictionary<string, IValidator> validators,
-            IDictionary<string, IModifier> modifiers,
-            IList<IGlobalModifier> globalModifiers,
+            IDictionary<string, INodeValidator> nodeValidators,
             IList<IGlobalValidator> globalValidators,
-            ShorthandRoot shorthand,
+            IDictionary<string, IModifier> modifiers,
+            IDictionary<string, INodeModifier> nodeModifiers,
+            IList<IGlobalModifier> globalModifiers,
             IDictionary<string, string> parameters
         ) {
             this.Clear(events);
-            Shorthand = shorthand;
-            Validators = validators;
+
+            // parser, reader, and mergeParameters do not need to be passed in
+
             Modifiers = modifiers;
+            NodeModifiers = nodeModifiers;
             GlobalModifiers = globalModifiers;
+
+            Validators = validators;
+            NodeValidators = nodeValidators;
             GlobalValidators = globalValidators;
+
             Serializer = serializer;
+
             LoadProperties(node, parent, parameters);
             LoadCollections(node, parent, parameters);
             PreValidate();
-            ValidateBasedOnAttributes(parameters);
+            ValidateBasedOnAttributes(node, parameters);
             ValidateListsBasedOnAttributes(node.Name);
             Validate();
             PostValidate();
@@ -322,7 +303,7 @@ namespace Cfg.Net {
                                     }
                                 }
                             } else {
-                                var loaded = item.Loader().Load(add, subNode.Name, Serializer, Events, Validators, Modifiers, GlobalModifiers, GlobalValidators, Shorthand, parameters);
+                                var loaded = item.Loader().Load(add, subNode.Name, Serializer, Events, Validators, NodeValidators, GlobalValidators, Modifiers, NodeModifiers, GlobalModifiers, parameters);
                                 elements[addKey].Add(loaded);
                             }
                         } else {
@@ -426,10 +407,16 @@ namespace Cfg.Net {
                     // run injected property specific modifiers
                     if (item.Attribute.ModifiersSet) {
                         foreach (var modifier in item.Attribute.modifiers.Split(item.Attribute.delimiter)) {
-                            if (Modifiers.ContainsKey(modifier)) {
-                                attribute.Value = Modifiers[modifier].Modify(attribute.Name, attribute.Value, parameters);
+                            var isModifier = Modifiers.ContainsKey(modifier);
+                            var isNodeModifier = !isModifier && NodeModifiers.ContainsKey(modifier);
+                            if (isModifier || isNodeModifier) {
+                                if (isModifier) {
+                                    attribute.Value = Modifiers[modifier].Modify(attribute.Name, attribute.Value, parameters);
+                                } else {
+                                    NodeModifiers[modifier].Modify(node, attribute.Value, parameters);
+                                }
                             } else {
-                                Events.Warning($"'{attribute.Name}' has a '{modifier}' modifier, but no '{modifier}' was passed in.");
+                                Events.Warning($"'{attribute.Name}' has a '{modifier}' modifier, but no '{modifier}' was injected.");
                             }
                         }
                     }
@@ -438,14 +425,6 @@ namespace Cfg.Net {
                         attribute.Value = attribute.Value.ToLower();
                     } else if (item.Attribute.toUpper) {
                         attribute.Value = attribute.Value.ToUpper();
-                    }
-
-                    if (item.Attribute.shorthand) {
-                        if (Shorthand?.MethodDataLookup == null) {
-                            Events.ShorthandNotLoaded(parentName, node.Name, attribute.Name);
-                        } else {
-                            TranslateShorthand(node, attribute.Value);
-                        }
                     }
 
                     if (item.PropertyInfo.PropertyType == typeof(string)) {
@@ -474,7 +453,7 @@ namespace Cfg.Net {
 
         }
 
-        internal void ValidateBasedOnAttributes(IDictionary<string, string> parameters) {
+        internal void ValidateBasedOnAttributes(INode node, IDictionary<string, string> parameters) {
             var metadata = CfgMetadataCache.GetMetadata(Type, Events);
             var keys = CfgMetadataCache.PropertyNames(Type).ToArray();
 
@@ -527,106 +506,40 @@ namespace Cfg.Net {
 
                 CheckValueBoundaries(item.Attribute, key, objectValue);
 
-                CheckValidators(item, key, stringValue, parameters);
+                CheckValidators(node, item, key, stringValue, parameters);
             }
         }
 
-        void CheckValidators(CfgMetadata item, string name, string value, IDictionary<string, string> parameters) {
+        void CheckValidators(INode node, CfgMetadata item, string name, string value, IDictionary<string, string> parameters) {
             if (!item.Attribute.ValidatorsSet)
                 return;
 
             foreach (var validator in item.Validators()) {
-                if (Validators.ContainsKey(validator)) {
+                var isValidator = Validators.ContainsKey(validator);
+                var isNodeValidator = !isValidator && NodeValidators.ContainsKey(validator);
+                if (isValidator || isNodeValidator) {
                     try {
-                        var result = Validators[validator].Validate(name, value, parameters);
-                        if (result.Valid)
-                            continue;
+                        var result = isValidator ?
+                            Validators[validator].Validate(name, value, parameters) :
+                            NodeValidators[validator].Validate(node, value, parameters);
 
                         if (result.Warnings != null) {
                             foreach (var warning in result.Warnings) {
                                 Warn(warning);
                             }
                         }
+
                         if (result.Errors != null) {
                             foreach (var error in result.Errors) {
                                 Error(error);
                             }
                         }
+
                     } catch (Exception ex) {
                         Events.ValidatorException(validator, ex, value);
                     }
                 } else {
                     Events.MissingValidator(name, validator);
-                }
-            }
-        }
-
-        void TranslateShorthand(INode node, string stringValue) {
-            var expressions = new Expressions(stringValue);
-            var shorthandNodes = new Dictionary<string, List<INode>>();
-
-            for (var j = 0; j < expressions.Count; j++) {
-                var expression = expressions[j];
-                MethodData methodData;
-                if (Shorthand.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
-                    if (methodData.Target.Collection == string.Empty || methodData.Target.Property == string.Empty)
-                        continue;
-
-                    var shorthandNode = new ShorthandNode("add");
-                    shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
-
-                    var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
-                    var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
-
-                    // single parameters
-                    if (methodData.Signature.Parameters.Count == 1 && expression.SingleParameter != string.Empty) {
-                        var name = methodData.Signature.Parameters[0].Name;
-                        var value = expression.SingleParameter.StartsWith(name + ":",
-                            StringComparison.OrdinalIgnoreCase)
-                            ? expression.SingleParameter.Remove(0, name.Length + 1)
-                            : expression.SingleParameter;
-                        shorthandNode.Attributes.Add(new ShorthandAttribute(name, value));
-                    } else {
-                        // named parameters
-                        for (var i = 0; i < passedParameters.Length; i++) {
-                            var parameter = passedParameters[i];
-                            var split = CfgUtility.Split(parameter, CfgConstants.NamedParameterSplitter);
-                            if (split.Length == 2) {
-                                var name = CfgMetadataCache.NormalizeName(typeof(Parameter), split[0]);
-                                shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
-                                signatureParameters.RemoveAll(
-                                    p => CfgMetadataCache.NormalizeName(typeof(Parameter), p.Name) == name);
-                                expression.Parameters.RemoveAll(p => p == parameter);
-                            }
-                        }
-
-                        // ordered nameless parameters
-                        for (var m = 0; m < signatureParameters.Count; m++) {
-                            var signatureParameter = signatureParameters[m];
-                            shorthandNode.Attributes.Add(m < expression.Parameters.Count
-                                ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
-                                : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
-                        }
-                    }
-
-                    if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
-                        shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
-                    } else {
-                        shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
-                    }
-                } else {
-                    Warn($"The short-hand expression method {expression.Method} is undefined.");
-                }
-            }
-
-            foreach (var pair in shorthandNodes) {
-                var shorthandCollection = node.SubNodes.FirstOrDefault(sn => sn.Name == pair.Key);
-                if (shorthandCollection == null) {
-                    shorthandCollection = new ShorthandNode(pair.Key);
-                    shorthandCollection.SubNodes.AddRange(pair.Value);
-                    node.SubNodes.Add(shorthandCollection);
-                } else {
-                    shorthandCollection.SubNodes.InsertRange(0, pair.Value);
                 }
             }
         }

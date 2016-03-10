@@ -2,8 +2,7 @@ Shorthand
 =========
 
 ### Intro
-Cfg-NET's shorthand feature is probably the most amazing thing in the world. No; just kidding. 
-it just helps you write more configuration with less `XML` or `JSON`.
+Cfg-NET's shorthand helps you write more configuration with less `XML` or `JSON`.
 
 For example, writing transformations in `XML` is a bit verbose:
 
@@ -12,7 +11,7 @@ For example, writing transformations in `XML` is a bit verbose:
     <fields>
         <add name="PhoneNumber" >
             <transforms>
-                <add method="replace" old-value="-" new-value="_" />
+                <add method="replace" old-value="-" new-value="." />
                 <add method="trim" trim-chars=" " />
             </transforms>
         </add>
@@ -25,12 +24,12 @@ Using a simple shorthand setup, you can write this instead:
 ```xml
 <cfg>
     <fields>
-        <add name="PhoneNumber" t="replace(-,_).trim( )" />
+        <add name="PhoneNumber" t="replace(-,.).trim( )" />
     </fields>
 </cfg>
 ```
 
-The shorthand translator will expand `replace(-,)` and `trim( )` into their
+The shorthand translator will expand `replace(-,.)` and `trim( )` into their
 `XML` equivalent.
 
 In order to do this, Cfg-NET needs to know a few things.  This means shorthand 
@@ -77,35 +76,27 @@ Every *method* has a _signature_ and _target_.  The signature tells
 Cfg-NET the order and names for the parameters.  The target
 explains where to place the new entries and preserve the method name.
 
-So, when Cfg-NET encounters an shorthand expression like `replace(-,)`:
+So, when Cfg-NET encounters an shorthand expression like `replace(-,.)`:
 
 * `replace` is the method name.  Per the configuration, `replace` has a `signature` called *replace*, and a `target` of *transforms*.
 * the *replace* signature defines the parameters:
   * `-` is *old-value*.
-  * `_` is *new-value*.
+  * `.` is *new-value*.
 * the *transforms* target defines where it should go:
   * the method's name (i.e. `replace`) goes in _method_.
   * an element with _method_, _old-value_, and _new-value_ is placed in _transforms_
 
 ### Using Shorthand
 
-In order to use shorthand, you have to decorate a property
-with `[Cfg(shorthand=true)]` and call the `LoadShorthand` method
-prior to the `Load` method.
-
-If you like, you can update your root node's constructor to
-this:
+A shorthand modifier is injected into `CfgNode` like this:
 
 ```csharp
-public class YourRootNode : CfgNode {
-    public YourRootNode(string cfg, string shorthand) {
-        LoadShorthand(shorthand);
-        Load(cfg);
-    }
-
-    // ...snip...
-}
+var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
+var root = new YourRootNode(xml, new ShorthandModifier(sh, "sh"));
 ```
+
+You also have to decorate the property you want to run shorthand on with `[Cfg(modifiers="sh")]`.
+
 
 ### Updates
 

@@ -132,8 +132,8 @@ namespace Cfg.Test {
     public class MyCfg : CfgNode {
         public MyCfg(string xml, IDictionary<string, string> parameters = null)
             : base(
-                  new MergeInternalParameters(new ReplacePlaceHolders(), new MergeParameters()), 
-                  new ReplacePlaceHolders(),
+                  new MergeInternalParameters(new PlaceHolderModifier(), new MergeParameters()), 
+                  new PlaceHolderModifier(),
                   new ValidatePlaceHolders()
             ) {
             Load(xml, parameters);

@@ -36,7 +36,7 @@ namespace Cfg.Net {
                 {typeof (uint), (x => Convert.ToUInt32(x))},
                 {typeof (ulong), (x => Convert.ToUInt64(x))},
                 {typeof (double), (x => Convert.ToDouble(x))},
-                {typeof (decimal), (x => Decimal.Parse(x, NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol, (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo))))},
+                {typeof (decimal), (x => decimal.Parse(x, NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol, (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo))))},
                 {typeof (char), (x => Convert.ToChar(x))},
                 {typeof (DateTime), (x => Convert.ToDateTime(x))},
                 {typeof (bool), (x => Convert.ToBoolean(x))},
@@ -44,5 +44,6 @@ namespace Cfg.Net {
                 {typeof (byte), (x => Convert.ToByte(x))},
                 {typeof(object), (x => x)}
             };
+
     }
 }

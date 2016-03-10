@@ -3,14 +3,14 @@ using System.Text;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Modifiers {
-    public class ReplacePlaceHolders : IGlobalModifier {
+    public class PlaceHolderModifier : IGlobalModifier {
         private readonly char _placeHolderMarker;
         private readonly char _placeHolderOpen;
         private readonly char _placeHolderClose;
 
-        public ReplacePlaceHolders():this('@','(',')') { }
+        public PlaceHolderModifier() : this('@', '(', ')') { }
 
-        public ReplacePlaceHolders(char placeHolderMarker, char placeHolderOpen, char placeHolderClose) {
+        public PlaceHolderModifier(char placeHolderMarker, char placeHolderOpen, char placeHolderClose) {
             _placeHolderMarker = placeHolderMarker;
             _placeHolderOpen = placeHolderOpen;
             _placeHolderClose = placeHolderClose;

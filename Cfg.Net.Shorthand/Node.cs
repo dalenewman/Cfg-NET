@@ -14,18 +14,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Cfg.Net.Contracts;
 
-namespace Cfg.Net.Shorthand
-{
-    public class Expressions : List<Expression>
-    {
-        private static readonly string[] ExpressionSplitter = {")."};
+namespace Cfg.Net.Shorthand {
+    internal class Node : INode {
+        public Node(string name) {
+            Name = name;
+            Attributes = new List<IAttribute>();
+            SubNodes = new List<INode>();
+        }
 
-        public Expressions(string value)
-        {
-            AddRange(CfgUtility.Split(value, ExpressionSplitter).Select(e => new Expression(e)));
+        public string Name { get; }
+        public List<IAttribute> Attributes { get; }
+        public List<INode> SubNodes { get; }
+
+        public bool TryAttribute(string name, out IAttribute attr) {
+            throw new NotImplementedException();
         }
     }
 }

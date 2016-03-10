@@ -182,14 +182,21 @@ namespace Cfg.Net {
         internal static T Clone<T>(T node) where T : CfgNode {
 
             var clone = Activator.CreateInstance<T>();
-            clone.Serializer = node.Serializer;
+
             clone.Parser = node.Parser;
             clone.Reader = node.Reader;
+            clone.Serializer = node.Serializer;
+
             clone.Validators = node.Validators;
-            clone.Modifiers = node.Modifiers;
-            clone.GlobalModifiers = node.GlobalModifiers;
+            clone.NodeValidators = node.NodeValidators;
             clone.GlobalValidators = node.GlobalValidators;
-            clone.Shorthand = node.Shorthand;
+
+            clone.Modifiers = node.Modifiers;
+            clone.NodeModifiers = node.NodeModifiers;
+            clone.GlobalModifiers = node.GlobalModifiers;
+
+            clone.MergeParameters = node.MergeParameters;
+
             clone.Type = node.Type;
             clone.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), node.Events.Logger));
 

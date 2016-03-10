@@ -14,19 +14,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Cfg.Net.Shorthand
 {
-    public class MethodData
+    public class Expressions : List<Expression>
     {
-        public MethodData(Method method, Signature signature, Target target)
-        {
-            Method = method;
-            Signature = signature;
-            Target = target;
-        }
+        private static readonly string[] ExpressionSplitter = {")."};
 
-        public Method Method { get; set; }
-        public Signature Signature { get; set; }
-        public Target Target { get; set; }
+        public Expressions(string value)
+        {
+            AddRange(Utility.Split(value, ExpressionSplitter).Select(e => new Expression(e)));
+        }
     }
 }

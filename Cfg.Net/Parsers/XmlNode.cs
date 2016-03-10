@@ -25,9 +25,7 @@ namespace Cfg.Net.Parsers
     {
         private Dictionary<string, IAttribute> _attributes;
 
-        public XmlNode()
-        {
-        }
+        public XmlNode(){}
 
         public XmlNode(NanoXmlNode nanoXmlNode)
         {
@@ -38,9 +36,9 @@ namespace Cfg.Net.Parsers
             SubNodes = new List<INode>(nanoXmlNode.SubNodes.Select(n => new XmlNode(n)));
         }
 
-        public string Name { get; private set; }
-        public List<IAttribute> Attributes { get; private set; }
-        public List<INode> SubNodes { get; private set; }
+        public string Name { get; }
+        public List<IAttribute> Attributes { get; }
+        public List<INode> SubNodes { get; }
 
         public bool TryAttribute(string name, out IAttribute attr)
         {
