@@ -66,8 +66,10 @@ Currently, an `IDependency` may be:
 * an `IParser` - for a different parser
 * an `ISerializer` - for a different serializer
 * an `IValidator` - for targeted property validation
+* an `INodeValidator` - for targeted node validation
 * an `IGlobalValidator` - for global property validation
 * an `IModifier` - for targeted property modification
+* an `INodeModifier` - for targeted node modification
 * an `IGlobalModifer` - for global property validation
 * an `ILogger` - for additional logging
 
@@ -82,7 +84,7 @@ name, and reads it from the file system.  Note: Cfg-Net
 can not read files, because it is a portable class library 
 (PCL).
 
-The `IReader` inter face:
+The `IReader` interface:
 
 ```csharp
 public interface IReader {
@@ -130,10 +132,7 @@ If I do this, I have to modify `DatabaseAdmin` in
 order to change the `IReader`.  This violates
 the open closed principle (open for extension, closed for modification).
 
-Instead, I should instantiate dependencies in one place. 
-This "place" is referred to as the *composition root*, 
-and it provides a single place to *wire up* dependency 
-implementations.
+Instead, I should instantiate dependencies in one place (a composition root). 
 
 So, I add `IReader` to the `DatabaseAdmin` constructor instead:
 
@@ -150,9 +149,6 @@ public class DatabaseAdmin : CfgNode {
 /* usage, in composition root */
 var dba = new DatabaseAdmin("DatabaseAdmin.xml", new FileReader());
 ```
-
-Exposing `IReader` like this allows injection from 
-the composition root.
 
 Unfortunately, the constructor is more complicated, but it 
 necessary to maintain a loose coupling between `DatabaseAdmin` 
@@ -201,12 +197,8 @@ creates them, and creates a fully-loaded `DatabaseAdmin`.
 
 ```csharp
 public class DatabaseAdmin : CfgNode {
-    public DatabaseAdmin(
-        string cfg, 
-        IReader reader,
-        IParser parser,
-        IValidator validator,
-        ILogger logger) :base(reader, parser, validator, logger) {
+    public DatabaseAdmin(string cfg, params IDependency[] dependencies) 
+        :base(dependencies) {
         this.Load(cfg);
     }
     

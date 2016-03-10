@@ -120,77 +120,50 @@ built-in options:
 
 In our model, the `Server` class has a `Name` property that is `required`, and must be `unique`.
 
-### The Order of Things
+### Load the Configuration
 
-For each node in your configuration, four things are cached:
+Load your configuration file into your model like this:
 
-1. the `Cfg` attribute
-2. the .NET `PropertyInfo` 
-3. the `get`
-4. the `set` 
+```csharp
+var dba = new DatabaseAdmin();
+var xml = File.ReadAllText("DatabaseAdmin.xml");
 
-With this, an instance is created. Each property in the instance is defaulted to `value` and 
-each collection is initialized.
+dba.Load(xml);
+```
 
-Per the metadata, Cfg-Net tries to read each attribute. If a 
-value is found, it is `set`. Then, `get` is invoked.
+As your configuration loads:
 
-Then:
-
+1. Corresponding objects are created. 
+1. List properties are initialized.
+1. `required` confirms value is input
+1. Default `value` is applied as necessary
 1. [`PreValidate()`](#PreValidate) is executed
-1. `required` confirms a value exists
-1. `modifiers` runs injected modifiers
+1. Injected `modifiers` are run
 1. `toLower` or `toUpper` may modify the value
 1. `domain` checks value against valid values
 1. `minLength` checks value against a minimum length
 1. `maxLength` checks value against a maximum length
 1. `minValue` checks value against a minimum value
 1. `maxValue` checks value against a maximum value
-1. `validators` checks value against injected validators
-1. `unique` confirms attributes are unique within a collection
-1. `required` confirms an item exists in a collection
+1. Injected `validators` are run
+1. `unique` confirms attributes are unique within a list
+1. `required` confirms an item exists in a list
 1. [`Validate`](#Validate) is executed
 1. [`PostValidate`](#PostValidate) is executed
 
-### Load the Configuration
-
-Load the file into your model like this:
-
-```csharp
-var dba = new DatabaseAdmin();
-dba.Load(File.ReadAllText("DatabaseAdmin.xml"));
-```
-
-I suggest adding a constructor to the `DatabaseAdmin` class:
-
-```csharp
-public class DatabaseAdmin : CfgNode {
-    public DatabaseAdmin(string cfg) {
-        this.Load(cfg);
-    }
-    
-    [Cfg(required = true)]
-    public List<Server> Servers { get; set; }
-}
-```
-
-Now loading it is one line:
-
-```csharp
-var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
-```
-
 ### Check the Configuration
 
-When you load a configuration, Cfg-NET doesn't throw exceptions
-(on purpose). Instead, it attempts to collect
-*all* the errors and/or warnings. So, after loading,
-you should always check it for any issues using
-the `Errors()` and `Warnings()` methods:
+When you load a configuration, Cfg-NET doesn't throw 
+exceptions (on purpose). Instead, it collects errors 
+and/or warnings. 
+
+After loading, always check your model for any 
+issues using the `Errors()` and `Warnings()` methods:
 
 ```csharp
 //LOAD CONFIGURATION
-var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
+var dba = new DatabaseAdmin();
+dba.Load(File.ReadAllText("DatabaseAdmin.xml"));
 
 /* CHECK FOR WARNINGS */
 Assert.AreEqual(0, dba.Warnings().Length);
@@ -205,23 +178,21 @@ By convention, an error means the configuration is invalid.
 A warning is something you ought to address, but the program
 should still work.
 
-By collecting multiple errors and warnings,
-you can report them to an end-user
-who can attempt to fix them all at once.
-The messages produced are usually
-quite helpful. Here are some examples:
+Report the errors and warnings to the end-user
+so they can fix the configuration. Here are some 
+example errors:
 
-Put another server named *Gandalf* in there, and it says:
+Put another server named *Gandalf* in there...
 
-> You set a duplicate 'name' value 'Gandalf' in 'servers'.
+> You set a duplicate **name** value **Gandalf** in **servers**.
 
-Add a *nickName* instead of a *name* in servers, and it says:
+Add a *nickName* instead of a *name* in servers...
 
-> 'servers' entry contains an invalid 'nickName' attribute.  Valid attributes are: name.
-> 'servers' entry is missing a 'name' attribute.
+> **servers** contain an invalid **nickName** attribute.  Valid attributes are: **name**.
+> **servers** is missing a **name** attribute.
 
-If Cfg-NET doesn't report any issues, you can
-be sure your configuration conforms to your model.
+If Cfg-NET doesn't report any issues, your configuration 
+conforms to your model.
 
 ### Back to the Scenario
 
@@ -316,49 +287,17 @@ initialized.
 Validation and Modification
 ---------------------------
 
-The `Cfg` attribute's optional properties offer *configurable* validation.
+The `Cfg` attribute's optional properties 
+offer *configurable* validation.
 If it's not enough, you have 5 ways to extend:
 
-1. [In Your Property](#InYourProperty)
 1. Overriding [`PreValidate()`](#PreValidate)
 1. Overriding [`Validate()`](#Validate)
 1. Overriding [`PostValidate()`](#PostValidate)
-1. [Injecting `IValidator`, `INodeValidator`, and/or `IGlobalValidator` into Model's Contructor](#InjectingValidators)
-1. Injecting `IModifier`, `INodeModifier`, and/or `IGlobalModifier` into Model's Constructor
+1. Injecting validator(s) into a model's contructor
+1. Injecting modifier(s) int model's constructor
 
 <a name="InYourProperty"></a>
-
-### In Your Property
-
-You don't _have_ to use auto-properties.  Instead of this:
-
-```csharp
-[Cfg(value = "file", domain = "file,folder,other", ignoreCase = true)]
-public string Provider { get; set; }
-```
-
-You can use a property with a backing field:
-
-```csharp
-private string _provider = "sqlserver";
-
-[Cfg]
-public string Provider {
-    get { return _provider ?? "sqlserver"; }
-    set {
-        if(value != null && value == "Bad Words"){
-            Error("I don't like Bad Words!")
-        } else {
-            _provider = value; 
-        }
-    }
-}
-```
-
-Your property's `get` and `set` are invoked during the loading, modifying,
-and validation process.  So any code you have in here will be executed.
-
-<a name="PreValidate"></a>
 
 ### Overriding PreValidate()
 
@@ -377,12 +316,10 @@ protected override void PreValidate() {
 `PreValidate()` runs *after* the properties are set,
 but *before* any validation runs.
 
-<a name="Validate"></a>
-
 ### Overriding Validate()
 
-To perform complex validation or validation involving more than
-one property, override the `Validate()` method like this:
+To perform validation involving more than
+one property, override `Validate()` like this:
 
 ```csharp
 public class Connection : CfgNode {
@@ -406,21 +343,16 @@ public class Connection : CfgNode {
 }
 ```
 
-The `Validate()` method has access
-to the `Provider`, `File`, and `Folder` properties.
-It runs *after* they're set and *after* `PreValidate()`.
-If you find that the configuration is invalid, add errors using
-the `Error()` method.  If you find non-critical issues,
-add them using the `Warn()` method.
+When you override `Validate`, add issues using
+the `Error()` and `Warn()` method.
 
 <a name="PostValidate"></a>
 
 ### Overriding PostValidate()
 
-After `Validate()` runs.  You can check for `Errors()` and/or
-`Warnings()`.  If you want, you may modify
-the configuration further; making sure your app has
-everything it needs for a clean run.
+Overriding `PostValidate` gives you an opportunity 
+to run code after validation.  You may check `Errors()` 
+and/or `Warnings()` and make further preparations. 
 
 ```csharp
 protected override void PostValidate() {
@@ -430,14 +362,20 @@ protected override void PostValidate() {
 }
 ```
 
-<a name="InjectingValidators"></a>
-
 ### Injecting Modifiers and Validators into Model's Contructor
 
-You may want to inject a validator into Cfg-NET instead
-of coding it up in one of the above methods.
+You may want to inject validators and modifiers into 
+Cfg-NET instead.  Interfaces are defined to facilite 
+this:
 
-*More on this later... see [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
+1. `string` IModifier.Modify(string name, string value, IDictionary<string,string> parameters)
+1. `void` INodeModifer.Modify(INode node, IDictionary<string,string> parameters)
+1. `string` IGlobalModifier.Modify(string name, string value, IDictionary<string,string> parameters)
+1. `ValidatorResult` IValidator.Modify(string name, string value, IDictionary<string,string> parameters)
+1. `ValidatorResult` INodeModifer.Modify(INode node, IDictionary<string,string> parameters)
+1. `ValidatorResult` IGlobalValidator.Modify(string name, string value, IDictionary<string,string> parameters)
+
+*Read more about injecting ... see [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
 
 Finishing Up The Scenario
 -------------------------

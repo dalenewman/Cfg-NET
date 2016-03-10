@@ -4,14 +4,15 @@ Environments, parameters, and place-holders work together in order
 to provide configuration flexibility at run-time.
 
 ### Update 0.6.x
-This feature is no longer built into Cfg-Net.  Instead, it is
-injectable.  I have left default implementations in Cfg-Net 
-that may be used to provide the same functionality:
+This feature is no longer built into Cfg-Net. 
+Instead, it is composed of IGlobalModifer, 
+IGlobalValidator, and IMergeParameter implementations 
+and injected into your model's constructor.
 
 ```csharp
 // an Autofac example...
 
-builder.RegisterType<ReplacePlaceHolders>().As<IGlobalModifier>();
+builder.RegisterType<PlaceHolderModifier>().As<IGlobalModifier>();
 builder.RegisterType<ValidatePlaceHolders>().As<IGlobalValidator>();
 builder.RegisterType<MergeParameters>().Named<IMergeParameters>("parameters");
 
