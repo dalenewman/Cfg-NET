@@ -18,54 +18,56 @@ namespace Cfg.Net.Shorthand {
             var expressions = new Expressions(value);
             var shorthandNodes = new Dictionary<string, List<INode>>();
 
-            for (var j = 0; j < expressions.Count; j++) {
-                var expression = expressions[j];
+            foreach (var expression in expressions) {
                 MethodData methodData;
-                if (_root.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
-                    if (methodData.Target.Collection == string.Empty || methodData.Target.Property == string.Empty)
-                        continue;
 
-                    var shorthandNode = new Node("add");
-                    shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
+                if (!_root.MethodDataLookup.TryGetValue(expression.Method, out methodData))
+                    continue;
 
-                    var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
-                    var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
+                if (methodData.Target.Collection == string.Empty || methodData.Target.Property == string.Empty)
+                    continue;
 
-                    // single parameters
-                    if (methodData.Signature.Parameters.Count == 1 && expression.SingleParameter != string.Empty) {
-                        var name = methodData.Signature.Parameters[0].Name;
-                        var val = expression.SingleParameter.StartsWith(name + ":",
-                            StringComparison.OrdinalIgnoreCase)
-                            ? expression.SingleParameter.Remove(0, name.Length + 1)
-                            : expression.SingleParameter;
-                        shorthandNode.Attributes.Add(new ShorthandAttribute(name, val));
-                    } else {
-                        // named parameters
-                        for (var i = 0; i < passedParameters.Length; i++) {
-                            var parameter = passedParameters[i];
-                            var split = Utility.Split(parameter, NamedParameterSplitter);
-                            if (split.Length == 2) {
-                                var name = Utility.NormalizeName(split[0]);
-                                shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
-                                signatureParameters.RemoveAll(p => Utility.NormalizeName(p.Name) == name);
-                                expression.Parameters.RemoveAll(p => p == parameter);
-                            }
-                        }
+                var shorthandNode = new Node("add");
+                shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
 
-                        // ordered nameless parameters
-                        for (var m = 0; m < signatureParameters.Count; m++) {
-                            var signatureParameter = signatureParameters[m];
-                            shorthandNode.Attributes.Add(m < expression.Parameters.Count
-                                ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
-                                : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
-                        }
+                var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
+                var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
+
+                // single parameters
+                if (methodData.Signature.Parameters.Count == 1 && expression.SingleParameter != string.Empty) {
+                    var name = methodData.Signature.Parameters[0].Name;
+                    var val = expression.SingleParameter.StartsWith(name + ":",
+                        StringComparison.OrdinalIgnoreCase)
+                        ? expression.SingleParameter.Remove(0, name.Length + 1)
+                        : expression.SingleParameter;
+                    shorthandNode.Attributes.Add(new ShorthandAttribute(name, val));
+                } else {
+                    // named parameters
+                    foreach (var parameter in passedParameters) {
+                        var split = Utility.Split(parameter, NamedParameterSplitter);
+                        if (split.Length != 2)
+                            continue;
+
+                        var name = Utility.NormalizeName(split[0]);
+                        shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
+                        signatureParameters.RemoveAll(p => Utility.NormalizeName(p.Name) == name);
+                        var parameter1 = parameter;
+                        expression.Parameters.RemoveAll(p => p == parameter1);
                     }
 
-                    if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
-                        shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
-                    } else {
-                        shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
+                    // ordered nameless parameters
+                    for (var m = 0; m < signatureParameters.Count; m++) {
+                        var signatureParameter = signatureParameters[m];
+                        shorthandNode.Attributes.Add(m < expression.Parameters.Count
+                            ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
+                            : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
                     }
+                }
+
+                if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
+                    shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
+                } else {
+                    shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
                 }
             }
 

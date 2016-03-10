@@ -128,7 +128,7 @@
       <Name>Cfg.Net.Reader</Name>
     </ProjectReference>
     <ProjectReference Include="..\Cfg.Net.Shorthand\Cfg.Net.Shorthand.csproj">
-      <Project>{52f94335-252e-4926-a916-d6684218feae}</Project>
+      <Project>{b74d8ffa-af9a-4b14-bc6d-3c43469d571d}</Project>
       <Name>Cfg.Net.Shorthand</Name>
     </ProjectReference>
     <ProjectReference Include="..\Cfg.Net\Cfg.Net.csproj">
