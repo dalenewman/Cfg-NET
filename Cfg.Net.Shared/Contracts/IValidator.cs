@@ -15,17 +15,10 @@
 // limitations under the License.
 #endregion
 
-using System;
 using System.Collections.Generic;
 
 namespace Cfg.Net.Contracts {
-
-    [Obsolete]
-    public interface IValidators : IDependency, IEnumerable<KeyValuePair<string, IValidator>> {
-        void Add(string name, IValidator validator);
-        [Obsolete("This goes un-used 99% of the time.")]
-        void AddRange(IEnumerable<KeyValuePair<string, IValidator>> validators);
-        [Obsolete("This goes un-used 99% of the time.")]
-        void Remove(string name);
+    public interface IValidator : INamedDependency {
+        void Validate(string name, string value, IDictionary<string, string> parameters, ILogger logger);
     }
 }

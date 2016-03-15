@@ -30,7 +30,13 @@ namespace Cfg.Net {
         }
 
         public static Func<object, object> CreateGetterGeneric<T, R>(MethodInfo getter) where T : class {
+
+#if (NET4)
             var getterTypedDelegate = (Func<T, R>)Delegate.CreateDelegate(typeof(Func<T, R>), getter);
+#else
+            var getterTypedDelegate = (Func<T, R>)getter.CreateDelegate(typeof(Func<T, R>), getter);
+#endif
+
             var getterDelegate = (Func<object, object>)((object instance) => getterTypedDelegate((T)instance));
             return getterDelegate;
         }
@@ -43,7 +49,11 @@ namespace Cfg.Net {
         }
 
         public static Action<object, object> CreateSetterGeneric<T, V>(MethodInfo setter) where T : class {
+#if NET4
             var setterTypedDelegate = (Action<T, V>)Delegate.CreateDelegate(typeof(Action<T, V>), setter);
+#else
+            var setterTypedDelegate = (Action<T, V>)setter.CreateDelegate(typeof(Action<T, V>), setter);
+#endif
             var setterDelegate =
                 (Action<object, object>)
                     ((instance, value) => setterTypedDelegate((T)instance, value == null ? default(V) : (V)value));

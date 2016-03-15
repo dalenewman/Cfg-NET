@@ -11,16 +11,14 @@ namespace Cfg.Net.Shorthand {
         }
 
         public string Name { get; set; }
-        public ValidatorResult Validate(INode node, string value, IDictionary<string, string> parameters) {
-            var result = new ValidatorResult { Valid = true };
+        public void Validate(INode node, string value, IDictionary<string, string> parameters, ILogger logger) {
             var expressions = new Expressions(value);
             foreach (var expression in expressions) {
                 MethodData methodData;
                 if (!_root.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
-                    result.Warn($"The short-hand expression method {expression.Method} is undefined.");
+                    logger.Warn($"The short-hand expression method {expression.Method} is undefined.");
                 }
             }
-            return result;
         }
     }
 }

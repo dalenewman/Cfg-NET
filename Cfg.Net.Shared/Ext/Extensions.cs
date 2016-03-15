@@ -16,6 +16,7 @@
 #endregion
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
@@ -28,8 +29,16 @@ namespace Cfg.Net.Ext {
         internal static void SetDefaults(this CfgNode node) {
 
             var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
-            foreach (var pair in metadata) {
-                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
+            foreach (var pair in metadata)
+            {
+                bool? isGenericType;
+#if NET4
+                isGenericType = pair.Value.PropertyInfo.PropertyType.IsGenericType;
+#else
+                isGenericType = pair.Value.PropertyInfo.PropertyType.GetTypeInfo().IsGenericType;
+#endif
+
+                if (isGenericType.Value) {
                     var value = pair.Value.Getter(node);
                     if (value == null) {
                         pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
@@ -57,8 +66,15 @@ namespace Cfg.Net.Ext {
 
         internal static void Clear(this CfgNode node, CfgEvents events) {
             var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
-            foreach (var pair in metadata) {
-                if (pair.Value.PropertyInfo.PropertyType.IsGenericType) {
+            foreach (var pair in metadata)
+            {
+                bool? isGenericType;
+#if NET4
+                isGenericType = pair.Value.PropertyInfo.PropertyType.IsGenericType;
+#else
+                isGenericType = pair.Value.PropertyInfo.PropertyType.GetTypeInfo().IsGenericType;
+#endif
+                if (isGenericType.Value) {
                     pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
                 } else {
                     pair.Value.Setter(node, pair.Value.TypeMismatch ? pair.Value.Default : pair.Value.Attribute.value);

@@ -2,7 +2,7 @@
 using System.Text;
 using Cfg.Net.Contracts;
 
-namespace Cfg.Net.Modifiers {
+namespace Cfg.Net.Environment {
     public class PlaceHolderModifier : IGlobalModifier {
         private readonly char _placeHolderMarker;
         private readonly char _placeHolderOpen;
@@ -17,7 +17,7 @@ namespace Cfg.Net.Modifiers {
         }
 
         public string Modify(string name, string value, IDictionary<string, string> parameters) {
-            if (parameters == null || value.IndexOf(_placeHolderMarker) < 0)
+            if (parameters.Count == 0 || value.IndexOf(_placeHolderMarker) < 0)
                 return value;
 
             var builder = new StringBuilder();

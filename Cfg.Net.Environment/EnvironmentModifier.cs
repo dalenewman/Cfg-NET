@@ -3,30 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net.Contracts;
 
-namespace Cfg.Net.MergeParameters {
-    public class MergeInternalParameters : IMergeParameters {
+namespace Cfg.Net.Environment {
+    public class EnvironmentModifier : IRootModifier {
         private readonly IGlobalModifier _placeHolderReplacer;
-        private readonly IMergeParameters _mergeParameters;
+        private readonly IRootModifier _mergeParameters;
         private readonly string _environmentsElementName;
         private readonly string _defaultEnvironmentAttribute;
         private readonly string _environmentNameAttribute;
         private readonly string _parametersElementName;
 
-        public MergeInternalParameters(
+        public string Name { get; set; }
+
+        public EnvironmentModifier(
             IGlobalModifier placeHolderReplacer,
-            IMergeParameters mergeParameters): 
+            IRootModifier mergeParameters) :
             this(
-                placeHolderReplacer, 
-                mergeParameters, 
-                "environments", 
-                "environment", 
-                "name", 
+                placeHolderReplacer,
+                mergeParameters,
+                "environments",
+                "environment",
+                "name",
                 "parameters"
             ) { }
 
-        public MergeInternalParameters(
+        public EnvironmentModifier(
             IGlobalModifier placeHolderReplacer,
-            IMergeParameters mergeParameters,
+            IRootModifier mergeParameters,
             string environmentsElementName,
             string defaultEnvironmentAttribute,
             string environmentNameAttribute,
@@ -40,8 +42,10 @@ namespace Cfg.Net.MergeParameters {
             _parametersElementName = parametersElementName;
         }
 
-        public IDictionary<string, string> Merge(INode root, IDictionary<string, string> parameters) {
+        public void Modify(INode root, IDictionary<string, string> parameters) {
+
             for (var i = 0; i < root.SubNodes.Count; i++) {
+
                 var environments = root.SubNodes.FirstOrDefault(n => n.Name.Equals(_environmentsElementName, StringComparison.OrdinalIgnoreCase));
                 if (environments == null)
                     continue;
@@ -49,34 +53,31 @@ namespace Cfg.Net.MergeParameters {
                 if (environments.SubNodes.Count == 0)
                     break;
 
-                INode environment;
-
                 if (environments.SubNodes.Count > 1) {
                     IAttribute defaultEnvironment;
                     if (!root.TryAttribute(_defaultEnvironmentAttribute, out defaultEnvironment))
                         continue;
 
-                    for (var j = 0; j < environments.SubNodes.Count; j++) {
-                        environment = environments.SubNodes[j];
-
+                    foreach (var node in environments.SubNodes) {
                         IAttribute environmentName;
-                        if (!environment.TryAttribute(_environmentNameAttribute, out environmentName))
+                        if (!node.TryAttribute(_environmentNameAttribute, out environmentName))
                             continue;
 
                         // for when the default environment is set with a place-holder (e.g. @(environment))
                         var value = _placeHolderReplacer.Modify(_defaultEnvironmentAttribute, defaultEnvironment.Value, parameters);
 
-                        if (!value.Equals(environmentName.Value) || environment.SubNodes.Count == 0)
+                        if (!value.Equals(environmentName.Value) || node.SubNodes.Count == 0)
                             continue;
 
-                        if (environment.SubNodes[0].Name == _parametersElementName) {
-                            return _mergeParameters.Merge(environment.SubNodes[0], parameters);
+                        if (node.SubNodes[0].Name == _parametersElementName) {
+                            _mergeParameters.Modify(node.SubNodes[0], parameters);
                         }
                     }
+
                 }
 
                 // default to first environment
-                environment = environments.SubNodes[0];
+                var environment = environments.SubNodes[0];
                 if (environment.SubNodes.Count == 0)
                     break;
 
@@ -85,11 +86,11 @@ namespace Cfg.Net.MergeParameters {
                 if (parametersNode.Name != _parametersElementName || environment.SubNodes.Count == 0)
                     break;
 
-                return _mergeParameters.Merge(parametersNode, parameters);
+                _mergeParameters.Modify(parametersNode, parameters);
             }
 
-            return parameters;
 
         }
+
     }
 }

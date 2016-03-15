@@ -17,9 +17,7 @@
 using System;
 using System.Collections.Generic;
 using Cfg.Net;
-using Cfg.Net.MergeParameters;
-using Cfg.Net.Modifiers;
-using Cfg.Net.Validators;
+using Cfg.Net.Environment;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -132,9 +130,9 @@ namespace Cfg.Test {
     public class MyCfg : CfgNode {
         public MyCfg(string xml, IDictionary<string, string> parameters = null)
             : base(
-                  new MergeInternalParameters(new PlaceHolderModifier(), new MergeParameters()), 
+                  new EnvironmentModifier(new PlaceHolderModifier(), new ParameterModifier()), 
                   new PlaceHolderModifier(),
-                  new ValidatePlaceHolders()
+                  new PlaceHolderValidator()
             ) {
             Load(xml, parameters);
         }

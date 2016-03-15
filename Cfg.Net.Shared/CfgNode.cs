@@ -40,8 +40,7 @@ namespace Cfg.Net {
         internal IDictionary<string, IModifier> Modifiers { get; set; } = new Dictionary<string, IModifier>();
         internal IDictionary<string, INodeModifier> NodeModifiers { get; set; } = new Dictionary<string, INodeModifier>();
         internal IList<IGlobalModifier> GlobalModifiers { get; set; } = new List<IGlobalModifier>();
-
-        internal IMergeParameters MergeParameters { get; set; }
+        internal IList<IRootModifier> RootModifiers { get; set; } = new List<IRootModifier>();
 
         internal Type Type { get; set; }
         internal CfgEvents Events { get; set; }
@@ -86,8 +85,8 @@ namespace Cfg.Net {
                             var validator = dependency as IValidator;
                             Validators[validator.Name] = validator;
                         }
-                    } else if (dependency is IMergeParameters) {
-                        MergeParameters = dependency as IMergeParameters;
+                    } else if (dependency is IRootModifier) {
+                        RootModifiers.Add(dependency as IRootModifier);
                     }
                 }
             }
@@ -112,6 +111,10 @@ namespace Cfg.Net {
 
             this.Clear(Events);
 
+            if (parameters == null) {
+                parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+
             INode node;
             try {
                 Source source;
@@ -127,9 +130,6 @@ namespace Cfg.Net {
                     cfg = result.Content;
                     source = result.Source;
                     if (result.Source != Source.Error && result.Parameters.Any()) {
-                        if (parameters == null) {
-                            parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                        }
                         foreach (var pair in result.Parameters) {
                             parameters[pair.Key] = pair.Value;
                         }
@@ -156,8 +156,8 @@ namespace Cfg.Net {
 
                 node = parser.Parse(cfg);
 
-                if (MergeParameters != null) {
-                    parameters = MergeParameters.Merge(node, parameters);
+                foreach (var modifier in RootModifiers) {
+                    modifier.Modify(node, parameters);
                 }
 
             } catch (Exception ex) {
@@ -399,11 +399,6 @@ namespace Cfg.Net {
                         attribute.Value = maybe.ToString();
                     }
 
-                    // run global modifiers
-                    foreach (var modifier in GlobalModifiers) {
-                        attribute.Value = modifier.Modify(attribute.Name, attribute.Value, parameters);
-                    }
-
                     // run injected property specific modifiers
                     if (item.Attribute.ModifiersSet) {
                         foreach (var modifier in item.Attribute.modifiers.Split(item.Attribute.delimiter)) {
@@ -419,6 +414,11 @@ namespace Cfg.Net {
                                 Events.Warning($"'{attribute.Name}' has a '{modifier}' modifier, but no '{modifier}' was injected.");
                             }
                         }
+                    }
+
+                    // run global modifiers
+                    foreach (var modifier in GlobalModifiers) {
+                        attribute.Value = modifier.Modify(attribute.Name, attribute.Value, parameters);
                     }
 
                     if (item.Attribute.toLower) {
@@ -477,20 +477,7 @@ namespace Cfg.Net {
                 // run global validators
                 foreach (var validator in GlobalValidators) {
                     try {
-                        var result = validator.Validate(key, stringValue, parameters);
-                        if (result.Valid)
-                            continue;
-
-                        if (result.Warnings != null) {
-                            foreach (var warning in result.Warnings) {
-                                Warn(warning);
-                            }
-                        }
-                        if (result.Errors == null) continue;
-                        foreach (var error in result.Errors) {
-                            Error(error);
-                        }
-
+                        validator.Validate(key, stringValue, parameters, Events.Logger);
                     } catch (Exception ex) {
                         Events.ValidatorException(validator.GetType().Name, ex, stringValue);
                     }
@@ -519,22 +506,11 @@ namespace Cfg.Net {
                 var isNodeValidator = !isValidator && NodeValidators.ContainsKey(validator);
                 if (isValidator || isNodeValidator) {
                     try {
-                        var result = isValidator ?
-                            Validators[validator].Validate(name, value, parameters) :
-                            NodeValidators[validator].Validate(node, value, parameters);
-
-                        if (result.Warnings != null) {
-                            foreach (var warning in result.Warnings) {
-                                Warn(warning);
-                            }
+                        if (isValidator) {
+                            Validators[validator].Validate(name, value, parameters, Events.Logger);
+                        } else {
+                            NodeValidators[validator].Validate(node, value, parameters, Events.Logger);
                         }
-
-                        if (result.Errors != null) {
-                            foreach (var error in result.Errors) {
-                                Error(error);
-                            }
-                        }
-
                     } catch (Exception ex) {
                         Events.ValidatorException(validator, ex, value);
                     }

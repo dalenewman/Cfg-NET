@@ -115,6 +115,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Cfg.Net.Environment\Cfg.Net.Environment.csproj">
+      <Project>{629f7c32-54ad-400c-a0bf-9d0772a58e3a}</Project>
+      <Name>Cfg.Net.Environment</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Cfg.Net.Parsers.Json.Net\Cfg.Net.Parsers.Json.Net.csproj">
       <Project>{d64515c8-95b0-459b-bf6c-9f54e170211f}</Project>
       <Name>Cfg.Net.Parsers.Json.Net</Name>

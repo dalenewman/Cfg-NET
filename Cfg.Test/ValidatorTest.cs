@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using Cfg.Net;
 using Cfg.Net.Contracts;
-using Cfg.Net.Validators;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -133,14 +132,11 @@ namespace Cfg.Test {
             }
 
             public string Name { get; set; }
-            public ValidatorResult Validate(string name, string value, IDictionary<string,string> parameters) {
-                var result = new ValidatorResult();
+            public void Validate(string name, string value, IDictionary<string,string> parameters, ILogger logger) {
                 var count = value.Split(new[] { '-' }, StringSplitOptions.None).Length - 1;
-                result.Valid = count == 2;
-                if (!result.Valid) {
-                    result.Error("The value '{0}' in the '{1}' attribute is no good! It does not have two dashes like we agreed on.", value, name);
+                if (count != 2) {
+                    logger.Error("The value '{0}' in the '{1}' attribute is no good! It does not have two dashes like we agreed on.", value, name);
                 }
-                return result;
             }
 
         }
@@ -152,12 +148,10 @@ namespace Cfg.Test {
             }
 
             public string Name { get; set; }
-            public ValidatorResult Validate(string name, string value, IDictionary<string,string> parameters) {
-                var result = new ValidatorResult { Valid = value.Contains("good") };
-                if (!result.Valid) {
-                    result.Error("The value '{0}' is missing good! I am deeply offended.", value);
+            public void Validate(string name, string value, IDictionary<string,string> parameters, ILogger logger) {
+                if (!value.Contains("good")) {
+                    logger.Error("The value '{0}' is missing good! I am deeply offended.", value);
                 }
-                return result;
             }
 
         }

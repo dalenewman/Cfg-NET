@@ -20,10 +20,8 @@ using System.IO;
 using System.Linq;
 using Cfg.Net;
 using Cfg.Net.Contracts;
-using Cfg.Net.Modifiers;
 using Cfg.Net.Reader;
 using Cfg.Net.Shorthand;
-using Cfg.Net.Validators;
 using NUnit.Framework;
 
 namespace Cfg.Test {

@@ -2,27 +2,28 @@ using System;
 using System.Collections.Generic;
 using Cfg.Net.Contracts;
 
-namespace Cfg.Net.MergeParameters {
-    public class MergeParameters : IMergeParameters {
+namespace Cfg.Net.Environment {
+
+    /// <summary>
+    /// Updatea the parameters dictionary from a collection of elements with attributes name and value.
+    /// </summary>
+    public class ParameterModifier : IRootModifier {
         private readonly string _nameAttribute;
         private readonly string _valueAttribute;
 
-        public MergeParameters() : this("name", "value") {}
+        public ParameterModifier() : this("name", "value") { }
 
-        public MergeParameters(string nameAttribute, string valueAttribute) {
+        public ParameterModifier(string nameAttribute, string valueAttribute) {
             _nameAttribute = nameAttribute;
             _valueAttribute = valueAttribute;
         }
 
-        public IDictionary<string, string> Merge(INode root, IDictionary<string, string> parameters) {
-            parameters = parameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        public void Modify(INode root, IDictionary<string, string> parameters) {
 
-            for (var j = 0; j < root.SubNodes.Count; j++) {
-                var parameter = root.SubNodes[j];
+            foreach (var parameter in root.SubNodes) {
                 string name = null;
                 string value = null;
-                for (var k = 0; k < parameter.Attributes.Count; k++) {
-                    var attribute = parameter.Attributes[k];
+                foreach (var attribute in parameter.Attributes) {
                     if (attribute.Name == _nameAttribute) {
                         name = attribute.Value;
                     } else if (attribute.Name == _valueAttribute) {
@@ -33,7 +34,6 @@ namespace Cfg.Net.MergeParameters {
                     parameters[name] = value;
                 }
             }
-            return parameters;
         }
     }
 }

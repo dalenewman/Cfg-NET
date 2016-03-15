@@ -1,23 +1,23 @@
 using System.Collections.Generic;
 using Cfg.Net.Contracts;
 
-namespace Cfg.Net.Validators {
-    public class ValidatePlaceHolders : IGlobalValidator {
+namespace Cfg.Net.Environment {
+    public sealed class PlaceHolderValidator : IGlobalValidator {
 
         private readonly char _placeHolderMarker;
         private readonly char _placeHolderOpen;
         private readonly char _placeHolderClose;
 
-        public ValidatePlaceHolders() : this('@', '(', ')'){}
+        public PlaceHolderValidator() : this('@', '(', ')'){}
 
-        public ValidatePlaceHolders(char placeHolderMarker, char placeHolderOpen, char placeHolderClose) {
+        public PlaceHolderValidator(char placeHolderMarker, char placeHolderOpen, char placeHolderClose) {
             _placeHolderMarker = placeHolderMarker;
             _placeHolderOpen = placeHolderOpen;
             _placeHolderClose = placeHolderClose;
         }
-        public ValidatorResult Validate(string name, string value, IDictionary<string, string> parameters) {
+        public void Validate(string name, string value, IDictionary<string, string> parameters, ILogger logger) {
             if (value.IndexOf(_placeHolderMarker) < 0)
-                return new ValidatorResult { Valid = true };
+                return;
 
             List<string> badKeys = null;
             for (var j = 0; j < value.Length; j++) {
@@ -41,12 +41,10 @@ namespace Cfg.Net.Validators {
             }
 
             if (badKeys == null)
-                return new ValidatorResult { Valid = true };
+                return;
 
-            var result = new ValidatorResult { Valid = false };
             var formatted = $"{_placeHolderMarker}{_placeHolderOpen}{string.Join($"{_placeHolderClose}, {_placeHolderMarker}{_placeHolderOpen}", badKeys)}{_placeHolderClose}";
-            result.Error("Missing {0} for {1}.", badKeys.Count == 1 ? "a parameter value" : "parameter values", formatted);
-            return result;
+            logger.Error("Missing {0} for {1}.", badKeys.Count == 1 ? "a parameter value" : "parameter values", formatted);
         }
     }
 }

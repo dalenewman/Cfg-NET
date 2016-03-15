@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>20ecb16c-d7e6-41ca-a8ed-3c197057eccd</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Cfg.Net.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CfgAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgEvents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgMetadata.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgMetadataCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgReflectionHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgSourceDetector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IDependency.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IGlobalModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IGlobalValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\ILogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\INamedDependency.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\INode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\INodeModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\INodeValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IRootModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\ISerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\ISourceDetector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\ReaderResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\Source.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ext\Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Loggers\DefaultLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Loggers\MemoryLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Loggers\NullLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\fastJSON\JSON.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\fastJSON\JsonParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\JsonNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\JsonParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\nanoXML\NanoXmlAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\nanoXML\NanoXmlBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\nanoXML\NanoXmlDocument.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\nanoXML\NanoXmlNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\nanoXML\NanoXmlParsingException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\NodeAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\XmlNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\XmlParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializers\JsonSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializers\XmlSerializer.cs" />
+  </ItemGroup>
+</Project>
