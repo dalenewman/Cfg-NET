@@ -15,8 +15,10 @@
 // limitations under the License.
 #endregion
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Cfg.Net;
 using Cfg.Net.Parsers;
 using NUnit.Framework;
 
@@ -124,5 +126,53 @@ namespace Cfg.Test {
             TestReadMe2();
         }
 
+        [Test]
+        public void NewTest() {
+            const string xml = @"
+<cfg>
+    <fruit>
+        <add name='apple'>
+            <colors>
+                <add name='red' />
+                <add name='yellow' />
+                <add name='green' />
+            </colors>
+        </add>
+        <add name='banana'>
+            <colors>
+                <add name='yellow' />
+            </colors>
+        </add>
+        <add name='apple' />
+    </fruit>
+</cfg>
+";
+
+            var cfg = new Cfg();
+            cfg.Load(xml);
+
+            foreach (var error in cfg.Errors()) {
+                Console.WriteLine(error);
+            }
+
+        }
+
+    }
+
+    class Cfg : CfgNode {
+        [Cfg(required = true)] // THERE MUST BE SOME FRUIT!
+        public List<Fruit> Fruit { get; set; }
+    }
+
+    class Fruit : CfgNode {
+        [Cfg(unique = true)] // THE FRUIT MUST BE UNIQUE!
+        public string Name { get; set; }
+        [Cfg]
+        public List<Color> Colors { get; set; }
+    }
+
+    class Color : CfgNode {
+        [Cfg]
+        public string Name { get; set; }
     }
 }

@@ -27,8 +27,8 @@ namespace Cfg.Test {
 
         [Test]
         public void TempTest() {
-            var cfg = new Cfg.Net.Reader.WebReader().Read("", new TraceLogger()).Content;
-            var sh = new Cfg.Net.Reader.WebReader().Read("", new TraceLogger()).Content;
+            var cfg = new global::Cfg.Net.Reader.WebReader().Read("", new TraceLogger()).Content;
+            var sh = new global::Cfg.Net.Reader.WebReader().Read("", new TraceLogger()).Content;
 
             Assert.AreEqual(1,1);
 

@@ -1,106 +1,141 @@
 Cfg-NET
 =======
 
-Cfg-NET is a JSON or XML based [open source](https://github.com/dalenewman/Cfg.Net) .NET
-configuration handler. It is an alternative to adding 
-custom sections in *app* or *web*.config. 
-Released under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
+An [open source](https://github.com/dalenewman/Cfg.Net) 
+configuration handler for .NET licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
 #### Good Configurations:
 
-* may be edited by end-users (in [JSON](http://en.wikipedia.org/wiki/JSON) or [XML](http://en.wikipedia.org/wiki/XML))
-* remove the need to re-compile
+* are editable by end-users
+* reduce the need to re-compile
 * co-exist with other configurations
 
 #### Good Configuration Handlers:
 
 * are easy to use
+* support collections
 * validate and report errors and warnings
-* allow for custom validation and modification
+* are extensible and/or composable
 * protect the program from `null`, by setting defaults
 * are available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
-* are portable
+* are portable (PCL)
 
-Getting Started
+Introduction
 ---------------
 
-Your database administrator (DBA) is unhappy.  Every few days he 
-gets text alerts saying "**Gandalf's E drive has less than 10% free space!**"
+By default, a .NET configuration (*App|Web.config*) offers a 
+collection of app settings (key value pairs) and connection 
+strings. These settings are sufficient in trivial cases, but 
+are limiting.  To segregate any collections of objects you
+want in your configuration, you must resort to 
+wierd keys and/or multiple delimiters in your values.
 
-He wants a program to make this text go away.  In other words, he 
-needs a program to move database backups from E drive to *another place*.
+If you need collections of objects in your configuration, 
+you may build the traditional [custom configuration 
+sections](https://msdn.microsoft.com/en-us/library/2tw134k3.aspx). I 
+used custom configuration settings for awhile, but found them to 
+be cumbersome and heavy.  I wanted something a easier 
+to use and lighter, so I built this (Cfg-NET).
 
-He provides you this information:
+Cfg-Net configurations are not confined to *App|Web.config*. They 
+are like little databases made of XML or JSON: 
 
-- a list of servers
-- a list of databases (for each server)
-- the local path where backups are kept (for each server)
-- how many backup sets he wants to keep on the local drive
+An XML example:
 
-With this, you can start modeling your configuration.  We'll 
-start with modeling *him*, and his *servers*.
+```xml
+<cfg>
+    <fruit>
+        <add name="apple">
+            <colors>
+                <add name="red" />
+                <add name="yellow" />
+                <add name="green" />
+            </colors>
+        </add>
+        <add name="banana">
+            <colors>
+                <add name="yellow" />
+            </colors>
+        <add>
+    </fruit>
+</cfg>
+```
 
-### Create a Model
+Or, if you prefer JSON:
 
-First, install Cfg-NET with Nuget:
+```js
+{
+    "fruit": [
+        { 
+            "name":"apple",
+            "colors": [
+                {"name":"red"},
+                {"name":"yellow"},
+                {"name":"green"}
+            ]
+        },
+        {
+            "name":"banana",
+            "colors": [
+                {"name":"yellow"}
+            ]
+        }
+    ]
+}
+```
 
-`PM> Install-Package Cfg-NET`
+In code, you'd want a  corresponding C# model like this:
 
-Then write:
+```csharp
+using System.Collections.Generic;
+
+public class Cfg {
+    public List<Fruit> Fruit { get; set; }
+}
+
+public class Fruit {
+    public string Name { get; set; }
+    public List<Color> {get; set;}
+}
+
+public class Color {
+    public string Name {get; set;}
+}
+```
+
+Cfg-NET binds the configuration and the model together using 
+inheritance and custom attributes like this:
 
 ```csharp
 using System.Collections.Generic;
 using Cfg.Net;
 
-/* him */
-public class DatabaseAdmin : CfgNode {
-    [Cfg(required = true)]
-    public List<Server> Servers { get; set; }
+class Cfg : CfgNode {
+    [Cfg]
+    public List<Fruit> Fruit { get; set; }
 }
 
-/* his servers */
-public class Server : CfgNode {
-    [Cfg(required = true, unique = true)]
+class Fruit : CfgNode {
+    [Cfg]
     public string Name { get; set; }
+    [Cfg]
+    public List<Color> Colors {get; set;}
+}
+
+class Color : CfgNode {
+    [Cfg]
+    public string Name {get; set;}
 }
 ```
-
-Both classes:
+ 
+Note that classes above:
 
 - Inherit from `CfgNode`.
 - Have properties decorated with the `Cfg` attribute.
 
 #### CfgNode Class
-The `CfgNode` class loads your configuration according to instructions defined in the `Cfg` attributes.
-
-### Write a Configuration
-
-The DBA told you the servers are named *Gandalf*,
-and *Saruman*. So, depending on your preference,
-write your configuration in **JSON** or **XML**:
-
-#### XML
-```xml
-<cfg>
-    <servers>
-        <add name="Gandalf" />
-        <add name="Saruman" />
-    </servers>
-</cfg>
-```
-
-#### JSON
-
-```json
-{
-    "servers": [
-        { "name":"Gandalf" },
-        { "name":"Saruman" }
-    ]
-}
-```
-
-Save this to *DatabaseAdmin.xml* or *DatabaseAdmin.json*.
+The `CfgNode` takes care of loading your configuration 
+according to instructions defined in the `Cfg` attributes.
 
 #### Cfg Attribute
 
@@ -118,24 +153,50 @@ built-in options:
 * `modifiers` with `delimiter` option
 * `validators` with `delimiter` option
 
-In our model, the `Server` class has a `Name` property that is `required`, and must be `unique`.
+So, if we want to make sure some fruit is defined in our configuration, we
+would add `required=true` to the fruit list.
+
+If we wanted to make sure the fruit names are unique, we could add `unique=true` to 
+the fruit name attribute.  Let's take a look:
+
+```csharp
+using System.Collections.Generic;
+using Cfg.Net;
+
+class Cfg : CfgNode {
+    [Cfg(required=true)] // THERE MUST BE SOME FRUIT!
+    public List<Fruit> Fruit { get; set; }
+}
+
+class Fruit : CfgNode {
+    [Cfg(unique=true)] // THE FRUIT MUST BE UNIQUE!
+    public string Name { get; set; }
+    [Cfg]
+    public List<Color> Colors {get; set;}
+}
+
+class Color : CfgNode {
+    [Cfg]
+    public string Name {get; set;}
+}
+```
 
 ### Load the Configuration
 
-Load your configuration file into your model like this:
+Now that we have a model and our choice of JSON or XML 
+configurations, we may load the configuration into the model like this:
 
 ```csharp
-var dba = new DatabaseAdmin();
-var xml = File.ReadAllText("DatabaseAdmin.xml");
-
-dba.Load(xml);
+// let's say the configuration is in the xml variable
+var cfg = new Cfg();
+cfg.Load(xml);
 ```
 
 As your configuration loads:
 
 1. Corresponding objects are created. 
 1. List properties are initialized.
-1. `required` confirms value is input
+1. `required` confirms a property value is input
 1. Default `value` is applied as necessary
 1. [`PreValidate()`](#PreValidate) is executed
 1. Injected `modifiers` are run
@@ -147,7 +208,7 @@ As your configuration loads:
 1. `maxValue` checks value against a maximum value
 1. Injected `validators` are run
 1. `unique` confirms attributes are unique within a list
-1. `required` confirms an item exists in a list
+1. `required` confirms a list has items
 1. [`Validate`](#Validate) is executed
 1. [`PostValidate`](#PostValidate) is executed
 
@@ -162,14 +223,14 @@ issues using the `Errors()` and `Warnings()` methods:
 
 ```csharp
 //LOAD CONFIGURATION
-var dba = new DatabaseAdmin();
-dba.Load(File.ReadAllText("DatabaseAdmin.xml"));
+var cfg = new Cfg();
+cfg.Load(xml);
 
 /* CHECK FOR WARNINGS */
-Assert.AreEqual(0, dba.Warnings().Length);
+Assert.AreEqual(0, cfg.Warnings().Length);
 
 /* CHECK FOR ERRORS */
-Assert.AreEqual(0, dba.Errors().Length);
+Assert.AreEqual(0, cfg.Errors().Length);
 
 /* EVERYTHING IS AWESOME!!! */
 ```
@@ -178,111 +239,37 @@ By convention, an error means the configuration is invalid.
 A warning is something you ought to address, but the program
 should still work.
 
-Report the errors and warnings to the end-user
-so they can fix the configuration. Here are some 
+We would report the errors and warnings to the end-user
+so they can fix them. Here are some 
 example errors:
 
-Put another server named *Gandalf* in there...
+Remove the required fruit and...
 
-> You set a duplicate **name** value **Gandalf** in **servers**.
+> A **fruit** element with at least one item is required in cfg.
 
-Add a *nickName* instead of a *name* in servers...
+Add another apple and...
 
-> **servers** contain an invalid **nickName** attribute.  Valid attributes are: **name**.
-> **servers** is missing a **name** attribute.
+> Duplicate **name** value **apple** in **fruit**.
 
 If Cfg-NET doesn't report any issues, your configuration 
-conforms to your model.
-
-### Back to the Scenario
-
-Moving on with our scenario; we need to make it so
-each *server* has a required collection of *databases*.
-
-Each *database* must have a unique `name` and
-unique `backup-folder`.
-
-The DBA said he wanted **4** backup sets, but since
-we know people change their minds, we're going to save
-ourself some (future) time by adding
-an optional `backups-to-keep` attribute.
+conforms to your model, and you can easily loop through
+the fruits and their colors like this:
 
 ```csharp
-using System.Collections.Generic;
-using Cfg.Net;
-
-public class DatabaseAdmin : CfgNode {
-    public DatabaseAdmin(string xml) {
-        this.Load(xml);
-    }
-    [Cfg(required = true)]
-    public List<Server> Servers { get; set; }
-}
-
-public class Server : CfgNode {
-    [Cfg(required = true, unique = true)]
-    public string Name { get; set; }
+var cfg = new Cfg();
+cfg.Load(xml);
     
-    [Cfg(required = true)
-    public List<Database>; Databases { get; set; }
-}
-
-public class Database : CfgNode {
-    [Cfg(required = true, unique = true)]
-    public string Name { get; set; }
-    
-    [Cfg(required = true, unique = true)]
-    public string BackupFolder { get; set; }
-    
-    [Cfg(value = 4)]
-    public int BackupsToKeep { get; set; }
-}
-```
-
-Now update *DatabaseAdmin.xml*:
-
-```xml
-<cfg>
-    <servers>
-        <add name="Gandalf">
-            <databases>
-                <add name="master"
-                     backup-folder="\\san\sql-backups\gandalf\master" />
-            </databases>
-        </add>
-        <add name="Saruman">
-            <databases>
-                <add name="master"
-                     backup-folder="\\san\sql-backups\saruman\master" />
-                <add name="model"
-                     backup-folder="\\san\sql-backups\saruman\model" />
-            </databases>
-        </add>
-    </servers>
-</cfg>
-```
-
-Now we have a collection of servers, and each
-server holds a collection of databases.
-Our program can easily loop through
-the servers and databases like this:
-
-```csharp
-var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
-    
-/* CHECK FOR ERRORS */
-foreach (var server in cfg.Servers) {
-    foreach (var database in server.Databases) {
-        /* use server.Name, database.Name, and database.BackupFolder... */  
+foreach (var fruit in cfg.Fruit) {
+    foreach (var color in fruit.Colors) {
+        /* use fruit.Name and color.Name... */  
     }
 }
 ```
 
-If you set default values, you never have to worry
-about a property being `null`.  Moreover, you never
-have to worry about a list being `null`; all lists
-decorated with the `Cfg` attribute are
-initialized.
+You never have to worry about a `Cfg` decorated list being `null` 
+because they are initialized as the configuration loads.  Moreover, 
+if you set default values (e.g. `[Cfg(value="default")]`), a 
+property is never `null`.
 
 Validation and Modification
 ---------------------------
@@ -291,18 +278,16 @@ The `Cfg` attribute's optional properties
 offer *configurable* validation.
 If it's not enough, you have 5 ways to extend:
 
-1. Overriding [`PreValidate()`](#PreValidate)
-1. Overriding [`Validate()`](#Validate)
-1. Overriding [`PostValidate()`](#PostValidate)
+1. Overriding `PreValidate()`
+1. Overriding `Validate()`
+1. Overriding `PostValidate()`
 1. Injecting validator(s) into a model's contructor
 1. Injecting modifier(s) int model's constructor
 
-<a name="InYourProperty"></a>
-
-### Overriding PreValidate()
+### PreValidate()
 
 If you want to modify the configuration before validation,
-you may override `PreValidate()` like this:
+override `PreValidate()` like this:
 
 ```csharp
 protected override void PreValidate() {
@@ -313,10 +298,7 @@ protected override void PreValidate() {
 }
 ```
 
-`PreValidate()` runs *after* the properties are set,
-but *before* any validation runs.
-
-### Overriding Validate()
+### Validate()
 
 To perform validation involving more than
 one property, override `Validate()` like this:
@@ -344,11 +326,9 @@ public class Connection : CfgNode {
 ```
 
 When you override `Validate`, add issues using
-the `Error()` and `Warn()` method.
+the `Error()` and `Warn()` methods.
 
-<a name="PostValidate"></a>
-
-### Overriding PostValidate()
+### PostValidate()
 
 Overriding `PostValidate` gives you an opportunity 
 to run code after validation.  You may check `Errors()` 
@@ -357,47 +337,25 @@ and/or `Warnings()` and make further preparations.
 ```csharp
 protected override void PostValidate() {
     if (Errors().Length == 0) {
-        MakeSomeOtherPreparations();
+        /* snip, make further preparations... */
     }
 }
 ```
 
 ### Injecting Modifiers and Validators into Model's Contructor
 
-You may want to inject validators and modifiers into 
-Cfg-NET instead.  Interfaces are defined to facilite 
-this:
+If you want to inject reusable validators and/or modifiers into 
+Cfg-NET, interfaces are defined to facilite this:
 
 1. `string` IModifier.Modify(string name, string value, IDictionary<string,string> parameters)
 1. `void` INodeModifer.Modify(INode node, IDictionary<string,string> parameters)
 1. `string` IGlobalModifier.Modify(string name, string value, IDictionary<string,string> parameters)
-1. `ValidatorResult` IValidator.Modify(string name, string value, IDictionary<string,string> parameters)
-1. `ValidatorResult` INodeModifer.Modify(INode node, IDictionary<string,string> parameters)
-1. `ValidatorResult` IGlobalValidator.Modify(string name, string value, IDictionary<string,string> parameters)
+1. `void` IRootModifier.Modify(INode node, IDictionary<string,string> parameters)
+1. `void` IValidator.Modify(string name, string value, IDictionary<string,string> parameters, ILogger logger)
+1. `void` INodeModifer.Modify(INode node, IDictionary<string,string> parameters, ILogger logger)
+1. `void` IGlobalValidator.Modify(string name, string value, IDictionary<string,string> parameters, ILogger logger)
 
 *Read more about injecting ... see [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
-
-Finishing Up The Scenario
--------------------------
-
-After you unravel the mystery of saving *x* complete
-backup sets, for *y* servers, and *z* databases, deploy
-your program with some method of allowing the user to
-update and choose the configuration he/she wants to use.
-
-For example, in a Console application (e.g. *Dba.exe*), allow
-the configuration file to be passed in as an argument,
-like this:
-
-`C:\> Dba.exe DatabaseAdmin.xml`
-
-Show the DBA how to add or remove servers and
-databases in *DatabaseAdmin.xml*.  Explain that
-he/she can create as many configuration files
-as necessary.
-
-When the DBA changes her mind about keeping **4**
-backup sets, point out the `backups-to-keep` attribute.
 
 About the Code
 --------------

@@ -11,21 +11,20 @@ capabilities, don't pass parameters into the
 `CfgNode` constructor.
 
 As seen in the [README](https://github.com/dalenewman/Cfg-NET/blob/master/README.md), 
-the `DatabaseAdmin` top-level class does not use the 
-base constructor:
+the `Cfg` top-level class does not use the base constructor:
 
 ```csharp
-public class DatabaseAdmin : CfgNode {
-    public DatabaseAdmin(string cfg) {
+class Cfg : CfgNode {
+    public Cfg(string cfg) {
         this.Load(cfg);
     }
     
     [Cfg(required = true)]
-    public List<Server> Servers { get; set; }
+    public List<Fruit> Fruit { get; set; }
 }
 
-/* usage */
-var dba = new DatabaseAdmin(File.ReadAllText("DatabaseAdmin.xml"));
+/* usage, pretending we have our configuration in cfg.xml */
+var cfg = new Cfg(File.ReadAllText("cfg.xml"));
 ```
 
 Without use of it's base constructor, `CfgNode` makes 
@@ -34,15 +33,18 @@ a few assumptions:
 1. You're passing in a valid `XML` or `JSON` string into the `Load` method.
  - `XML` is parsed with `NanoXmlParser`
  - `JSON` is parsed with `FastJsonParser`
-4. You're not using any custom validators
-5. You're not requesting any logging
+1. You're not using any custom validators or modifiers
+1. You're not requesting any additional logging
+1. You're not using a custom serializer
 
-In many cases, this is fine.  But, if you want to:
+In many cases, this is fine. I made it this way so you can just use it 
+(batteries included).  But, if you want to:
 
 * pass in anything other than `XML` or `JSON`
 * use a different parser
-* add custom validation
-* or have Cfg-NET use your logger
+* use a different serializer
+* add additional logging
+* add custom validation and/or modification
 
 If you want to do any of the above, you'll have to 
 inject dependencies.
@@ -65,19 +67,20 @@ Currently, an `IDependency` may be:
 * an `IReader` - for passing in something other than `XML` or `JSON`.
 * an `IParser` - for a different parser
 * an `ISerializer` - for a different serializer
+* an `ILogger` - for additional logging
 * an `IValidator` - for targeted property validation
 * an `INodeValidator` - for targeted node validation
 * an `IGlobalValidator` - for global property validation
 * an `IModifier` - for targeted property modification
 * an `INodeModifier` - for targeted node modification
+* an `IRootModifier` - for modifying the root node
 * an `IGlobalModifer` - for global property validation
-* an `ILogger` - for additional logging
 
 ### An IReader
 
-The reader is used in the `CfgNode.Load` method.  The default 
-reader *reads the string* you pass into `Load`.  It expects 
-valid `XML` or `JSON`.
+The `IReader` performs the initial read of the configuration 
+in `CfgNode.Load`.  The default reader *reads the string* you 
+pass into `Load` expecting it to be valid `XML` or `JSON`.
 
 To change that, implement a reader that expects a file 
 name, and reads it from the file system.  Note: Cfg-Net 
@@ -111,51 +114,54 @@ public class FileReader : IReader {
 Use `FileReader` in the base `CfgNode` constructor like this:
 
 ```csharp
-public class DatabaseAdmin : CfgNode {
+class Cfg : CfgNode {
     /* note: the :base() usage */
-    public DatabaseAdmin(string cfg):base(new FileReader()) {
+    public Cfg(string cfg):base(new FileReader()) {
         this.Load(cfg);
     }
     
     [Cfg(required = true)]
-    public List<Server> Servers { get; set; }
+    public List<Fruit> Fruit { get; set; }
 }
 
 /* usage */
-var dba = new DatabaseAdmin("DatabaseAdmin.xml");
+var cfg = new Cfg("cfg.xml");
 ```
 
 ### VIOLATION!
 
-I instantiated `FileReader` inside my `DatabaseAdmin`. 
-If I do this, I have to modify `DatabaseAdmin` in 
-order to change the `IReader`.  This violates
-the open closed principle (open for extension, closed for modification).
+I instantiated `FileReader` inside my `Cfg`. 
+If I do this, I have to modify `Cfg` in 
+order to change out an `IReader`.  This violates
+the open closed principle (open for extension, 
+closed for modification).
 
-Instead, I should instantiate dependencies in one place (a composition root). 
+Instead, I should instantiate dependencies in one 
+place: the composition root. 
 
 So, I add `IReader` to the `DatabaseAdmin` constructor instead:
 
 ```csharp
-public class DatabaseAdmin : CfgNode {
-    public DatabaseAdmin(string cfg, IReader reader):base(reader) {
+class Cfg : CfgNode {
+    public Cfg(string cfg, IReader reader):base(reader) {
         this.Load(cfg);
     }
     
     [Cfg(required = true)]
-    public List<Server> Servers { get; set; }
+    public List<Fruit> Fruit { get; set; }
 }
 
 /* usage, in composition root */
-var dba = new DatabaseAdmin("DatabaseAdmin.xml", new FileReader());
+var cfg = new Cfg("cfg.xml", new FileReader());
 ```
 
 Unfortunately, the constructor is more complicated, but it 
-necessary to maintain a loose coupling between `DatabaseAdmin` 
+necessary to maintain a loose coupling between `Cfg` 
 and it's `IReader` implementation.
 
-This loose coupling makes our code more flexible (aka composable), 
-which is desirable for software since requirements are likely to change.
+This loose coupling between `Cfg` and it's `IReader` makes our code 
+more flexible (aka composable).  This is desirable for software 
+since requirements are likely to change.
 
 In this example, `FileReader` has no dependencies 
 of it's own. The next example demonstrates using a reader 
@@ -167,7 +173,8 @@ I have created a *Cfg-NET.Reader* and put it on [Nuget](https://www.nuget.org/pa
 
 It requires the full .NET 4 framework. It handles `XML`, `JSON`, 
 a file name, and/or a web address. In addition, it translates 
-query strings into parameters.
+query strings into parameters that may be used in injected 
+modifiers and validators.
 
 It has a `DefaultReader` that implements `IReader`, and it's constructor  
 requires an `ISourceDetector`, a file reader, and a web reader. 
@@ -180,30 +187,25 @@ var reader = new DefaultReader(
     new FileReader(),
     new WebReader()
 );
-var dba = new DatabaseAdmin("DatabaseAdmin.xml", reader);
+var cfg = new Cfg("cfg.xml", reader);
 ```
 
 The reader is instantiated with three dependencies, and then 
-passed into `DatabaseAdmin`.  So far, the examples 
-only demonstrate switching out an `IReader`.  The next 
-example switches out everything.
+passed into `Cfg`.
 
 ### An IReader, an IParser, an IValidator, and an ILogger
 
-To see dependency injection in all it's glory, it's 
-worthwhile implement everything for `CfgNode`. This example 
-modifies `DatabaseAdmin` to accomadate the dependencies, 
-creates them, and creates a fully-loaded `DatabaseAdmin`.
+This next example modifies `Cfg` to accomadate any number of dependencies. 
 
 ```csharp
-public class DatabaseAdmin : CfgNode {
-    public DatabaseAdmin(string cfg, params IDependency[] dependencies) 
+class Cfg : CfgNode {
+    public Cfg(string cfg, params IDependency[] dependencies) 
         :base(dependencies) {
         this.Load(cfg);
     }
     
     [Cfg(required = true)]
-    public List<Server> Servers { get; set; }
+    public List<Fruit> Fruit { get; set; }
 }
 
 /* usage, in composition root */
@@ -213,10 +215,10 @@ var reader = new DefaultReader(
     new WebReader()
 );
 var parser = new XDocumentParser();
-var validator = new JintParser("js");
+var validator = new JintValidator("js");
 var logger = new TraceLogger();
 
-var dba = new DatabaseAdmin("DatabaseAdmin.xml", reader, parser, validator, logger);
+var cfg = new Cfg("cfg.xml", reader, parser, validator, logger);
 ```
 
 The example above uses:
@@ -226,13 +228,13 @@ The example above uses:
 * a custom javascript validator implemented with [Jint](https://github.com/sebastienros/jint)
 * a trace logger implementation
 
-Although it took a fair amount of setup, this provides a `DatabaseAdmin` with 
-a flexible reader, a faster parser, a javascript validator for 
-properties decorated with `Cfg[validators="js"]`, and finally; 
-some fancy tracing output.
+Although it took a fair amount of setup, this provides a `Cfg` 
+with a flexible reader, a faster parser, a javascript validator 
+for properties decorated with `Cfg[validators="js"]`, and finally; 
+some tracing output.
 
-Injecting dependencies allows for a *Super-Charged* version of 
-the configuration handler.
+Injecting dependencies allows for this *Super-Charged* version of 
+the configuration handler without any modification to Cfg-NET.
 
 ### Autofac
 
@@ -258,8 +260,8 @@ public class ConfigurationModule : Module {
         /* when I ask for an IParser, give me an XDocumentParser */
         builder.RegisterType<XDocumentParser>().As<IParser>();
 
-        /* when I ask for an IValidator named "js", give me a JintParser */
-        builder.RegisterType<JintParser>().Named<IValidator>("js");
+        /* when I ask for an IValidator named "js", give me a JintValidator */
+        builder.RegisterType<JintValidator>().Named<IValidator>("js");
 
         /* register dependencies for DefaultReader */
         builder.RegisterType<SourceDetector>().As<ISourceDetector>();
@@ -314,8 +316,3 @@ dependencies.
 
 * [Autofac](http://autofac.org/)
 * [Dependency Injection in .NET, by Mark Seemann](https://www.manning.com/books/dependency-injection-in-dot-net)
-
-
-#### Updates:
-
-* 2015-09-29: ISerializer introduced as optional dependency.

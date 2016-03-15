@@ -6,36 +6,35 @@ to provide configuration flexibility at run-time.
 ### Update 0.6.x
 This feature is no longer built into Cfg-Net. 
 Instead, it is composed of IGlobalModifer, 
-IGlobalValidator, and IMergeParameter implementations 
+IGlobalValidator, and IRootModifier implementations 
 and injected into your model's constructor.
 
 ```csharp
-// an Autofac example...
+// an Autofac registration example...
 
 builder.RegisterType<PlaceHolderModifier>().As<IGlobalModifier>();
-builder.RegisterType<ValidatePlaceHolders>().As<IGlobalValidator>();
-builder.RegisterType<MergeParameters>().Named<IMergeParameters>("parameters");
+builder.RegisterType<PlaceHolderValidator>().As<IGlobalValidator>();
 
-builder.Register(ctx => new MergeInternalParameters(
+builder.Register(ctx => new EnvironmentModifier(
     ctx.Resolve<IGlobalModifier>(), 
-    ctx.ResolveNamed<IMergeParameters>("parameters"))
-).Named<IMergeParameters>("environments");
+    new ParameterModifier()
+    )
+).As<IRootModifier>();
 
-builder.Register((ctx) => new MyCfg(
+builder.Register((ctx) => new Cfg(
     ctx.Resolve<IGlobalModifier>(),
-    ctx.ResolveNamed<IMergeParameters>("environments"),
+    ctx.Resolve<IRootModifier>(),
     ctx.Resolve<IGlobalValidator>()
-)).As<MyCfg>();
+)).As<Cfg>();
 ```
-
 
 ### Environments
 It may be necessary for values in your configuration to
 change depending on the program's environment (i.e. `production`, or `test`).
 
-To take advantage of Cfg-NET's built-in environment features, include
-an `environment` attribute, and `environments` collection with nested 
-`parameters` just inside your configuration's root.
+To use Cfg-NET.Environment, include an `environment` attribute, 
+and `environments` collection with nested `parameters` 
+just inside your configuration's root.
 
 Your configuration should look similar to this:
 
@@ -78,9 +77,9 @@ environment is used.
 A Cfg-NET implementation of the above XML looks like this:
 
 ```csharp
-public class MyCfg : CfgNode {
+class Cfg : CfgNode {
 
-    public MyCfg(string xml) {
+    public Cfg(string xml) {
         this.Load(xml);
     }
 
@@ -88,19 +87,19 @@ public class MyCfg : CfgNode {
     public string Environment {get; set;}
 
     [Cfg(required = false)]
-    public List<MyEnvironment> Environments { get; set; }
+    public List<Environment> Environments { get; set; }
 }
 
-public class MyEnvironment : CfgNode {
+class Environment : CfgNode {
 
     [Cfg(required = true)]
     public string Name { get; set; }
 
     [Cfg(required = true)]
-    public List<MyParameter> Parameters { get; set; }
+    public List<Parameter> Parameters { get; set; }
 }
 
-public class MyParameter : CfgNode {
+class Parameter : CfgNode {
 
     [Cfg(required = true, unique = true)]
     public string Name { get; set; }

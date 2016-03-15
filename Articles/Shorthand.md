@@ -2,7 +2,7 @@ Shorthand
 =========
 
 ### Intro
-Cfg-NET's shorthand helps you write more configuration with less `XML` or `JSON`.
+Cfg-NET.Shorthand helps you write more configuration with less `XML` or `JSON`.
 
 For example, writing transformations in `XML` is a bit verbose:
 
@@ -83,8 +83,8 @@ So, when Cfg-NET encounters an shorthand expression like `replace(-,.)`:
   * `-` is *old-value*.
   * `.` is *new-value*.
 * the *transforms* target defines where it should go:
-  * the method's name (i.e. `replace`) goes in _method_.
-  * an element with _method_, _old-value_, and _new-value_ is placed in _transforms_
+  * the method's name (i.e. `replace`) goes in *method*.
+  * an element with *method*, *old-value*, and *new-value* is placed in _transforms_
 
 ### Using Shorthand
 
@@ -92,12 +92,7 @@ A shorthand modifier is injected into `CfgNode` like this:
 
 ```csharp
 var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-var root = new YourRootNode(xml, new ShorthandModifier(sh, "sh"));
+var root = new Cfg(xml, new ShorthandModifier(sh, "sh"));
 ```
 
 You also have to decorate the property you want to run shorthand on with `[Cfg(modifiers="sh")]`.
-
-
-### Updates
-
-* 2015-07-17: Added support for named parameters (e.g. `padleft(total-width:10,padding-char:X)`)
