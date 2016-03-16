@@ -14,11 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-using Cfg.Net.Ext;
+
+using System.Collections.Generic;
 
 namespace Cfg.Net.Contracts {
 
     public interface IReader : IDependency {
-        ReaderResult Read(string resource, ILogger logger);
+        string Read(string resource, IDictionary<string,string> parameters, ILogger logger);
     }
 }

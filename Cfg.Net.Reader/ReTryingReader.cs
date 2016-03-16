@@ -14,26 +14,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using System;
+using System.Collections.Generic;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Reader {
     public class ReTryingReader : IReader {
         private readonly IReader _reader;
         private readonly int _attempts;
+        private readonly int _sleep;
 
-        public ReTryingReader(IReader reader, int attempts) {
+        public ReTryingReader(IReader reader, int attempts, int sleep = 1000) {
             _reader = reader;
             _attempts = attempts;
+            _sleep = sleep;
         }
 
-        public ReaderResult Read(string resource, ILogger logger) {
-            var result = new ReaderResult { Source = Source.Url };
-            for (var i = 0; i < _attempts; i++) {
-                result = _reader.Read(resource, logger);
-                if (result.Source != Source.Error)
-                    break;
+        public string Read(string resource, IDictionary<string, string> parameters, ILogger logger) {
+
+            if (string.IsNullOrEmpty(resource)) {
+                logger.Error("Your configuration resource is null or empty.");
+                return null;
             }
-            return result;
+
+            for (var i = 0; i < _attempts; i++) {
+                try {
+                    var cfg = _reader.Read(resource, parameters, logger);
+                    if (!string.IsNullOrEmpty(cfg)) {
+                        return cfg;
+                    }
+                } catch (Exception ex) {
+                    logger.Error(ex.Message);
+                }
+                logger.Warn($"Sleeping {_sleep}ms.");
+                System.Threading.Thread.Sleep(_sleep);
+            }
+            return null;
         }
     }
 }

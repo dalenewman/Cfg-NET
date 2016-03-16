@@ -37,8 +37,7 @@ namespace Cfg.Test {
 
             var cfg = new TestPassInLogger(xml, new TraceLogger());
 
-            var problems = cfg.Logs();
-            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(1, cfg.Errors().Length);
 
             Assert.AreEqual(true, cfg.Parameters.First().Value);
             Assert.AreEqual(false, cfg.Parameters.Last().Value);

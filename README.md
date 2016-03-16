@@ -4,41 +4,25 @@ Cfg-NET
 An [open source](https://github.com/dalenewman/Cfg.Net) 
 configuration handler for .NET licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
-#### Good Configurations:
+#### Cfg-NET Configurations:
 
 * are editable by end-users
 * reduce the need to re-compile
 * co-exist with other configurations
 
-#### Good Configuration Handlers:
+#### Cfg-NET:
 
-* are easy to use
-* support collections
-* validate and report errors and warnings
-* are extensible and/or composable
-* protect the program from `null`, by setting defaults
-* are available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
-* are portable (PCL)
-
-Introduction
----------------
-
-By default, a .NET configuration (*App|Web.config*) offers a 
-collection of app settings (key value pairs) and connection 
-strings. These settings are sufficient in trivial cases, but 
-are limiting.  To segregate any collections of objects you
-want in your configuration, you must resort to 
-wierd keys and/or multiple delimiters in your values.
-
-If you need collections of objects in your configuration, 
-you may build the traditional [custom configuration 
-sections](https://msdn.microsoft.com/en-us/library/2tw134k3.aspx). I 
-used custom configuration settings for awhile, but found them to 
-be cumbersome and heavy.  I wanted something a easier 
-to use and lighter, so I built this (Cfg-NET).
-
-Cfg-Net configurations are not confined to *App|Web.config*. They 
-are like little databases made of XML or JSON: 
+* is easy to use
+* supports collections
+* validates and reports errors and warnings
+* offers protection from `null`
+* allows you to store your configuration where you want
+* is extensible 
+* is composable
+* is small (68.5 KB)
+* has zero dependencies
+* is portable (PCL)
+* is available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
 
 An XML example:
 
@@ -84,7 +68,7 @@ Or, if you prefer JSON:
 }
 ```
 
-In code, you'd want a  corresponding C# model like this:
+In code, you'd want to deal with a corresponding C# model like this:
 
 ```csharp
 using System.Collections.Generic;
@@ -95,7 +79,7 @@ public class Cfg {
 
 public class Fruit {
     public string Name { get; set; }
-    public List<Color> {get; set;}
+    public List<Color> Colors {get; set;}
 }
 
 public class Color {
@@ -103,7 +87,7 @@ public class Color {
 }
 ```
 
-Cfg-NET binds the configuration and the model together using 
+Cfg-NET binds the configuration and the model (above) together using 
 inheritance and custom attributes like this:
 
 ```csharp
@@ -133,14 +117,12 @@ Note that classes above:
 - Inherit from `CfgNode`.
 - Have properties decorated with the `Cfg` attribute.
 
-#### CfgNode Class
-The `CfgNode` takes care of loading your configuration 
-according to instructions defined in the `Cfg` attributes.
+### What Does Cfg-NET Do?
 
-#### Cfg Attribute
+Inheriting from `CfgNode` gives you a `Load()` method for your configuration.
 
-The `Cfg` attribute adds validation and modification 
-instructions to the property.  Currently, it has these 
+The `Cfg` attributes add validation and modification 
+instructions.  An attribute has these 
 built-in options:
 
 * `value`, as in _default_ value
@@ -251,9 +233,9 @@ Add another apple and...
 
 > Duplicate **name** value **apple** in **fruit**.
 
-If Cfg-NET doesn't report any issues, your configuration 
-conforms to your model, and you can easily loop through
-the fruits and their colors like this:
+If Cfg-NET doesn't report issues, your configuration 
+is valid.  Now you can loop through your fruits and their 
+colors without a care in the world:
 
 ```csharp
 var cfg = new Cfg();
@@ -357,12 +339,57 @@ Cfg-NET, interfaces are defined to facilite this:
 
 *Read more about injecting ... see [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
 
+### Serialize
+
+After your configuration is loaded into code, you 
+can serialize it back to a string with `Serialize()`.
+
+```csharp
+// load
+var cfg = new Cfg();
+cfg.Load(xml);
+
+// modify
+cfg.Fruit.RemoveAll(f => f.Name == "apple");
+cfg.Fruit.Add(new Fruit {
+    Name = "plum",
+    Colors = new List<Color> {
+        new Color { Name = "purple" }
+    }
+});
+
+// serialize
+var result = cfg.Serialize();
+```
+
+This produces a result of:
+
+```xml
+<cfg>
+    <fruit>
+        <add name="banana">
+            <colors>
+                <add name="yellow" />
+            </colors>
+        </add>
+        <add name="plum">
+            <colors>
+                <add name="purple" />
+            </colors>
+        </add>
+    </fruit>
+</cfg>
+```
+
+**Note**: Modifying your configuration code doesn't 
+set defaults for or validate your newly added objects.  Of course, 
+you can serialize and load again if that's what you want.
+
 About the Code
 --------------
 
 Cfg.Net doesn't have any direct dependencies.  It has built-in `XML` and `JSON`
-default parsers.  There is a constructor on `CfgNode` that allows you to inject
-(or compose) some of it's behavior. Cfg-NET is a portable class library targeting:
+default parsers adn serializers.  It is a portable class library targeting:
 
 * .NET 4
 * Silverlight 5
@@ -377,10 +404,10 @@ default parsers.  There is a constructor on `CfgNode` that allows you to inject
 
 ### Further Reading
 
-* [Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
-* [Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-* [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
-* [Extension Methods](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Methods.md) 
+* [Using Dependency Injection & Autofac with Cfg-NET](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
+* [Using Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
+* [Using Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
+* [Using Extension Methods](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Methods.md) 
 
 ### Updates
 * a `Serialize` method was added to `CfgNode`.  XML and JSON serializers are 

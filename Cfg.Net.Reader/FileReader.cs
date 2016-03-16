@@ -15,39 +15,54 @@
 // limitations under the License.
 #endregion
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Reader {
     public class FileReader : IReader {
 
-        public ReaderResult Read(string resource, ILogger logger) {
-            var result = new ReaderResult { Source = Source.File };
+        public string Read(string fileName, IDictionary<string, string> parameters, ILogger logger) {
 
-            var queryStringIndex = resource.IndexOf('?');
-            if (queryStringIndex > 0) {
-                result.Parameters = HttpUtility.ParseQueryString(resource.Substring(queryStringIndex+1));
-                resource = resource.Substring(0, queryStringIndex);
+            if (string.IsNullOrEmpty(fileName)) {
+                logger.Error("Your configuration file name is null or empty.");
+                return null;
             }
 
-            if (Path.HasExtension(resource)) {
+            var queryStringIndex = fileName.IndexOf('?');
+            if (queryStringIndex > 0) {
+                var newParameters = HttpUtility.ParseQueryString(fileName.Substring(queryStringIndex + 1));
+                foreach (var pair in newParameters) {
+                    parameters[pair.Key] = pair.Value;
+                }
+                fileName = fileName.Substring(0, queryStringIndex);
+            }
 
-                if (!Path.IsPathRooted(resource)) {
-                    resource = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, resource);
+            var lastPart = fileName.Split('\\').Last();
+            var intersection = lastPart.Intersect(Path.GetInvalidFileNameChars()).ToArray();
+
+            if (intersection.Any()) {
+                logger.Error("Your configuration file name contains invalid characters: " + string.Join(", ", intersection) + ".");
+                return null;
+            }
+
+            if (Path.HasExtension(fileName)) {
+                if (!Path.IsPathRooted(fileName)) {
+                    fileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
                 }
 
-                var fileInfo = new FileInfo(resource);
+                var fileInfo = new FileInfo(fileName);
                 try {
-                    result.Content = File.ReadAllText(fileInfo.FullName);
+                    return File.ReadAllText(fileInfo.FullName);
                 } catch (Exception ex) {
                     logger.Error("Can not read file. {0}", ex.Message);
-                    result.Source = Source.Error;
+                    return null;
                 }
-            } else {
-                logger.Error("Invalid file name: {0}.  File must have an extension (e.g. xml, json, etc)", resource);
-                result.Source = Source.Error;
             }
-            return result;
+
+            logger.Error("Invalid file name: {0}.  File must have an extension (e.g. xml, json, etc)", fileName);
+            return null;
         }
     }
 }

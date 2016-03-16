@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Cfg.Net;
+using Cfg.Net.Ext;
 using Cfg.Net.Parsers;
 using NUnit.Framework;
 
@@ -143,17 +144,25 @@ namespace Cfg.Test {
                 <add name='yellow' />
             </colors>
         </add>
-        <add name='apple' />
     </fruit>
 </cfg>
 ";
 
             var cfg = new Cfg();
             cfg.Load(xml);
+            cfg.Fruit.RemoveAll(f => f.Name == "apple");
+            cfg.Fruit.Add(new Fruit {
+                Name = "plum",
+                Colors = new List<Color> {
+                    new Color { Name = "purple" }
+                }
+            });
 
             foreach (var error in cfg.Errors()) {
                 Console.WriteLine(error);
             }
+
+            Console.WriteLine(cfg.Serialize());
 
         }
 

@@ -15,6 +15,7 @@
 // limitations under the License.
 #endregion
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using Cfg.Net.Contracts;
@@ -22,13 +23,20 @@ using Cfg.Net.Contracts;
 namespace Cfg.Net.Reader {
     public class WebReader : IReader {
 
-        public ReaderResult Read(string resource, ILogger logger) {
-            var result = new ReaderResult { Source = Source.Url };
+        public string Read(string url, IDictionary<string,string> parameters, ILogger logger) {
+
+            if (string.IsNullOrEmpty(url)) {
+                logger.Error("Your configuration url null or empty.");
+                return null;
+            }
 
             try {
-                var uri = new Uri(resource);
+                var uri = new Uri(url);
                 if (!string.IsNullOrEmpty(uri.Query)) {
-                    result.Parameters = HttpUtility.ParseQueryString(uri.Query.Substring(1));
+                    var newParameters = HttpUtility.ParseQueryString(uri.Query.Substring(1));
+                    foreach (var pair in newParameters) {
+                        parameters[pair.Key] = pair.Value;
+                    }
                 }
                 var request = (HttpWebRequest)WebRequest.Create(uri);
                 request.Method = "GET";
@@ -39,21 +47,20 @@ namespace Cfg.Net.Reader {
 
                         } else {
                             if (response.StatusCode == HttpStatusCode.OK) {
-                                var reader = new StreamReader(responseStream);
-                                result.Content = reader.ReadToEnd();
-                            } else {
-                                logger.Error("Response code was {0}. {1}", response.StatusCode, response.StatusDescription);
-                                result.Source = Source.Error;
+                                return new StreamReader(responseStream).ReadToEnd();
                             }
+
+                            logger.Error("Response code was {0}. {1}", response.StatusCode, response.StatusDescription);
+                            return null;
                         }
                     }
                 }
             } catch (Exception ex) {
                 logger.Error("Can not read url. {0}", ex.Message);
-                result.Source = Source.Error;
+                return null;
             }
 
-            return result;
+            return null;
         }
     }
 }

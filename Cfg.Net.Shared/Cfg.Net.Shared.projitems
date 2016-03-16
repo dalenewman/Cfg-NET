@@ -16,7 +16,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)CfgMetadataCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgReflectionHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CfgSourceDetector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IDependency.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IGlobalModifier.cs" />
@@ -31,10 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IRootModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\ISerializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\ISourceDetector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IValidator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\ReaderResult.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\Source.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ext\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Loggers\DefaultLogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Loggers\MemoryLogger.cs" />

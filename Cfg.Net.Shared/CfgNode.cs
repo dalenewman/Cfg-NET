@@ -111,50 +111,55 @@ namespace Cfg.Net {
 
             this.Clear(Events);
 
+            if (string.IsNullOrEmpty(cfg)) {
+                Events.Error("The configuration passed in is null.");
+                this.SetDefaults();
+                return;
+            }
+
+            cfg = cfg.Trim();
+
             if (parameters == null) {
                 parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
 
             INode node;
             try {
-                Source source;
-                var sourceDetector = new CfgSourceDetector();
-                if (Reader == null) {
-                    source = sourceDetector.Detect(cfg, Events.Logger);
-                } else {
-                    var result = Reader.Read(cfg, Events.Logger);
+                if (Reader != null) {
+                    cfg = Reader.Read(cfg, parameters, Events.Logger);
                     if (Events.Errors().Any()) {
-                        this.WithDefaults();
+                        this.SetDefaults();
                         return;
-                    }
-                    cfg = result.Content;
-                    source = result.Source;
-                    if (result.Source != Source.Error && result.Parameters.Any()) {
-                        foreach (var pair in result.Parameters) {
-                            parameters[pair.Key] = pair.Value;
-                        }
                     }
                 }
 
-                // set up parser
-                // could be passed in
-                // could be built-in JSON or XML parsers depending on source
-                IParser parser;
-                switch (source) {
-                    case Source.Error:
-                        this.WithDefaults();
-                        return;
-                    case Source.Json:
-                        parser = Parser ?? new FastJsonParser();
-                        break;
-                    default:
-                        parser = Parser ?? new NanoXmlParser();
-                        break;
+                if (Parser == null) {
+                    switch (cfg[0]) {
+                        case '{':
+                            node = new FastJsonParser().Parse(cfg);
+                            break;
+                        case '<':
+                            node = new NanoXmlParser().Parse(cfg);
+                            break;
+                        default:
+                            Events.Error("Without a custom parser, the configuration should be XML or JSON. Your configuration starts with the character {0}.", cfg[0]);
+                            this.SetDefaults();
+                            return;
+                    }
+                } else {
+                    node = Parser.Parse(cfg);
                 }
 
-                Serializer = GetSerializer(cfg, source, sourceDetector);
-
-                node = parser.Parse(cfg);
+                if (Serializer == null) {
+                    switch (cfg[0]) {
+                        case '{':
+                            Serializer = new JsonSerializer();
+                            break;
+                        default:
+                            Serializer = new XmlSerializer();
+                            break;
+                    }
+                }
 
                 foreach (var modifier in RootModifiers) {
                     modifier.Modify(node, parameters);
@@ -172,27 +177,6 @@ namespace Cfg.Net {
             ValidateListsBasedOnAttributes(node.Name);
             Validate();
             PostValidate();
-        }
-
-        ISerializer GetSerializer(string cfg, Source source, ISourceDetector sourceDetector) {
-
-            if (Serializer != null)
-                return Serializer;
-
-            switch (source) {
-                case Source.Json:
-                    return new JsonSerializer();
-                case Source.Xml:
-                    return new XmlSerializer();
-                case Source.File:
-                case Source.Url:
-                    if (sourceDetector.Detect(cfg, new NullLogger()) == Source.Json) {
-                        return new JsonSerializer();
-                    }
-                    return new XmlSerializer();
-                default:
-                    return new XmlSerializer();
-            }
         }
 
         CfgNode Load(
@@ -556,12 +540,6 @@ namespace Cfg.Net {
                     Events.ValueTooBig(name, value, itemAttributes.maxValue);
                 }
             }
-        }
-
-        public List<string> Logs() {
-            var list = new List<string>(Errors());
-            list.AddRange(Warnings());
-            return list;
         }
 
         public string[] Errors() {

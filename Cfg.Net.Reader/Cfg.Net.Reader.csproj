@@ -39,7 +39,6 @@
     <Compile Include="HttpUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReTryingReader.cs" />
-    <Compile Include="SourceDetector.cs" />
     <Compile Include="WebReader.cs" />
   </ItemGroup>
   <ItemGroup>

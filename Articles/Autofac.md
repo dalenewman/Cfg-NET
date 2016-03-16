@@ -51,7 +51,7 @@ inject dependencies.
 
 ### Cfg-NET by Injection
 
-The `CfgNode` constructor:
+The `CfgNode` constructor takes an optional array of `IDependency`:
 
 ```csharp
 public abstract class CfgNode {
@@ -64,27 +64,28 @@ public abstract class CfgNode {
 
 Currently, an `IDependency` may be:
 
-* an `IReader` - for passing in something other than `XML` or `JSON`.
+* an `IReader` - for a different resource reader
 * an `IParser` - for a different parser
 * an `ISerializer` - for a different serializer
 * an `ILogger` - for additional logging
 * an `IValidator` - for targeted property validation
-* an `INodeValidator` - for targeted node validation
+* an `INodeValidator` - for targeted `INode` validation
 * an `IGlobalValidator` - for global property validation
 * an `IModifier` - for targeted property modification
-* an `INodeModifier` - for targeted node modification
-* an `IRootModifier` - for modifying the root node
-* an `IGlobalModifer` - for global property validation
+* an `INodeModifier` - for targeted `INode` modification
+* an `IRootModifier` - for modifying the root `INode`
+* an `IGlobalModifer` - for global property modification
 
 ### An IReader
 
 The `IReader` performs the initial read of the configuration 
 in `CfgNode.Load`.  The default reader *reads the string* you 
-pass into `Load` expecting it to be valid `XML` or `JSON`.
+pass into `Load`.  It expects valid `XML` or `JSON`.  If you pass in 
+a file name, it would result in a parse error.
 
-To change that, implement a reader that expects a file 
-name, and reads it from the file system.  Note: Cfg-Net 
-can not read files, because it is a portable class library 
+To change this, implement a reader that expects a file 
+name, and reads it from the file system.  Note: Cfg-NET 
+can not read files because it is a portable class library 
 (PCL).
 
 The `IReader` interface:
@@ -95,10 +96,13 @@ public interface IReader {
 }
 ```
 
-The `Read` method provides a *resource* and 
-a *logger*. In our case, the resource is a file name. 
-The logger is used to record *Errors* or *Warnings* 
-you encounter. Here is a *happy path* implementation:
+The `Read` method gives you access to the *resource* 
+and the active *logger*. The resource is 
+a file name, and the logger is used to record *Errors* and/or *Warnings*. 
+The implementation we write should convert the resource to something 
+the parser can handle (by default, that's XML or JSON).
+
+Here is a simple implementation:
 
 ```csharp
 public class FileReader : IReader {
@@ -111,39 +115,12 @@ public class FileReader : IReader {
 }
 ```
 
-Use `FileReader` in the base `CfgNode` constructor like this:
+Here is `Cfg` modified to expect our new `FileReader`:
 
 ```csharp
 class Cfg : CfgNode {
-    /* note: the :base() usage */
-    public Cfg(string cfg):base(new FileReader()) {
-        this.Load(cfg);
-    }
-    
-    [Cfg(required = true)]
-    public List<Fruit> Fruit { get; set; }
-}
-
-/* usage */
-var cfg = new Cfg("cfg.xml");
-```
-
-### VIOLATION!
-
-I instantiated `FileReader` inside my `Cfg`. 
-If I do this, I have to modify `Cfg` in 
-order to change out an `IReader`.  This violates
-the open closed principle (open for extension, 
-closed for modification).
-
-Instead, I should instantiate dependencies in one 
-place: the composition root. 
-
-So, I add `IReader` to the `DatabaseAdmin` constructor instead:
-
-```csharp
-class Cfg : CfgNode {
-    public Cfg(string cfg, IReader reader):base(reader) {
+    public Cfg(string cfg, params IDependency[] dependencies)
+        :base(dependencies) {
         this.Load(cfg);
     }
     
@@ -155,13 +132,8 @@ class Cfg : CfgNode {
 var cfg = new Cfg("cfg.xml", new FileReader());
 ```
 
-Unfortunately, the constructor is more complicated, but it 
-necessary to maintain a loose coupling between `Cfg` 
-and it's `IReader` implementation.
-
-This loose coupling between `Cfg` and it's `IReader` makes our code 
-more flexible (aka composable).  This is desirable for software 
-since requirements are likely to change.
+The constructor is more complicated, but it is 
+necessary to decouple `Cfg` and the `IReader` implementation.
 
 In this example, `FileReader` has no dependencies 
 of it's own. The next example demonstrates using a reader 
@@ -173,44 +145,30 @@ I have created a *Cfg-NET.Reader* and put it on [Nuget](https://www.nuget.org/pa
 
 It requires the full .NET 4 framework. It handles `XML`, `JSON`, 
 a file name, and/or a web address. In addition, it translates 
-query strings into parameters that may be used in injected 
-modifiers and validators.
+query strings on file names and urls into parameters.
 
 It has a `DefaultReader` that implements `IReader`, and it's constructor  
-requires an `ISourceDetector`, a file reader, and a web reader. 
-Here's how to use it:
+requires a file reader, and a web reader.  Here's how to use it:
 
 ```csharp
 /* usage, in composition root */
 var reader = new DefaultReader(
-    new SourceDetector(),
     new FileReader(),
     new WebReader()
 );
 var cfg = new Cfg("cfg.xml", reader);
 ```
 
-The reader is instantiated with three dependencies, and then 
+The reader is instantiated with two dependencies of it's own, and then 
 passed into `Cfg`.
 
 ### An IReader, an IParser, an IValidator, and an ILogger
 
-This next example modifies `Cfg` to accomadate any number of dependencies. 
+This next example shows `Cfg` with 4 dependencies. 
 
 ```csharp
-class Cfg : CfgNode {
-    public Cfg(string cfg, params IDependency[] dependencies) 
-        :base(dependencies) {
-        this.Load(cfg);
-    }
-    
-    [Cfg(required = true)]
-    public List<Fruit> Fruit { get; set; }
-}
-
 /* usage, in composition root */
 var reader = new DefaultReader(
-    new SourceDetector(),
     new FileReader(),
     new WebReader()
 );
@@ -221,7 +179,7 @@ var logger = new TraceLogger();
 var cfg = new Cfg("cfg.xml", reader, parser, validator, logger);
 ```
 
-The example above uses:
+The example above composition uses:
 
 * the `Cfg-NET.Reader` for reading multiple inputs
 * the `XDocumentParser` to use an `XDocument` based parser instead of the `NanoXmlParser`
@@ -276,14 +234,14 @@ public class ConfigurationModule : Module {
             ctx.ResolveNamed<IReader>("web")
         ));
 
-        /* using previously registered components, register the DatabaseAdmin */
-        builder.Register((ctx) => new DatabaseAdmin(
+        /* using previously registered components, register the Cfg */
+        builder.Register((ctx) => new Cfg(
             _resource,
             ctx.Resolve<IReader>(),
             ctx.Reslove<IParser>(),
             new Dictionary<string, IValidator>() { { "js", ctx.ResolveNamed<IValidator>("js") } },
             ctx.Resolve<ILogger>()
-        )).As<DatabaseAdmin>();
+        )).As<Cfg>();
 
     }
 }
@@ -297,11 +255,11 @@ Cfg-NET.  Use it like this:
 
 /* register */
 var builder = new ContainerBuilder();
-builder.RegisterModule(new ConfigurationModule("DatabaseAdmin.xml"));
+builder.RegisterModule(new ConfigurationModule("cfg.xml"));
 var container = builder.Build();
 
 /* resolve */
-var dba = container.Resolve<DatabaseAdmin>();
+var cfg = container.Resolve<Cfg>();
 
 /* snip */
 
