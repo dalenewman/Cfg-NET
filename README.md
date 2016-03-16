@@ -19,7 +19,7 @@ configuration handler for .NET licensed under [Apache 2](http://www.apache.org/l
 * allows you to store your configuration where you want
 * is extensible 
 * is composable
-* is small (68.5 KB)
+* is small (~69 KB)
 * has zero dependencies
 * is portable (PCL)
 * is available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
@@ -221,9 +221,8 @@ By convention, an error means the configuration is invalid.
 A warning is something you ought to address, but the program
 should still work.
 
-We would report the errors and warnings to the end-user
-so they can fix them. Here are some 
-example errors:
+Errors and warnings should be reported to the end-user
+so they can fix them. Here are some example errors:
 
 Remove the required fruit and...
 
@@ -329,13 +328,15 @@ protected override void PostValidate() {
 If you want to inject reusable validators and/or modifiers into 
 Cfg-NET, interfaces are defined to facilite this:
 
-1. `string` IModifier.Modify(string name, string value, IDictionary<string,string> parameters)
-1. `void` INodeModifer.Modify(INode node, IDictionary<string,string> parameters)
-1. `string` IGlobalModifier.Modify(string name, string value, IDictionary<string,string> parameters)
-1. `void` IRootModifier.Modify(INode node, IDictionary<string,string> parameters)
-1. `void` IValidator.Modify(string name, string value, IDictionary<string,string> parameters, ILogger logger)
-1. `void` INodeModifer.Modify(INode node, IDictionary<string,string> parameters, ILogger logger)
-1. `void` IGlobalValidator.Modify(string name, string value, IDictionary<string,string> parameters, ILogger logger)
+* Modification
+    1. `string` IModifier.Modify(string name, string value, IDictionary<string,string> parameters)
+    1. `void` INodeModifer.Modify(INode node, IDictionary<string,string> parameters)
+    1. `string` IGlobalModifier.Modify(string name, string value, IDictionary<string,string> parameters)
+    1. `void` IRootModifier.Modify(INode node, IDictionary<string,string> parameters)
+* Validation
+    1. `void` IValidator.Validate(string name, string value, IDictionary<string,string> parameters, ILogger logger)
+    1. `void` INodeValidator.Validate(INode node, IDictionary<string,string> parameters, ILogger logger)
+    1. `void` IGlobalValidator.Validate(string name, string value, IDictionary<string,string> parameters, ILogger logger)
 
 *Read more about injecting ... see [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
 
