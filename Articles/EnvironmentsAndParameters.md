@@ -4,7 +4,7 @@ Environments, parameters, and place-holders work together in order
 to provide configuration flexibility at run-time.
 
 ### Update 0.6.x
-This feature is no longer built into Cfg-Net. 
+This feature is no longer built into Cfg-NET. 
 Instead, it is composed of `IGlobalModifer`, 
 `IGlobalValidator`, and `IRootModifier` implementations 
 and injected into your model's constructor.
@@ -115,8 +115,7 @@ without matching place-holders. Place-holders tell Cfg-NET where the parameter
 values must be inserted.
 
 Insert explicit c# razor style place holders that reference parameter names in
-the XML's attribute values. The place-holder and parameter names must match
-exactly.  They are case-sensitive. In XML, they would look like this:
+the XML's attribute values. In XML, they would look like this:
 
 ```xml
 <trusted-connections>
@@ -143,6 +142,5 @@ var cfg = new Cfg(File.ReadAllText("Something.xml"), parameters);
 ```
 
 **Note**: If you have a place-holder in the configuration,
-and you don't setup an environment default, or pass in a parameter, Cfg.NET
-reports it as an error. So, always check `Errors()` after loading 
-the configuration.
+and you don't setup an environment default, or pass in a parameter, `PlaceHolderValidator` 
+reports it as an error.

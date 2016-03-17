@@ -165,14 +165,14 @@ var logger = new TraceLogger();
 var cfg = new Cfg("cfg.xml", reader, parser, validator, logger);
 ```
 
-The example above composition uses:
+The example above uses:
 
 * the `Cfg-NET.Reader` for reading multiple inputs
 * the `XDocumentParser` to use an `XDocument` based parser instead of the `NanoXmlParser`
 * a custom javascript validator implemented with [Jint](https://github.com/sebastienros/jint)
 * a trace logger implementation
 
-Although it took a fair amount of setup, this provides a `Cfg` 
+Although it took a fair amount of setup, this provides `Cfg` 
 with a flexible reader, a faster parser, a javascript validator 
 for properties decorated with `Cfg[validators="js"]`, and finally; 
 some tracing output.
