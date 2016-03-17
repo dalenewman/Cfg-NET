@@ -5,8 +5,8 @@ to provide configuration flexibility at run-time.
 
 ### Update 0.6.x
 This feature is no longer built into Cfg-Net. 
-Instead, it is composed of IGlobalModifer, 
-IGlobalValidator, and IRootModifier implementations 
+Instead, it is composed of `IGlobalModifer`, 
+`IGlobalValidator`, and `IRootModifier` implementations 
 and injected into your model's constructor.
 
 ```csharp

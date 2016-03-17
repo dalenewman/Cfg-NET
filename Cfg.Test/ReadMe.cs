@@ -137,6 +137,7 @@ namespace Cfg.Test {
                 <add name='red' />
                 <add name='yellow' />
                 <add name='green' />
+                <add name='pink' />
             </colors>
         </add>
         <add name='banana'>
@@ -181,7 +182,7 @@ namespace Cfg.Test {
     }
 
     class Color : CfgNode {
-        [Cfg]
+        [Cfg(domain="red,yellow,green,purple,blue,orange")]
         public string Name { get; set; }
     }
 }

@@ -24,6 +24,10 @@ configuration handler for .NET licensed under [Apache 2](http://www.apache.org/l
 * is portable (PCL)
 * is available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
 
+### Configuration
+
+Out of the box, Cfg-NET supports XML and JSON configurations.
+
 An XML example:
 
 ```xml
@@ -68,6 +72,8 @@ Or, if you prefer JSON:
 }
 ```
 
+### Code
+
 In code, you'd want to deal with a corresponding C# model like this:
 
 ```csharp
@@ -87,8 +93,9 @@ public class Color {
 }
 ```
 
-Cfg-NET binds the configuration and the model (above) together using 
-inheritance and custom attributes like this:
+To make the above model work with Cfg-NET, make each 
+class inherit from `CfgNode` and decorate the properties 
+with the `Cfg` custom attribute: 
 
 ```csharp
 using System.Collections.Generic;
@@ -112,12 +119,7 @@ class Color : CfgNode {
 }
 ```
  
-Note that classes above:
-
-- Inherit from `CfgNode`.
-- Have properties decorated with the `Cfg` attribute.
-
-### What Does Cfg-NET Do?
+### Design the Configuration
 
 Inheriting from `CfgNode` gives you a `Load()` method for your configuration.
 
@@ -135,30 +137,33 @@ built-in options:
 * `modifiers` with `delimiter` option
 * `validators` with `delimiter` option
 
-So, if we want to make sure some fruit is defined in our configuration, we
-would add `required=true` to the fruit list.
-
-If we wanted to make sure the fruit names are unique, we could add `unique=true` to 
-the fruit name attribute.  Let's take a look:
+If we want to make sure some fruit is defined in our configuration, we
+would add `required=true` to the fruit list like this:
 
 ```csharp
-using System.Collections.Generic;
-using Cfg.Net;
-
 class Cfg : CfgNode {
     [Cfg(required=true)] // THERE MUST BE SOME FRUIT!
     public List<Fruit> Fruit { get; set; }
 }
+```
+If we want to make sure the fruit names are unique, we could 
+add `unique=true` to the fruit name attribute like this:  
 
+```csharp
 class Fruit : CfgNode {
     [Cfg(unique=true)] // THE FRUIT MUST BE UNIQUE!
     public string Name { get; set; }
     [Cfg]
     public List<Color> Colors {get; set;}
 }
+```
 
+If we want to control what colors are used, we could 
+add `domain="red,green,etc"` to the color name attribute like this:
+
+```csharp
 class Color : CfgNode {
-    [Cfg]
+    [Cfg(domain="red,yellow,green,blue,purple,orange")]
     public string Name {get; set;}
 }
 ```
@@ -226,14 +231,18 @@ so they can fix them. Here are some example errors:
 
 Remove the required fruit and...
 
-> A **fruit** element with at least one item is required in cfg.
+> A **fruit** element with at least one item is required in **cfg**.
 
 Add another apple and...
 
 > Duplicate **name** value **apple** in **fruit**.
 
+Add the color pink...
+
+> An invalid value of **pink** is in the **name** attribute. The valid domain is: red, yellow, green, purple, blue, orange.
+
 If Cfg-NET doesn't report issues, your configuration 
-is valid.  Now you can loop through your fruits and their 
+is valid.  You can loop through your fruits and their 
 colors without a care in the world:
 
 ```csharp
@@ -318,7 +327,7 @@ and/or `Warnings()` and make further preparations.
 ```csharp
 protected override void PostValidate() {
     if (Errors().Length == 0) {
-        /* snip, make further preparations... */
+        /* make further preparations... */
     }
 }
 ```
@@ -329,16 +338,16 @@ If you want to inject reusable validators and/or modifiers into
 Cfg-NET, interfaces are defined to facilite this:
 
 * Modification
-    1. `string` IModifier.Modify(string name, string value, IDictionary<string,string> parameters)
-    1. `void` INodeModifer.Modify(INode node, IDictionary<string,string> parameters)
-    1. `string` IGlobalModifier.Modify(string name, string value, IDictionary<string,string> parameters)
-    1. `void` IRootModifier.Modify(INode node, IDictionary<string,string> parameters)
+    1. `string` IModifier.Modify(`string` name, `string` value, `IDictionary<string,string>` parameters)
+    1. `void` INodeModifer.Modify(`INode` node, `IDictionary<string,string>` parameters)
+    1. `string` IGlobalModifier.Modify(`string` name, `string` value, `IDictionary<string,string>` parameters)
+    1. `void` IRootModifier.Modify(`INode` node, `IDictionary<string,string>` parameters)
 * Validation
-    1. `void` IValidator.Validate(string name, string value, IDictionary<string,string> parameters, ILogger logger)
-    1. `void` INodeValidator.Validate(INode node, IDictionary<string,string> parameters, ILogger logger)
-    1. `void` IGlobalValidator.Validate(string name, string value, IDictionary<string,string> parameters, ILogger logger)
+    1. `void` IValidator.Validate(`string` name, `string` value, `IDictionary<string,string>` parameters, `ILogger` logger)
+    1. `void` INodeValidator.Validate(`INode` node, `IDictionary<string,string>` parameters, `ILogger` logger)
+    1. `void` IGlobalValidator.Validate(`string` name, `string` value, `IDictionary<string,string>` parameters, `ILogger` logger)
 
-*Read more about injecting ... see [Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
+*Read more about injecting ... see [Using Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
 
 ### Serialize
 
@@ -408,8 +417,4 @@ default parsers adn serializers.  It is a portable class library targeting:
 * [Using Dependency Injection & Autofac with Cfg-NET](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
 * [Using Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
 * [Using Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-* [Using Extension Methods](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Methods.md) 
-
-### Updates
-* a `Serialize` method was added to `CfgNode`.  XML and JSON serializers are 
-built in, or you may inject an `ISerializer` implementation of you own.
+* [Using Extension Methods](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Methods.md)
