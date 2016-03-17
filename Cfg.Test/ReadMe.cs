@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Cfg.Net;
+using Cfg.Net.Contracts;
 using Cfg.Net.Ext;
 using Cfg.Net.Parsers;
 using NUnit.Framework;
@@ -182,7 +183,9 @@ namespace Cfg.Test {
     }
 
     class Color : CfgNode {
-        [Cfg(domain="red,yellow,green,purple,blue,orange")]
+        [Cfg(domain = "red,yellow,green,purple,blue,orange")]
         public string Name { get; set; }
     }
+
+
 }

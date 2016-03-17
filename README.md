@@ -347,7 +347,7 @@ Cfg-NET, interfaces are defined to facilite this:
     1. `void` INodeValidator.Validate(`INode` node, `IDictionary<string,string>` parameters, `ILogger` logger)
     1. `void` IGlobalValidator.Validate(`string` name, `string` value, `IDictionary<string,string>` parameters, `ILogger` logger)
 
-*Read more about injecting ... see [Using Dependency Injection & Autofac](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
+*Read more about injecting ... see [Using Dependency Injection & Autofac with Cfg-NET](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
 
 ### Serialize
 
@@ -399,7 +399,7 @@ About the Code
 --------------
 
 Cfg.Net doesn't have any direct dependencies.  It has built-in `XML` and `JSON`
-default parsers adn serializers.  It is a portable class library targeting:
+default parsers and serializers.  It is a portable class library targeting:
 
 * .NET 4
 * Silverlight 5

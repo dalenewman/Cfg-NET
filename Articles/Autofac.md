@@ -8,34 +8,12 @@ of dependencies.
 
 If you want to use Cfg-NET's default, built-in 
 capabilities, don't pass parameters into the 
-`CfgNode` constructor.
+`CfgNode` constructor. Here are the assumptions 
+made:
 
-As seen in the [README](https://github.com/dalenewman/Cfg-NET/blob/master/README.md), 
-the `Cfg` top-level class does not use the base constructor:
-
-```csharp
-class Cfg : CfgNode {
-    public Cfg(string cfg) {
-        this.Load(cfg);
-    }
-    
-    [Cfg(required = true)]
-    public List<Fruit> Fruit { get; set; }
-}
-
-/* usage, pretending we have our configuration in cfg.xml */
-var cfg = new Cfg(File.ReadAllText("cfg.xml"));
-```
-
-Without use of it's base constructor, `CfgNode` makes 
-a few assumptions:
-
-1. You're passing in a valid `XML` or `JSON` string into the `Load` method.
- - `XML` is parsed with `NanoXmlParser`
- - `JSON` is parsed with `FastJsonParser`
-1. You're not using any custom validators or modifiers
-1. You're not requesting any additional logging
-1. You're not using a custom serializer
+1. You're passing a valid `XML` or `JSON` string into the `Load` method.
+2. `XML` is parsed with `NanoXmlParser` and serialized with `XmlSerializer`
+3. `JSON` is parsed with `FastJsonParser` and serialized with `JsonSerializer`
 
 In many cases, this is fine. I made it this way so you can just use it 
 (batteries included).  But, if you want to:
@@ -46,8 +24,7 @@ In many cases, this is fine. I made it this way so you can just use it
 * add additional logging
 * add custom validation and/or modification
 
-If you want to do any of the above, you'll have to 
-inject dependencies.
+You'll have to inject dependencies....
 
 ### Cfg-NET by Injection
 
@@ -92,13 +69,18 @@ The `IReader` interface:
 
 ```csharp
 public interface IReader {
-    ReaderResult Read(string resource, ILogger logger);
+    string Read(string resource, IDictionary<string,string> parameters, ILogger logger);
 }
 ```
 
-The `Read` method gives you access to the *resource* 
-and the active *logger*. The resource is 
-a file name, and the logger is used to record *Errors* and/or *Warnings*. 
+Inside Cfg-NET, the `Read` method is called with:
+
+1. The resource (your file name)
+2. The parameters collection
+3. The active logger. 
+
+The logger is used to record *Errors* and/or *Warnings*.
+
 The implementation we write should convert the resource to something 
 the parser can handle (by default, that's XML or JSON).
 
@@ -106,14 +88,18 @@ Here is a simple implementation:
 
 ```csharp
 public class FileReader : IReader {
-    public ReaderResult Read(string resource, ILogger logger) {
-        return new ReaderResult { 
-            Source = Source.File,
-            Content = File.ReadAllText(resource)
-        };
+    public string Read(string resource, IDictionary<string, string> parameters, ILogger logger) {
+        try {
+            return File.ReadAllText(resource);
+        } catch (Exception ex) {
+            logger.Error(ex.Message);
+            return null;
+        }
     }
 }
 ```
+
+This `FileReader` will read the file and pass back it's contents or add an error and return null.
 
 Here is `Cfg` modified to expect our new `FileReader`:
 
@@ -133,7 +119,7 @@ var cfg = new Cfg("cfg.xml", new FileReader());
 ```
 
 The constructor is more complicated, but it is 
-necessary to decouple `Cfg` and the `IReader` implementation.
+necessary to decouple `Cfg` from the `IReader` implementation.
 
 In this example, `FileReader` has no dependencies 
 of it's own. The next example demonstrates using a reader 
@@ -222,14 +208,12 @@ public class ConfigurationModule : Module {
         builder.RegisterType<JintValidator>().Named<IValidator>("js");
 
         /* register dependencies for DefaultReader */
-        builder.RegisterType<SourceDetector>().As<ISourceDetector>();
         builder.RegisterType<FileReader>().Named<IReader>("file");
         builder.RegisterType<WebReader>().Named<IReader>("web");
         
         /* user Register method with  Autofac's context (ctx), 
            to resolve previously registered components */
         builder.Register<IReader>((ctx) => new DefaultReader(
-            ctx.Resolve<ISourceDetector>(),
             ctx.ResolveNamed<IReader>("file"),
             ctx.ResolveNamed<IReader>("web")
         ));
@@ -247,8 +231,7 @@ public class ConfigurationModule : Module {
 }
 ```
 
-The module (above) becomes a single place to *compose* 
-Cfg-NET.  Use it like this:
+Use the Autofac module (above) like this:
 
 ```csharp
 /* in composition root*/
