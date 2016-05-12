@@ -14,9 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Cfg.Net.Contracts;
 
@@ -29,6 +32,12 @@ namespace Cfg.Net.Serializers {
         string InnerSerialize(CfgNode node) {
 
             var type = node.GetType();
+#if NET4
+            var attribute = type.GetCustomAttributes(typeof(CfgAttribute), true).FirstOrDefault() as CfgAttribute;
+#else
+            var attribute = type.GetTypeInfo().GetCustomAttributes(typeof(CfgAttribute), true).FirstOrDefault() as CfgAttribute;
+#endif
+            var name = !string.IsNullOrEmpty(attribute?.name) ? attribute.name : type.Name;
             var meta = CfgMetadataCache.GetMetadata(type);
             var builder = new StringBuilder();
 
@@ -38,12 +47,12 @@ namespace Cfg.Net.Serializers {
                 builder.Append(" />");
             } else {
                 builder.Append("<");
-                builder.Append(type.Name);
+                builder.Append(name);
                 SerializeAttributes(meta, node, builder);
                 builder.AppendLine(">");
                 SerializeElements(meta, node, builder, 1);
                 builder.Append("</");
-                builder.Append(type.Name);
+                builder.Append(name);
                 builder.Append(">");
             }
 
@@ -51,10 +60,10 @@ namespace Cfg.Net.Serializers {
         }
 
         static bool JustAttributes(IDictionary<string, CfgMetadata> meta, object node) {
-            if(meta.All(kv => kv.Value.ListType == null))
+            if (meta.All(kv => kv.Value.ListType == null))
                 return true;
 
-            foreach(var pair in meta.Where(kv=>kv.Value.ListType != null)){
+            foreach (var pair in meta.Where(kv => kv.Value.ListType != null)) {
                 var list = (IList)meta[pair.Key].Getter(node);
                 if (list != null && list.Count > 0)
                     return false;
@@ -68,10 +77,11 @@ namespace Cfg.Net.Serializers {
                 var items = (IList)meta[pair.Key].Getter(node);
                 if (items == null || items.Count == 0)
                     continue;
+                var name = meta[pair.Key].Attribute.name;
 
                 Indent(builder, level);
                 builder.Append("<");
-                builder.Append(pair.Key);
+                builder.Append(name);
                 builder.AppendLine(">");
 
                 foreach (var item in items) {
@@ -80,7 +90,7 @@ namespace Cfg.Net.Serializers {
                     builder.Append("<add");
                     SerializeAttributes(metaData, item, builder);
 
-                    if(JustAttributes(metaData, item)) {
+                    if (JustAttributes(metaData, item)) {
                         builder.AppendLine(" />");
                     } else {
                         builder.AppendLine(">");
@@ -92,7 +102,7 @@ namespace Cfg.Net.Serializers {
 
                 Indent(builder, level);
                 builder.Append("</");
-                builder.Append(pair.Key);
+                builder.Append(name);
                 builder.AppendLine(">");
             }
 
@@ -112,8 +122,10 @@ namespace Cfg.Net.Serializers {
                         continue;
                     }
 
+                    var name = meta[pair.Key].Attribute.name;
+
                     builder.Append(" ");
-                    builder.Append(pair.Key);
+                    builder.Append(name);
                     builder.Append("=\"");
 
                     var stringValue = pair.Value.PropertyInfo.PropertyType == typeof(string) ? (string)value : value.ToString();
@@ -125,8 +137,9 @@ namespace Cfg.Net.Serializers {
                 }
             } else if (obj is Dictionary<string, string>) {
                 foreach (var pair in (Dictionary<string, string>)obj) {
+                    var name = meta[pair.Key].Attribute.name;
                     builder.Append(" ");
-                    builder.Append(pair.Key);
+                    builder.Append(name);
                     builder.Append("=\"");
                     builder.Append(pair.Value == null ? string.Empty : Encode(pair.Value));
                     builder.Append("\"");

@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using Cfg.Net;
 using NUnit.Framework;
+using Pipeline.Actions;
 
 namespace Cfg.Test {
 
@@ -38,7 +39,7 @@ namespace Cfg.Test {
     </parameters>
 </xml>";
 
-            const string expected = @"<TestToXml>
+            const string expected = @"<xml>
     <parameters>
         <add name=""p1"" value=""true"" />
         <add name=""p2"">
@@ -47,7 +48,7 @@ namespace Cfg.Test {
             </alternatives>
         </add>
     </parameters>
-</TestToXml>";
+</xml>";
 
             var cfg = new TestToXml(xml);
 
@@ -66,6 +67,7 @@ namespace Cfg.Test {
 
         }
 
+        [Cfg(name="xml")]
         class TestToXml : CfgNode {
             [Cfg]
             public List<TestToXmlParameter> Parameters { get; set; }

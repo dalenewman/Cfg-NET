@@ -32,6 +32,7 @@ namespace Cfg.Net {
         internal IParser Parser { get; set; }
         internal IReader Reader { get; set; }
         internal ISerializer Serializer { get; set; }
+        internal ILogger Logger { get; set; }
 
         internal IDictionary<string, IValidator> Validators { get; set; } = new Dictionary<string, IValidator>();
         internal IDictionary<string, INodeValidator> NodeValidators { get; set; } = new Dictionary<string, INodeValidator>();
@@ -61,12 +62,7 @@ namespace Cfg.Net {
                     } else if (dependency is ISerializer) {
                         Serializer = dependency as ISerializer;
                     } else if (dependency is ILogger) {
-                        var composite = new DefaultLogger(new MemoryLogger(), dependency as ILogger);
-                        if (Events == null) {
-                            Events = new CfgEvents(composite);
-                        } else {
-                            Events.Logger = composite;
-                        }
+                        Logger = dependency as ILogger;
                     } else if (dependency is IGlobalModifier) {
                         GlobalModifiers.Add(dependency as IGlobalModifier);
                     } else if (dependency is INodeModifier) {
@@ -109,6 +105,7 @@ namespace Cfg.Net {
         /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, IDictionary<string, string> parameters = null) {
 
+            Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), Logger));
             this.Clear(Events);
 
             if (string.IsNullOrEmpty(cfg)) {

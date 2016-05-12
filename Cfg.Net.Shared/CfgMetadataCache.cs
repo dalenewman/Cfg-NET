@@ -120,6 +120,10 @@ namespace Cfg.Net {
                     }
 #endif
 
+                    if (string.IsNullOrEmpty(attribute.name)) {
+                        attribute.name = key;
+                    }
+
                     item.Setter = CfgReflectionHelper.CreateSetter(propertyInfo);
                     item.Getter = CfgReflectionHelper.CreateGetter(propertyInfo);
 

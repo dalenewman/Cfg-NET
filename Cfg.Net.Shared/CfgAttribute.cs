@@ -18,7 +18,9 @@ using System;
 
 namespace Cfg.Net {
 
-    [AttributeUsage(AttributeTargets.Property)]
+
+
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
     public class CfgAttribute : Attribute {
         private string _domain;
         private int _maxLength;
@@ -30,38 +32,79 @@ namespace Cfg.Net {
         private object _value;
 
         // ReSharper disable InconsistentNaming
-        public object value {
+
+        /// <summary>
+        /// The default value.
+        /// </summary>
+        public object value
+        {
             get { return _value; }
-            set {
+            set
+            {
                 if (value == null) return;
                 _value = value;
                 ValueIsSet = true;
             }
         }
 
+        /// <summary>
+        /// Is this property required?
+        /// </summary>
         public bool required { get; set; }
+
+        /// <summary>
+        /// Is this property unique?
+        /// </summary>
         public bool unique { get; set; }
+
+        /// <summary>
+        /// Convert this property's value to upper case.
+        /// </summary>
         public bool toUpper { get; set; }
+
+        /// <summary>
+        /// Convert this property's value to lower case.
+        /// </summary>
         public bool toLower { get; set; }
+
+        /// <summary>
+        /// Serialize this property.
+        /// </summary>
         public bool serialize { get; set; } = true;
 
-        public string domain {
+        /// <summary>
+        /// A list of values representing this property's domain (list of valid values). 
+        /// Use <see cref="delimiter"/> to set the delimiter.
+        /// </summary>
+        public string domain
+        {
             get { return _domain; }
-            set {
+            set
+            {
                 _domain = value;
                 DomainSet = true;
             }
         }
 
-        public string validators {
+        /// <summary>
+        /// A list of injected validators to validate this property.
+        /// Use <see cref="delimiter"/> to set the delimiter.
+        /// </summary>
+        public string validators
+        {
             get { return _validators; }
-            set {
+            set
+            {
                 if (value == null) return;
                 _validators = value;
                 ValidatorsSet = true;
             }
         }
 
+        /// <summary>
+        /// A list of injected modifiers to modify this property.
+        /// Use <see cref="delimiter"/> to set the delimiter.
+        /// </summary>
         public string modifiers
         {
             get { return _modifiers; }
@@ -73,49 +116,74 @@ namespace Cfg.Net {
             }
         }
 
+        /// <summary>
+        /// The delimiter used in <see cref="domain"/>, <see cref="validators"/>, and <see cref="modifiers"/>.
+        /// </summary>
         public char delimiter { get; set; } = ',';
 
-        [Obsolete("Use delimiter instead.")]
-        public char domainDelimiter { get; set; } = ',';
-
-        [Obsolete("Use delimiter instead.")]
-        public char validatorDelimiter { get; set; } = ',';
-
+        /// <summary>
+        /// Ignore case for this property.
+        /// </summary>
         public bool ignoreCase { get; set; }
 
-        public int minLength {
+        /// <summary>
+        /// Minimum length for this property.
+        /// </summary>
+        public int minLength
+        {
             get { return _minLength; }
-            set {
+            set
+            {
                 _minLength = value;
                 MinLengthSet = true;
             }
         }
 
-        public int maxLength {
+        /// <summary>
+        /// Maximum length for this property.
+        /// </summary>
+        public int maxLength
+        {
             get { return _maxLength; }
-            set {
+            set
+            {
                 _maxLength = value;
                 MaxLengthSet = true;
             }
         }
 
-        public object minValue {
+        /// <summary>
+        /// Minimum value for this property.
+        /// </summary>
+        public object minValue
+        {
             get { return _minValue; }
-            set {
+            set
+            {
                 if (value == null) return;
                 _minValue = value;
                 MinValueSet = true;
             }
         }
 
-        public object maxValue {
+        /// <summary>
+        /// Maximum value for this property.
+        /// </summary>
+        public object maxValue
+        {
             get { return _maxValue; }
-            set {
+            set
+            {
                 if (value == null) return;
                 _maxValue = value;
                 MaxValueSet = true;
             }
         }
+
+        /// <summary>
+        /// Serialization name for this property.
+        /// </summary>
+        public string name { get; set; }
 
         public bool MaxLengthSet { get; private set; }
         public bool MinLengthSet { get; private set; }

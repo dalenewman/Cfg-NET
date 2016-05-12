@@ -58,9 +58,14 @@ namespace Cfg.Net.Shorthand {
                     // ordered nameless parameters
                     for (var m = 0; m < signatureParameters.Count; m++) {
                         var signatureParameter = signatureParameters[m];
-                        shorthandNode.Attributes.Add(m < expression.Parameters.Count
-                            ? new ShorthandAttribute(signatureParameter.Name, expression.Parameters[m])
-                            : new ShorthandAttribute(signatureParameter.Name, signatureParameter.Value));
+                        var parameterValue = m < expression.Parameters.Count ? expression.Parameters[m] : signatureParameter.Value;
+
+                        if (parameterValue.Contains("\\" + NamedParameterSplitter)) {
+                            parameterValue = parameterValue.Replace("\\" + NamedParameterSplitter, NamedParameterSplitter.ToString());
+                        }
+
+                        var attribute = new ShorthandAttribute(signatureParameter.Name, parameterValue);
+                        shorthandNode.Attributes.Add(attribute);
                     }
                 }
 

@@ -30,12 +30,8 @@ namespace Cfg.Net.Shorthand {
             if (arg.Equals(string.Empty))
                 return new string[0];
 
-            string[] split = arg.Replace("\\" + splitter, ControlString).Split(splitter);
-            return
-                split.Select(s => s.Replace(ControlChar, splitter))
-                    .Skip(skip)
-                    .Where(s => !string.IsNullOrEmpty(s))
-                    .ToArray();
+            var split = arg.Replace("\\" + splitter, ControlString).Split(splitter);
+            return split.Select(s => s.Replace(ControlChar, splitter)).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
         }
 
         internal static string[] Split(string arg, string[] splitter, int skip = 0) {
@@ -43,11 +39,7 @@ namespace Cfg.Net.Shorthand {
                 return new string[0];
 
             var split = arg.Replace("\\" + splitter[0], ControlString).Split(splitter, StringSplitOptions.None);
-            return
-                split.Select(s => s.Replace(ControlString, splitter[0]))
-                    .Skip(skip)
-                    .Where(s => !string.IsNullOrEmpty(s))
-                    .ToArray();
+            return split.Select(s => s.Replace(ControlString, splitter[0])).Skip(skip).Where(s => !string.IsNullOrEmpty(s)).ToArray();
         }
 
         public static string NormalizeName(string name) {

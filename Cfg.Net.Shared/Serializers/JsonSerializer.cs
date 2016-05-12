@@ -61,7 +61,7 @@ namespace Cfg.Net.Serializers {
 
                 Indent(sb, level);
                 sb.Append("\"");
-                sb.Append(pair.Key);
+                sb.Append(meta[pair.Key].Attribute.name);
                 sb.AppendLine("\":[");
 
                 var count = nodes.Count;
@@ -127,7 +127,7 @@ namespace Cfg.Net.Serializers {
                     var stringValue = ValueToString(type, value);
 
                     sb.Append(" \"");
-                    sb.Append(pair.Key);
+                    sb.Append(meta[pair.Key].Attribute.name);
                     sb.Append("\":");
                     sb.Append(stringValue);
                     sb.Append(",");
@@ -137,7 +137,7 @@ namespace Cfg.Net.Serializers {
                 var dict = (Dictionary<string, string>)obj;
                 foreach (var pair in dict) {
                     sb.Append(" \"");
-                    sb.Append(pair.Key);
+                    sb.Append(meta[pair.Key].Attribute.name);
                     sb.Append("\":\"");
                     sb.Append(Encode(pair.Value));
                     sb.Append("\"");
@@ -212,6 +212,12 @@ namespace Cfg.Net.Serializers {
             {typeof(bool), v=> v.ToString().ToLower()},
             {typeof(DateTime), v => "\"" + ((DateTime)v).ToString("o") + "\""},
             {typeof(Guid), v=> "\"" + ((Guid)v) + "\"" },
+            {typeof(int), v=> v.ToString() },
+            {typeof(short), v=> v.ToString() },
+            {typeof(long), v=> v.ToString() },
+            {typeof(double), v=> v.ToString() },
+            {typeof(float), v=> v.ToString() },
+            {typeof(decimal), v=> v.ToString() },
             {typeof(char), v=> "\"" + Encode(v.ToString()) + "\""}
         };
 

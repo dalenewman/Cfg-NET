@@ -12,6 +12,8 @@ namespace Cfg.Net.Shorthand {
 
         public string Name { get; set; }
         public void Validate(INode node, string value, IDictionary<string, string> parameters, ILogger logger) {
+            if (string.IsNullOrEmpty(value))
+                return;
             var expressions = new Expressions(value);
             foreach (var expression in expressions) {
                 MethodData methodData;

@@ -36,8 +36,8 @@ namespace Cfg.Test {
 
             const string expected = @"{
     ""parameters"":[
-        { ""name"":""p1"", ""value"":true },
-        { ""name"":""p2"" }
+        { ""namers"":""p1"", ""value"":true },
+        { ""namers"":""p2"" }
     ]
 }";
 
@@ -54,7 +54,7 @@ namespace Cfg.Test {
             Console.WriteLine(actual);
             Assert.AreEqual(expected, actual);
 
-            Assert.AreEqual(@"{ ""name"":""p1"", ""value"":true }", cfg.Parameters[0].Serialize());
+            Assert.AreEqual(@"{ ""namers"":""p1"", ""value"":true }", cfg.Parameters[0].Serialize());
 
         }
 
@@ -69,7 +69,7 @@ namespace Cfg.Test {
         }
 
         class TestToJsonParameter : CfgNode {
-            [Cfg(required = true, toLower = true)]
+            [Cfg(required = true, toLower = true,name="namers")]
             public string Name { get; set; }
 
             [Cfg(value = false)]
