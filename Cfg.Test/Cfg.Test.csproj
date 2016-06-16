@@ -58,9 +58,14 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <Reference Include="YamlDotNet, Version=3.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.3.9.0\lib\net35\YamlDotNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Clone.cs" />
+    <Compile Include="YamlDotNet.cs" />
     <Compile Include="ToJson.cs" />
     <Compile Include="ToXml.cs" />
     <Compile Include="DifferentJsonParser.cs" />
@@ -124,6 +129,10 @@
     <ProjectReference Include="..\Cfg.Net.Parsers.Xml.Linq\Cfg.Net.Parsers.Xml.Linq.csproj">
       <Project>{093898fa-64e6-4e71-8dff-141c8888bfbe}</Project>
       <Name>Cfg.Net.Parsers.Xml.Linq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Cfg.Net.Parsers.YamlDotNet\Cfg.Net.Parsers.YamlDotNet.csproj">
+      <Project>{2008644b-db1f-4a50-bb7e-550f55e704f0}</Project>
+      <Name>Cfg.Net.Parsers.YamlDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\Cfg.Net.Reader\Cfg.Net.Reader.csproj">
       <Project>{93afd9a7-5dc8-4392-8632-a553723bd3ac}</Project>

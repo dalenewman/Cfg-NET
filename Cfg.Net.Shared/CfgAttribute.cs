@@ -17,9 +17,6 @@
 using System;
 
 namespace Cfg.Net {
-
-
-
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
     public class CfgAttribute : Attribute {
         private string _domain;

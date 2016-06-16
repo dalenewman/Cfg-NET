@@ -109,7 +109,7 @@ namespace Cfg.Net.Serializers {
             }
         }
 
-        private void SerializeAttributes(Dictionary<string, CfgMetadata> meta, object obj, StringBuilder sb) {
+        private static void SerializeAttributes(IDictionary<string, CfgMetadata> meta, object obj, StringBuilder sb) {
 
             if (meta.Count > 0) {
                 var pairs = meta.Where(kv => kv.Value.ListType == null).ToArray();
@@ -124,40 +124,51 @@ namespace Cfg.Net.Serializers {
                     }
 
                     var type = pair.Value.PropertyInfo.PropertyType;
-                    var stringValue = ValueToString(type, value);
 
                     sb.Append(" \"");
                     sb.Append(meta[pair.Key].Attribute.name);
                     sb.Append("\":");
-                    sb.Append(stringValue);
+                    sb.Append(ValueToString(type, value));
                     sb.Append(",");
                 }
 
-            } else if (obj is Dictionary<string, string>) {
-                var dict = (Dictionary<string, string>)obj;
+            } else {
+                var dict = obj as IProperties;
+                if (dict == null) return;
+
                 foreach (var pair in dict) {
                     sb.Append(" \"");
-                    sb.Append(meta[pair.Key].Attribute.name);
-                    sb.Append("\":\"");
-                    sb.Append(Encode(pair.Value));
-                    sb.Append("\"");
+                    sb.Append(pair.Key);
+                    sb.Append("\":");
+                    sb.Append(TypeToString[pair.Value.GetType()](pair.Value));
                     sb.Append(",");
                 }
             }
-
         }
 
-        public static string Encode(string value) {
-            if (value.Length == 0) {
-                return string.Empty;
+        public static object Encode(object value) {
+            if (value == null)
+                return "null";
+
+            var str = value as string;
+
+            if (str == null) {
+                return value;
+            }
+
+            var len = str.Length;
+
+            if (len == 0) {
+                return "\"\"";
             }
 
             int i;
-            var len = value.Length;
-            var sb = new StringBuilder(len + 4);
+            var sb = new StringBuilder(len + 6);
+
+            sb.Append('"');
 
             for (i = 0; i < len; i += 1) {
-                var c = value[i];
+                var c = str[i];
                 switch (c) {
                     case '\\':
                     case '"':
@@ -193,6 +204,8 @@ namespace Cfg.Net.Serializers {
                         break;
                 }
             }
+            sb.Append('"');
+
             return sb.ToString();
         }
 
@@ -208,7 +221,7 @@ namespace Cfg.Net.Serializers {
         }
 
         private static readonly Dictionary<Type, Func<object, string>> TypeToString = new Dictionary<Type, Func<object, string>> {
-            {typeof(string), v => "\"" + Encode((string)v) + "\"" },
+            {typeof(string), v => Encode((string)v).ToString() },
             {typeof(bool), v=> v.ToString().ToLower()},
             {typeof(DateTime), v => "\"" + ((DateTime)v).ToString("o") + "\""},
             {typeof(Guid), v=> "\"" + ((Guid)v) + "\"" },
@@ -222,7 +235,7 @@ namespace Cfg.Net.Serializers {
         };
 
         private static string ValueToString(Type type, object value) {
-            return TypeToString.ContainsKey(type) ? TypeToString[type](value) : value.ToString();
+            return TypeToString.ContainsKey(type) ? TypeToString[type](value) : "\"" + value + "\"";
         }
     }
 }

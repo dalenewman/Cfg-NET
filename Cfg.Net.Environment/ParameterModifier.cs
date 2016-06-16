@@ -22,16 +22,23 @@ namespace Cfg.Net.Environment {
 
             foreach (var parameter in root.SubNodes) {
                 string name = null;
-                string value = null;
+                object value = null;
                 foreach (var attribute in parameter.Attributes) {
                     if (attribute.Name == _nameAttribute) {
-                        name = attribute.Value;
+                        name = attribute.Value.ToString();
                     } else if (attribute.Name == _valueAttribute) {
                         value = attribute.Value;
                     }
                 }
-                if (name != null && value != null && !parameters.ContainsKey(name)) {
-                    parameters[name] = value;
+                if (name != null && value != null) {
+                    if (parameters.ContainsKey(name)) {
+                        IAttribute attr;
+                        if (parameter.TryAttribute(_valueAttribute, out attr)) {
+                            attr.Value = parameters[name];
+                        }
+                    } else {
+                        parameters[name] = value.ToString();
+                    }
                 }
             }
         }

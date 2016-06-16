@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CfgAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IProperties.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgMetadata.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgMetadataCache.cs" />

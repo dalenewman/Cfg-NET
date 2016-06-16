@@ -16,33 +16,39 @@ namespace Cfg.Net.Environment {
             _placeHolderClose = placeHolderClose;
         }
 
-        public string Modify(string name, string value, IDictionary<string, string> parameters) {
-            if (parameters.Count == 0 || value.IndexOf(_placeHolderMarker) < 0)
+        public object Modify(string name, object value, IDictionary<string, string> parameters)
+        {
+
+            var str = value as string;
+            if (str == null)
                 return value;
 
-            var builder = new StringBuilder();
-            for (var j = 0; j < value.Length; j++) {
-                if (value[j] == _placeHolderMarker && value.Length > j + 1 && value[j + 1] == _placeHolderOpen) {
-                    var length = 2;
-                    while (value.Length > j + length && value[j + length] != _placeHolderClose) {
-                        length++;
-                    }
-                    if (length > 2) {
-                        var key = value.Substring(j + 2, length - 2);
-                        if (parameters.ContainsKey(key)) {
-                            builder.Append(parameters[key]);
-                        } else {
-                            builder.AppendFormat("@({0})", key);
+                if (parameters.Count == 0 || str.IndexOf(_placeHolderMarker) < 0)
+                    return value;
+
+                var builder = new StringBuilder();
+                for (var j = 0; j < str.Length; j++) {
+                    if (str[j] == _placeHolderMarker && str.Length > j + 1 && str[j + 1] == _placeHolderOpen) {
+                        var length = 2;
+                        while (str.Length > j + length && str[j + length] != _placeHolderClose) {
+                            length++;
                         }
+                        if (length > 2) {
+                            var key = str.Substring(j + 2, length - 2);
+                            if (parameters.ContainsKey(key)) {
+                                builder.Append(parameters[key]);
+                            } else {
+                                builder.AppendFormat("@({0})", key);
+                            }
+                        }
+                        j = j + length;
+                    } else {
+                        builder.Append(str[j]);
                     }
-                    j = j + length;
-                } else {
-                    builder.Append(value[j]);
                 }
-            }
 
-            return builder.ToString();
+                return builder.ToString();
+
         }
-
     }
 }

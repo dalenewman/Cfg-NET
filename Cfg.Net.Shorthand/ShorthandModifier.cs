@@ -14,8 +14,14 @@ namespace Cfg.Net.Shorthand {
         }
 
         public string Name { get; set; }
-        public void Modify(INode node, string value, IDictionary<string, string> parameters) {
-            var expressions = new Expressions(value);
+        public void Modify(INode node, object value, IDictionary<string, string> parameters)
+        {
+            var str = value as string;
+
+            if (str == null)
+                return;
+
+            var expressions = new Expressions(str);
             var shorthandNodes = new Dictionary<string, List<INode>>();
 
             foreach (var expression in expressions) {
@@ -58,7 +64,7 @@ namespace Cfg.Net.Shorthand {
                     // ordered nameless parameters
                     for (var m = 0; m < signatureParameters.Count; m++) {
                         var signatureParameter = signatureParameters[m];
-                        var parameterValue = m < expression.Parameters.Count ? expression.Parameters[m] : signatureParameter.Value;
+                        var parameterValue = m < expression.Parameters.Count ? expression.Parameters[m] : (signatureParameter.Value ?? string.Empty);
 
                         if (parameterValue.Contains("\\" + NamedParameterSplitter)) {
                             parameterValue = parameterValue.Replace("\\" + NamedParameterSplitter, NamedParameterSplitter.ToString());

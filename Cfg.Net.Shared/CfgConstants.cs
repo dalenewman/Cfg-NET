@@ -26,9 +26,9 @@ namespace Cfg.Net {
         internal static char ControlChar = (char)31;
         internal static char NamedParameterSplitter = ':';
 
-        internal static Dictionary<Type, Func<string, object>> Converter = new Dictionary<Type, Func<string, object>> {
+        internal static Dictionary<Type, Func<object, object>> Converter = new Dictionary<Type, Func<object, object>> {
                 {typeof (string), (x => x)},
-                {typeof (Guid), (x => Guid.Parse(x))},
+                {typeof (Guid), (x => Guid.Parse(x.ToString()))},
                 {typeof (short), (x => Convert.ToInt16(x))},
                 {typeof (int), (x => Convert.ToInt32(x))},
                 {typeof (long), (x => Convert.ToInt64(x))},
@@ -36,7 +36,7 @@ namespace Cfg.Net {
                 {typeof (uint), (x => Convert.ToUInt32(x))},
                 {typeof (ulong), (x => Convert.ToUInt64(x))},
                 {typeof (double), (x => Convert.ToDouble(x))},
-                {typeof (decimal), (x => decimal.Parse(x, NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol, (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo))))},
+                {typeof (decimal), (x => decimal.Parse(x.ToString(), NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol, (IFormatProvider) CultureInfo.CurrentCulture.GetFormat(typeof (NumberFormatInfo))))},
                 {typeof (char), (x => Convert.ToChar(x))},
                 {typeof (DateTime), (x => Convert.ToDateTime(x))},
                 {typeof (bool), (x => Convert.ToBoolean(x))},

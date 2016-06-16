@@ -62,8 +62,11 @@ namespace Cfg.Test {
             }
 
             public string Name { get; set; }
-            public string Modify(string name, string value, IDictionary<string, string> parameters) {
-                return value.Replace("--", "-");
+            public object Modify(string name, object value, IDictionary<string, string> parameters) {
+                var str = value as string;
+                if (str == null)
+                    return value;
+                return str.Replace("--", "-");
             }
 
         }
@@ -75,8 +78,8 @@ namespace Cfg.Test {
             }
 
             public string Name { get; set; }
-            public string Modify(string name, string value, IDictionary<string, string> parameters) {
-                return value.Replace("GOOD", "BAD");
+            public object Modify(string name, object value, IDictionary<string, string> parameters) {
+                return value.ToString().Replace("GOOD", "BAD");
             }
 
         }

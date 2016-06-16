@@ -15,9 +15,11 @@
 // limitations under the License.
 #endregion
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net;
+using Cfg.Net.Contracts;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -92,12 +94,33 @@ namespace Cfg.Test {
         }
     }
 
-    public class CfgDataSet : CfgNode
-    {
+    public class CfgDataSet : CfgNode {
         [Cfg(required = true)]
         public string Name { get; set; }
 
-        [Cfg()]
-        public List<Dictionary<string,string>> Rows { get; set; }
+        [Cfg]
+        public List<CfgRow> Rows { get; set; }
+    }
+
+    public class CfgRow : IProperties {
+        private readonly IDictionary<string, object> _storage;
+
+        public CfgRow() {
+            _storage = new Dictionary<string, object>();
+        }
+
+        public object this[string name]
+        {
+            get { return _storage[name]; }
+            set { _storage[name] = value; }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return ((IEnumerable)_storage).GetEnumerator();
+        }
+
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() {
+            return _storage.GetEnumerator();
+        }
     }
 }

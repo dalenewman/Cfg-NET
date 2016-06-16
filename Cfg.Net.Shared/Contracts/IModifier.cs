@@ -3,6 +3,6 @@
 namespace Cfg.Net.Contracts {
 
     public interface IModifier : INamedDependency {
-        string Modify(string name, string value, IDictionary<string, string> parameters);
+        object Modify(string name, object value, IDictionary<string, string> parameters);
     }
 }

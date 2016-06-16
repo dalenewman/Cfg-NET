@@ -18,6 +18,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Cfg.Net.Contracts;
 using Cfg.Net.Ext;
 using Cfg.Net.Loggers;
@@ -260,16 +261,40 @@ namespace Cfg.Net {
                             var addKey = CfgMetadataCache.NormalizeName(Type, subNode.Name);
                             addHits.Add(addKey);
                             if (item.Loader == null) {
-                                if (item.ListType == typeof(Dictionary<string, string>)) {
-                                    var dict = new Dictionary<string, string>();
-                                    for (var k = 0; k < add.Attributes.Count; k++) {
-                                        var attribute = add.Attributes[k];
-                                        dict[attribute.Name] = attribute.Value;
+                                if (typeof(IProperties).IsAssignableFrom(item.ListType)) {
+                                    object obj = null;
+                                    foreach (var cp in item.ListType.GetConstructors().Select(c => c.GetParameters())) {
+                                        if (!cp.Any()) {
+                                            obj = Activator.CreateInstance(item.ListType);
+                                            break;
+                                        }
+
+                                        if (cp.Count() == 1) {
+                                            if (cp.First().ParameterType == typeof(int)) {
+                                                obj = Activator.CreateInstance(item.ListType, add.Attributes.Count);
+                                                break;
+                                            }
+
+                                            if (cp.First().ParameterType == typeof(string[])) {
+                                                var names = add.Attributes.Select(a => a.Name).ToArray();
+                                                obj = Activator.CreateInstance(item.ListType, new object[] { names });
+                                                break;
+                                            }
+                                        }
                                     }
-                                    elements[addKey].Add(dict);
+                                    if (obj == null) {
+                                        Events.ConstructorNotFound(parentName, subNode.Name);
+                                    } else {
+                                        var properties = obj as IProperties;
+                                        for (var k = 0; k < add.Attributes.Count; k++) {
+                                            var attribute = add.Attributes[k];
+                                            properties[attribute.Name] = attribute.Value;
+                                        }
+                                        elements[addKey].Add(obj);
+                                    }
                                 } else {
                                     if (add.Attributes.Count == 1) {
-                                        string attrValue = add.Attributes[0].Value;
+                                        var attrValue = add.Attributes[0].Value;
                                         if (item.ListType == typeof(string) || item.ListType == typeof(object)) {
                                             elements[addKey].Add(attrValue);
                                         } else {
@@ -377,7 +402,7 @@ namespace Cfg.Net {
                             }
                             continue;
                         }
-                        attribute.Value = maybe.ToString();
+                        attribute.Value = maybe;
                     }
 
                     // run injected property specific modifiers
@@ -402,13 +427,13 @@ namespace Cfg.Net {
                         attribute.Value = modifier.Modify(attribute.Name, attribute.Value, parameters);
                     }
 
-                    if (item.Attribute.toLower) {
-                        attribute.Value = attribute.Value.ToLower();
-                    } else if (item.Attribute.toUpper) {
-                        attribute.Value = attribute.Value.ToUpper();
-                    }
-
                     if (item.PropertyInfo.PropertyType == typeof(string)) {
+
+                        if (item.Attribute.toLower) {
+                            attribute.Value = attribute.Value.ToString().ToLower();
+                        } else if (item.Attribute.toUpper) {
+                            attribute.Value = attribute.Value.ToString().ToUpper();
+                        }
                         item.Setter(this, attribute.Value);
                         keyHits.Add(attributeKey);
                     } else {

@@ -111,7 +111,11 @@ namespace Cfg.Net {
         }
 
         public void OnlyOneAttributeAllowed(string parentName, string name, int count) {
-            Logger.Error("The '{0}' '{1}' collection does not inherit from CfgNode, so you can only have one value (attribute).  You have {2} defined. So, limit it to one, or have your list item inherit from CfgNode.", parentName, name, count);
+            Logger.Error("The '{0}' '{1}' collection does not inherit from CfgNode or implement IProperties, so you can only have one value (attribute).  You have {2} defined.", parentName, name, count);
+        }
+
+        public void ConstructorNotFound(string parentName, string name) {
+            Logger.Error("The '{0}' '{1}' collection implementing IProperties has an incompatible constructor.  Cfg-Net needs a constructorless or single parameter constructor.  The single parameter may be a string[] of names, or an integer representing capacity.", parentName, name);
         }
 
         public void TypeMismatch(string key, object value, Type propertyType) {

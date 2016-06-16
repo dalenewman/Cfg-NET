@@ -37,6 +37,9 @@ namespace Cfg.Net.Serializers {
 #else
             var attribute = type.GetTypeInfo().GetCustomAttributes(typeof(CfgAttribute), true).FirstOrDefault() as CfgAttribute;
 #endif
+            if (attribute != null && !attribute.serialize)
+                return string.Empty;
+
             var name = !string.IsNullOrEmpty(attribute?.name) ? attribute.name : type.Name;
             var meta = CfgMetadataCache.GetMetadata(type);
             var builder = new StringBuilder();
@@ -74,10 +77,16 @@ namespace Cfg.Net.Serializers {
         void SerializeElements(IDictionary<string, CfgMetadata> meta, object node, StringBuilder builder, int level) {
 
             foreach (var pair in meta.Where(kv => kv.Value.ListType != null)) {
-                var items = (IList)meta[pair.Key].Getter(node);
+
+                var m = meta[pair.Key];
+
+                if (!m.Attribute.serialize)
+                    continue;
+
+                var items = (IList)m.Getter(node);
                 if (items == null || items.Count == 0)
                     continue;
-                var name = meta[pair.Key].Attribute.name;
+                var name = m.Attribute.name;
 
                 Indent(builder, level);
                 builder.Append("<");
@@ -114,9 +123,13 @@ namespace Cfg.Net.Serializers {
             }
         }
 
-        private void SerializeAttributes(Dictionary<string, CfgMetadata> meta, object obj, StringBuilder builder) {
+        private void SerializeAttributes(IDictionary<string, CfgMetadata> meta, object obj, StringBuilder builder) {
             if (meta.Count > 0) {
                 foreach (var pair in meta.Where(kv => kv.Value.ListType == null)) {
+
+                    if (!pair.Value.Attribute.serialize)
+                        continue;
+
                     var value = pair.Value.Getter(obj);
                     if (value == null || value.Equals(pair.Value.Attribute.value) || (!pair.Value.Attribute.ValueIsSet && pair.Value.Default != null && pair.Value.Default.Equals(value))) {
                         continue;
@@ -135,13 +148,15 @@ namespace Cfg.Net.Serializers {
                     builder.Append(Encode(stringValue));
                     builder.Append("\"");
                 }
-            } else if (obj is Dictionary<string, string>) {
-                foreach (var pair in (Dictionary<string, string>)obj) {
-                    var name = meta[pair.Key].Attribute.name;
+            } else {
+                var dict = obj as IProperties;
+                if (dict == null)
+                    return;
+                foreach (var pair in dict) {
                     builder.Append(" ");
-                    builder.Append(name);
+                    builder.Append(pair.Key);
                     builder.Append("=\"");
-                    builder.Append(pair.Value == null ? string.Empty : Encode(pair.Value));
+                    builder.Append(pair.Value == null ? string.Empty : Encode(pair.Value.ToString()));
                     builder.Append("\"");
                 }
             }
@@ -149,8 +164,8 @@ namespace Cfg.Net.Serializers {
 
         public string Encode(string value) {
             var builder = new StringBuilder();
-            for (int i = 0; i < value.Length; i++) {
-                char ch = value[i];
+            for (var i = 0; i < value.Length; i++) {
+                var ch = value[i];
                 if (ch <= '>') {
                     switch (ch) {
                         case '<':

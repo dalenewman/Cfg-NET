@@ -17,17 +17,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net.Contracts;
-using Newtonsoft.Json.Linq;
 
-namespace Cfg.Net.Parsers.Json.Net {
+namespace Cfg.Net.Parsers.YamlDotNet {
 
-    public class JsonNetNode : INode {
+    public class YamlDotNetNode : INode {
 
         public string Name { get; }
         public List<IAttribute> Attributes { get; }
         public List<INode> SubNodes { get; }
 
-        public JsonNetNode(string name, JObject node) {
+        public YamlDotNetNode(string name, Dictionary<object, object> node) {
 
             Name = name;
             Attributes = new List<IAttribute>();
@@ -37,28 +36,21 @@ namespace Cfg.Net.Parsers.Json.Net {
                 return;
 
             foreach (var pair in node) {
-                var key = pair.Key;
+                var key = pair.Key.ToString();
                 var token = pair.Value;
-                switch (token.Type) {
-                    case JTokenType.Object:
-                        break;
-                    case JTokenType.Property:
-                        break;
-                    case JTokenType.None:
-                        break;
-                    case JTokenType.Null:
-                        break;
-                    case JTokenType.Array:
-                        var subNode = new JsonNetNode(key, null);
-                        foreach (var item in (JArray)token) {
-                            subNode.SubNodes.Add(new JsonNetNode("add", (JObject)item));
+                var list = token as List<object>;
+                if (list != null) {
+                    if (list.Count > 0) {
+                        var subNode = new YamlDotNetNode(key, null);
+                        foreach (var item in list) {
+                            subNode.SubNodes.Add(new YamlDotNetNode("add", (Dictionary<object, object>)item));
                         }
                         SubNodes.Add(subNode);
-                        break;
-                    default:  // a value
-                        Attributes.Add(new NodeAttribute() { Name = key, Value = token });
-                        break;
+                    }
+                    continue;
                 }
+
+                Attributes.Add(new NodeAttribute { Name = key, Value = token });
             }
 
         }

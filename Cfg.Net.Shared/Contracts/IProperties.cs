@@ -14,9 +14,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using System.Collections.Generic;
+
 namespace Cfg.Net.Contracts {
-    public interface IAttribute {
-        string Name { get; set; }
-        object Value { get; set; }
+
+    public interface IProperties : IEnumerable<KeyValuePair<string, object>> {
+        object this[string name] { get; set; }
     }
+
 }

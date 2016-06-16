@@ -20,7 +20,7 @@ using Newtonsoft.Json.Linq;
 namespace Cfg.Net.Parsers.Json.Net {
     public class JsonNetParser : IParser {
         public INode Parse(string cfg) {
-            return new JsonNetNode("root", JObject.Parse(cfg));
+            return new JsonNetNode("cfg", JObject.Parse(cfg));
         }
 
         public string Decode(string value) {

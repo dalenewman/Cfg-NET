@@ -246,10 +246,12 @@ namespace Cfg.Net {
                 var cloneItems = (IList)Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType);
                 foreach (var item in items) {
                     var metaItem = GetMetadata(item.GetType());
-                    var cloneItem = Activator.CreateInstance(pair.Value.ListType);
-                    CloneProperties(metaItem, item, cloneItem);
-                    CloneLists(metaItem, item, cloneItem);
-                    cloneItems.Add(cloneItem);
+                    if (typeof(CfgNode).IsAssignableFrom(pair.Value.ListType)) {
+                        var cloneItem = Activator.CreateInstance(pair.Value.ListType);
+                        CloneProperties(metaItem, item, cloneItem);
+                        CloneLists(metaItem, item, cloneItem);
+                        cloneItems.Add(cloneItem);
+                    }
                 }
                 meta[pair.Key].Setter(clone, cloneItems);
             }
