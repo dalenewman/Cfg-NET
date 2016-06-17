@@ -261,11 +261,8 @@ because they are initialized as the configuration loads.  Moreover,
 if you set default values (e.g. `[Cfg(value="default")]`), a 
 property is never `null`.
 
-Play with the apples and bananas [.NET Fiddle](https://dotnetfiddle.net/slRAf3):
-<iframe width="100%" 
-        height="475" 
-        src="https://dotnetfiddle.net/Widget/slRAf3" frameborder="0">
-</iframe>
+Play with the apples and bananas on [.NET Fiddle](https://dotnetfiddle.net/slRAf3).
+<iframe width="100%" height="475" src="https://dotnetfiddle.net/Widget/slRAf3" frameborder="0"></iframe>
 
 Validation and Modification
 ---------------------------
@@ -345,9 +342,9 @@ Cfg-NET, interfaces are defined to facilite this.
 
 #### Modifiers
 
-- `IRootModifier` can do it all. It is passed the 
+- `IRootModifier` is passed the 
 root-level node. It can add, modify, and delete 
-anything it wants to in that node.
+anything.
 - `IGlobalModifier` can modify any properties' value. 
 It is passed the attribute's name and value and is
 expected to return a value.
@@ -366,19 +363,26 @@ passed in an properties' value and it's node.  It
 can add, modify, and delete anything it wants to in 
 that node.
 
-#### Validation
+Try a modifier out on [.NET Fiddle](https://dotnetfiddle.net/qRFOxd).
+
+#### Validators
 
 All validators are passed Cfg-NET's `ILogger` implementation. When 
 a validator finds something wrong, it should add errors and/or warnings 
 accordingly.
 
+- `IGlobalValidator` validates every name-value pair.
+
+#### Named Validators
+
 - `IValidator` validates targeted properties. 
 It is passed a properties' name and value (as a `string`).
 - `INodeValidator` validates targeted nodes.  It is 
 passed a node.
-- `IGlobalValidator` validates every name-value pair.
 
-*Read more about injecting ... see [Using Dependency Injection & Autofac with Cfg-NET](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
+Try a validator out on [.NET Fiddle](https://dotnetfiddle.net/1Uz1c7).
+
+Read more about injecting [here](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md).
 
 ### Serialize
 
