@@ -44,7 +44,7 @@ An XML example:
             <colors>
                 <add name="yellow" />
             </colors>
-        <add>
+        </add>
     </fruit>
 </cfg>
 ```
@@ -79,16 +79,16 @@ In code, you'd want to deal with a corresponding C# model like this:
 ```csharp
 using System.Collections.Generic;
 
-public class Cfg {
+class Cfg {
     public List<Fruit> Fruit { get; set; }
 }
 
-public class Fruit {
+class Fruit {
     public string Name { get; set; }
     public List<Color> Colors {get; set;}
 }
 
-public class Color {
+class Color {
     public string Name {get; set;}
 }
 ```
@@ -261,6 +261,12 @@ because they are initialized as the configuration loads.  Moreover,
 if you set default values (e.g. `[Cfg(value="default")]`), a 
 property is never `null`.
 
+Play with the apples and bananas [.NET Fiddle](https://dotnetfiddle.net/slRAf3):
+<iframe width="100%" 
+        height="475" 
+        src="https://dotnetfiddle.net/Widget/slRAf3" frameborder="0">
+</iframe>
+
 Validation and Modification
 ---------------------------
 
@@ -335,17 +341,42 @@ protected override void PostValidate() {
 ### Injecting Modifiers and Validators into Model's Contructor
 
 If you want to inject reusable validators and/or modifiers into 
-Cfg-NET, interfaces are defined to facilite this:
+Cfg-NET, interfaces are defined to facilite this.
 
-* Modification
-    1. `string` IModifier.Modify(`string` name, `string` value, `IDictionary<string,string>` parameters)
-    1. `void` INodeModifer.Modify(`INode` node, `IDictionary<string,string>` parameters)
-    1. `string` IGlobalModifier.Modify(`string` name, `string` value, `IDictionary<string,string>` parameters)
-    1. `void` IRootModifier.Modify(`INode` node, `IDictionary<string,string>` parameters)
-* Validation
-    1. `void` IValidator.Validate(`string` name, `string` value, `IDictionary<string,string>` parameters, `ILogger` logger)
-    1. `void` INodeValidator.Validate(`INode` node, `IDictionary<string,string>` parameters, `ILogger` logger)
-    1. `void` IGlobalValidator.Validate(`string` name, `string` value, `IDictionary<string,string>` parameters, `ILogger` logger)
+#### Modifiers
+
+- `IRootModifier` can do it all. It is passed the 
+root-level node. It can add, modify, and delete 
+anything it wants to in that node.
+- `IGlobalModifier` can modify any properties' value. 
+It is passed the attribute's name and value and is
+expected to return a value.
+
+#### Named Modifiers
+
+A named modifier is injected with a name and 
+only runs on properties with the same name 
+listed in the `modifiers` attribute.
+
+- `IModifier` modifies targeted properties' values.  
+It is passed the attribute's name and value and is 
+expected to return a value.
+- `INodeModifer` modifies targeted nodes.  It is 
+passed in an properties' value and it's node.  It 
+can add, modify, and delete anything it wants to in 
+that node.
+
+#### Validation
+
+All validators are passed Cfg-NET's `ILogger` implementation. When 
+a validator finds something wrong, it should add errors and/or warnings 
+accordingly.
+
+- `IValidator` validates targeted properties. 
+It is passed a properties' name and value (as a `string`).
+- `INodeValidator` validates targeted nodes.  It is 
+passed a node.
+- `IGlobalValidator` validates every name-value pair.
 
 *Read more about injecting ... see [Using Dependency Injection & Autofac with Cfg-NET](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md) article.*
 
