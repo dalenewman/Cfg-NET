@@ -44,52 +44,54 @@ namespace Cfg.Net.Environment {
 
         public void Modify(INode root, IDictionary<string, string> parameters) {
 
-            for (var i = 0; i < root.SubNodes.Count; i++) {
-
-                var environments = root.SubNodes.FirstOrDefault(n => n.Name.Equals(_environmentsElementName, StringComparison.OrdinalIgnoreCase));
-                if (environments == null)
-                    continue;
-
-                if (environments.SubNodes.Count == 0)
-                    break;
-
-                if (environments.SubNodes.Count > 1) {
-                    IAttribute defaultEnvironment;
-                    if (!root.TryAttribute(_defaultEnvironmentAttribute, out defaultEnvironment))
-                        continue;
-
-                    foreach (var node in environments.SubNodes) {
-                        IAttribute environmentName;
-                        if (!node.TryAttribute(_environmentNameAttribute, out environmentName))
-                            continue;
-
-                        // for when the default environment is set with a place-holder (e.g. @(environment))
-                        var value = _placeHolderReplacer.Modify(_defaultEnvironmentAttribute, defaultEnvironment.Value, parameters);
-
-                        if (!value.Equals(environmentName.Value) || node.SubNodes.Count == 0)
-                            continue;
-
-                        if (node.SubNodes[0].Name == _parametersElementName) {
-                            _mergeParameters.Modify(node.SubNodes[0], parameters);
-                        }
-                    }
-
-                }
-
-                // default to first environment
-                var environment = environments.SubNodes[0];
-                if (environment.SubNodes.Count == 0)
-                    break;
-
-                var parametersNode = environment.SubNodes[0];
-
-                if (parametersNode.Name != _parametersElementName || environment.SubNodes.Count == 0)
-                    break;
-
-                _mergeParameters.Modify(parametersNode, parameters);
+            var environments = root.SubNodes.FirstOrDefault(n => n.Name.Equals(_environmentsElementName, StringComparison.OrdinalIgnoreCase));
+            if (environments == null) {
+                var rootParameters = root.SubNodes.FirstOrDefault(n => n.Name.Equals(_parametersElementName, StringComparison.OrdinalIgnoreCase));
+                if (rootParameters == null)
+                    return;
+                if (rootParameters.SubNodes.Count == 0)
+                    return;
+                _mergeParameters.Modify(rootParameters, parameters);
+                return;
             }
 
+            if (environments.SubNodes.Count == 0)
+                return;
 
+            if (environments.SubNodes.Count > 1) {
+                IAttribute defaultEnvironment;
+                if (!root.TryAttribute(_defaultEnvironmentAttribute, out defaultEnvironment))
+                    return;
+
+                foreach (var node in environments.SubNodes) {
+                    IAttribute environmentName;
+                    if (!node.TryAttribute(_environmentNameAttribute, out environmentName))
+                        continue;
+
+                    // for when the default environment is set with a place-holder (e.g. @(environment))
+                    var value = _placeHolderReplacer.Modify(_defaultEnvironmentAttribute, defaultEnvironment.Value, parameters);
+
+                    if (!value.Equals(environmentName.Value) || node.SubNodes.Count == 0)
+                        continue;
+
+                    if (node.SubNodes[0].Name == _parametersElementName) {
+                        _mergeParameters.Modify(node.SubNodes[0], parameters);
+                    }
+                }
+
+            }
+
+            // default to first environment
+            var environment = environments.SubNodes[0];
+            if (environment.SubNodes.Count == 0)
+                return;
+
+            var parametersNode = environment.SubNodes[0];
+
+            if (parametersNode.Name != _parametersElementName || environment.SubNodes.Count == 0)
+                return;
+
+            _mergeParameters.Modify(parametersNode, parameters);
         }
 
     }

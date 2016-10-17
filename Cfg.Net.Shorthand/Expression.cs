@@ -27,11 +27,11 @@ namespace Cfg.Net.Shorthand {
 
         public Expression(string expression) {
             OriginalExpression = expression;
-            int openIndex = expression.IndexOf(Open);
+            var openIndex = expression.IndexOf(Open);
 
             if (openIndex > 0) {
                 Method = expression.Substring(0, openIndex).ToLower();
-                string parameters = expression.Remove(0, openIndex + 1);
+                var parameters = expression.Remove(0, openIndex + 1);
                 if (parameters.EndsWith(Close, StringComparison.Ordinal)) {
                     parameters = parameters.Substring(0, parameters.Length - 1);
                 }

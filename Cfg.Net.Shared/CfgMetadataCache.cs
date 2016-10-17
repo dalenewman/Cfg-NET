@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
 
 namespace Cfg.Net {
@@ -226,7 +227,8 @@ namespace Cfg.Net {
             clone.GlobalModifiers = node.GlobalModifiers;
 
             clone.Type = node.Type;
-            clone.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), node.Events.Logger));
+            var logger = node.Events == null ? new NullLogger() : node.Events.Logger as ILogger;
+            clone.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), logger));
 
             var meta = GetMetadata(typeof(T));
             CloneProperties(meta, node, clone);

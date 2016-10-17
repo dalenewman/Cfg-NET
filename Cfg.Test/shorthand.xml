@@ -18,6 +18,11 @@
       </parameters>
     </add>
     <add name="none"/>
+    <add name="params">
+      <parameters>
+        <add name="domain" />
+      </parameters>
+    </add>
   </signatures>
 
   <targets>
@@ -32,6 +37,7 @@
     <add name="padright" signature="padding" target="t" />
     <add name="javascript" signature="script" target="t" />
     <add name="copy" signature="none" target="none" />
+    <add name="in" signature="params" target="t" />
   </methods>
 
 </cfg>

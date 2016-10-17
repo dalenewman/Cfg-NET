@@ -5,7 +5,7 @@ using Cfg.Net.Contracts;
 namespace Cfg.Net.Environment {
 
     /// <summary>
-    /// Updatea the parameters dictionary from a collection of elements with attributes name and value.
+    /// Updates the parameters dictionary from a collection of elements with attributes name and value.
     /// </summary>
     public class ParameterModifier : IRootModifier {
         private readonly string _nameAttribute;

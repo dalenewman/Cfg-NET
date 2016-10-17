@@ -38,9 +38,9 @@ namespace Cfg.Test {
             }
 
             Assert.AreEqual(0, root.Errors().Count());
-            Assert.AreEqual(4, root.Signatures.Count);
+            Assert.AreEqual(5, root.Signatures.Count);
             Assert.AreEqual(2, root.Targets.Count);
-            Assert.AreEqual(6, root.Methods.Count);
+            Assert.AreEqual(7, root.Methods.Count);
         }
 
         [Test]
@@ -52,6 +52,7 @@ namespace Cfg.Test {
                         <add name='right' t='right(2)' />
                         <add name='padleft' t='padleft(10,0)' />
                         <add name='padright' t='copy(x,y).padright(10).left(10).balls()' />
+                        <add name='in' t='copy(x).in(1,2)' />
                     </fields>
                 </cfg>
             ";
@@ -65,7 +66,7 @@ namespace Cfg.Test {
 
             Assert.AreEqual(0, sample.Errors().Count());
             Assert.AreEqual(1, sample.Warnings().Count());
-            Assert.AreEqual(4, sample.Fields.Count());
+            Assert.AreEqual(5, sample.Fields.Count());
             Assert.AreEqual("left(1)", sample.Fields[0].T);
             Assert.AreEqual(1, sample.Fields[0].Transforms.Count);
 
@@ -83,6 +84,10 @@ namespace Cfg.Test {
             var last = sample.Fields[3].Transforms.Last();
             Assert.AreEqual("left", last.Method);
             Assert.AreEqual(10, last.Length);
+
+            Assert.AreEqual("in", sample.Fields[4].Transforms.First().Method);
+            Assert.AreEqual("1,2", sample.Fields[4].Transforms.First().Domain);
+
         }
 
         [Test]
@@ -280,5 +285,8 @@ namespace Cfg.Test {
 
         [Cfg(value = "")]
         public string Script { get; set; }
+
+        [Cfg]
+        public string Domain { get; set; }
     }
 }
