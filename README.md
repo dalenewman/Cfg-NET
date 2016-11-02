@@ -430,18 +430,6 @@ This produces a result of:
 set defaults for or validate your newly added objects.  Of course, 
 you can serialize and load again if that's what you want.
 
-About the Code
---------------
-
-Cfg.Net doesn't have any direct dependencies.  It has built-in `XML` and `JSON`
-default parsers and serializers.  It is a portable class library targeting:
-
-* .NET 4
-* Silverlight 5
-* Windows 8
-* Windows Phone 8.1
-* Windows Phone Silverlight 8
-
 ### Credits
 *  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
 *  a modified version of `fastJSON` found [here](http://www.codeproject.com/Articles/159450/fastJSON)

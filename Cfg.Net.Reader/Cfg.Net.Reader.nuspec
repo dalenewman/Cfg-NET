@@ -14,7 +14,7 @@
     <copyright>Copyright 2015-2016</copyright>
     <tags>configuration, settings</tags>
     <dependencies>
-      <dependency id="Cfg-NET" version="0.8.0" />
+      <dependency id="Cfg-NET" version="0.8.1" />
     </dependencies>
   </metadata>
   <files>
