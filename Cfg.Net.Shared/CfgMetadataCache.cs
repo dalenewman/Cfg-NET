@@ -43,26 +43,17 @@ namespace Cfg.Net {
                 var keyCache = new List<string>();
                 var listCache = new List<string>();
 
-                var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                var propertyInfos = type.GetRuntimeProperties().ToArray();
                 metadata = new Dictionary<string, CfgMetadata>(StringComparer.Ordinal);
-                for (var i = 0; i < propertyInfos.Length; i++) {
-                    var propertyInfo = propertyInfos[i];
-
+                foreach (var propertyInfo in propertyInfos) {
                     if (!propertyInfo.CanRead)
                         continue;
                     if (!propertyInfo.CanWrite)
                         continue;
 
-                    CfgAttribute attribute = null;
-#if NET4
-                    attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
+                    var attribute = (CfgAttribute)propertyInfo.GetCustomAttribute(typeof(CfgAttribute), true);
                     if (attribute == null)
                         continue;
-#else
-                    attribute = (CfgAttribute) propertyInfo.GetCustomAttribute(typeof (CfgAttribute), true);
-                    if (attribute == null)
-                        continue;
-#endif
 
                     var key = NormalizeName(type, propertyInfo.Name);
                     var item = new CfgMetadata(propertyInfo, attribute) {
@@ -98,28 +89,16 @@ namespace Cfg.Net {
                         attribute.maxValue = maxValue;
                     }
 
-#if NET4
-                    if (propertyInfo.PropertyType.IsGenericType) {
+                    var propertyTypeInfo = propertyInfo.PropertyType.GetTypeInfo();
+                    if (propertyTypeInfo.IsGenericType) {
                         listCache.Add(key);
-                        item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                        if (item.ListType.IsSubclassOf(typeof(CfgNode))) {
-                            item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
-                        }
-                    } else {
-                        keyCache.Add(key);
-                    }
-#else
-
-                    if (propertyInfo.PropertyType.GetTypeInfo().IsGenericType) {
-                        listCache.Add(key);
-                        item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
+                        item.ListType = propertyTypeInfo.GenericTypeArguments[0];
                         if (item.ListType.GetTypeInfo().IsSubclassOf(typeof(CfgNode))) {
                             item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
                         }
                     } else {
                         keyCache.Add(key);
                     }
-#endif
 
                     if (string.IsNullOrEmpty(attribute.name)) {
                         attribute.name = key;
@@ -161,11 +140,7 @@ namespace Cfg.Net {
         }
 
         private static object GetDefaultValue(Type t) {
-#if NET4
-            return t.IsValueType ? Activator.CreateInstance(t) : null;
-#else
             return t.GetTypeInfo().IsValueType ? Activator.CreateInstance(t) : null;
-#endif
         }
 
         private static bool TryConvertValue(ref object value, Type conversionType) {
@@ -248,7 +223,7 @@ namespace Cfg.Net {
                 var cloneItems = (IList)Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType);
                 foreach (var item in items) {
                     var metaItem = GetMetadata(item.GetType());
-                    if (typeof(CfgNode).IsAssignableFrom(pair.Value.ListType)) {
+                    if (typeof(CfgNode).GetTypeInfo().IsAssignableFrom(pair.Value.ListType.GetTypeInfo())) {
                         var cloneItem = Activator.CreateInstance(pair.Value.ListType);
                         CloneProperties(metaItem, item, cloneItem);
                         CloneLists(metaItem, item, cloneItem);

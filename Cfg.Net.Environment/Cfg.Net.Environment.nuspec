@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Cfg-NET.Environment</id>
+    <version>0.1.1</version>
+    <title>Cfg-NET Environment</title>
+    <authors>Dale Newman</authors>
+    <owners>Dale Newman</owners>
+    <licenseUrl>https://github.com/dalenewman/Cfg-NET/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>allow manipulation from the outside via paramenters, environments, and place-holders</description>
+    <releaseNotes>Target netstandard1.0 instead of PCL</releaseNotes>
+    <copyright>Copyright 2015-2016</copyright>
+    <tags>configuration, settings</tags>
+    <dependencies>
+      <group targetFramework="netstandard1.0">
+        <dependency id="NETStandard.Library" version="1.6.0" />
+        <dependency id="System.Runtime" version="4.1.0" />
+        <dependency id="Cfg-NET" version="0.8.0" />
+      </group>
+      <group targetFramework="portable-net45+win8+wpa81+wp8" />
+    </dependencies>    
+  </metadata>
+  <files>
+    <file src="bin\Release\Cfg.Net.Environment.dll" target="lib\netstandard1.0\Cfg.Net.Environment.dll" />
+    <file src="bin\Release\Cfg.Net.Environment.dll" target="lib\portable-net45+win8+wpa81+wp8\Cfg.Net.Environment.dll" />
+  </files>
+</package>

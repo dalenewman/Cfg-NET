@@ -21,7 +21,7 @@ configuration handler for .NET licensed under [Apache 2](http://www.apache.org/l
 * is composable
 * is small (~69 KB)
 * has zero dependencies
-* is portable (PCL)
+* is portable (.NETStandard1.0 with PCL compatibility)
 * is available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
 
 ### Configuration

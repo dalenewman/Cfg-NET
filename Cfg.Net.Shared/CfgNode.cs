@@ -261,9 +261,12 @@ namespace Cfg.Net {
                             var addKey = CfgMetadataCache.NormalizeName(Type, subNode.Name);
                             addHits.Add(addKey);
                             if (item.Loader == null) {
-                                if (typeof(IProperties).IsAssignableFrom(item.ListType)) {
+                                var listTypeInfo = item.ListType.GetTypeInfo();
+
+                                if (typeof(IProperties).GetTypeInfo().IsAssignableFrom(listTypeInfo)) {
                                     object obj = null;
-                                    foreach (var cp in item.ListType.GetConstructors().Select(c => c.GetParameters())) {
+
+                                    foreach (var cp in listTypeInfo.DeclaredConstructors.Select(c => c.GetParameters())) {
                                         if (!cp.Any()) {
                                             obj = Activator.CreateInstance(item.ListType);
                                             break;

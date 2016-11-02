@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Reader {
@@ -48,11 +49,26 @@ namespace Cfg.Net.Reader {
             }
 
             if (Path.HasExtension(fileName)) {
+                FileInfo fileInfo = null;
                 if (!Path.IsPathRooted(fileName)) {
-                    fileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+                    var locations = new HashSet<string> {
+                        Path.Combine(Directory.GetCurrentDirectory(), fileName),
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName),
+                        Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty, fileName)
+                    };
+                    foreach (var location in locations) {
+                        fileInfo = new FileInfo(location);
+                        if (!fileInfo.Exists) {
+                            logger.Warn($"file {fileInfo.FullName} not found...");
+                            continue;
+                        }
+                        fileName = fileInfo.FullName;
+                        break;
+                    }
                 }
 
-                var fileInfo = new FileInfo(fileName);
+                fileInfo = new FileInfo(fileName);
+
                 try {
                     return File.ReadAllText(fileInfo.FullName);
                 } catch (Exception ex) {

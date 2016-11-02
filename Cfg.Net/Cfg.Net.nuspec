@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Cfg-NET</id>
+    <version>0.8.1</version>
+    <title>Cfg-NET</title>
+    <authors>Dale Newman</authors>
+    <owners>Dale Newman</owners>
+    <licenseUrl>https://github.com/dalenewman/Cfg-NET/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An alternative configuration handler.</description>
+    <releaseNotes>Target netstandard1.0 instead of PCL</releaseNotes>
+    <copyright>Copyright 2015-2016</copyright>
+    <tags>configuration, settings</tags>
+    <dependencies>
+      <group targetFramework="netstandard1.0">
+        <dependency id="NETStandard.Library" version="1.6.0" />
+        <dependency id="System.Runtime" version="4.1.0" />
+      </group>
+      <group targetFramework="portable-net45+win8+wpa81+wp8" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\CfgNet.dll" target="lib\netstandard1.0\CfgNet.dll" />
+    <file src="bin\Release\CfgNet.dll" target="lib\portable-net45+win8+wpa81+wp8\CfgNet.dll" />
+  </files>
+</package>

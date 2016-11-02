@@ -21,12 +21,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Cfg.Net.Reader")]
-[assembly: AssemblyDescription("A reader for Cfg-NET configurations.")]
+[assembly: AssemblyTitle("Cfg-Net Reader")]
+[assembly: AssemblyDescription("A configuration reader implementation.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Transformalize")]
-[assembly: AssemblyProduct("Cfg.Net.Reader")]
-[assembly: AssemblyCopyright("Copyright ©  2015 Dale Newman")]
+[assembly: AssemblyCompany("Dale Newman")]
+[assembly: AssemblyProduct("Cfg-Net")]
+[assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -48,5 +48,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.1.1.0")]
-[assembly: AssemblyFileVersion("0.1.1.0")]
+[assembly: AssemblyVersion("0.2.0.0")]
+[assembly: AssemblyFileVersion("0.2.0.0")]
