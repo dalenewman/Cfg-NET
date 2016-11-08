@@ -129,6 +129,7 @@ built-in options:
 
 * `value`, as in _default_ value
 * `toLower` or `toUpper`
+* `trim`, `trimStart`, or `trimEnd`
 * `required`
 * `unique`
 * `domain` with `delimiter` and `ignoreCase` options
@@ -188,6 +189,7 @@ As your configuration loads:
 1. [`PreValidate()`](#PreValidate) is executed
 1. Injected `modifiers` are run
 1. `toLower` or `toUpper` may modify the value
+1. `trim`, `trimStart`, or `trimEnd` may trim the value
 1. `domain` checks value against valid values
 1. `minLength` checks value against a minimum length
 1. `maxLength` checks value against a maximum length

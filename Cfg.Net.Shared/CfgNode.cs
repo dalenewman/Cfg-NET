@@ -432,11 +432,26 @@ namespace Cfg.Net {
 
                     if (item.PropertyInfo.PropertyType == typeof(string)) {
 
+                        var stringValue = attribute.Value.ToString();
+
                         if (item.Attribute.toLower) {
-                            attribute.Value = attribute.Value.ToString().ToLower();
+                            stringValue = stringValue.ToLower();
                         } else if (item.Attribute.toUpper) {
-                            attribute.Value = attribute.Value.ToString().ToUpper();
+                            stringValue = stringValue.ToUpper();
                         }
+
+                        if (item.Attribute.trim || item.Attribute.trimStart && item.Attribute.trimEnd) {
+                            stringValue = stringValue.Trim();
+                        } else {
+                            if (item.Attribute.trimStart) {
+                                stringValue = stringValue.TrimStart();
+                            }
+                            if (item.Attribute.trimEnd) {
+                                stringValue = stringValue.TrimEnd();
+                            }
+                        }
+
+                        attribute.Value = stringValue;
                         item.Setter(this, attribute.Value);
                         keyHits.Add(attributeKey);
                     } else {

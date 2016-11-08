@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Clone.cs" />
+    <Compile Include="Trim.cs" />
     <Compile Include="YamlDotNet.cs" />
     <Compile Include="ToJson.cs" />
     <Compile Include="ToXml.cs" />

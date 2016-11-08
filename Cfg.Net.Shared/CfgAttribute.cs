@@ -65,6 +65,21 @@ namespace Cfg.Net {
         public bool toLower { get; set; }
 
         /// <summary>
+        /// Trim this property's value
+        /// </summary>
+        public bool trim { get; set; }
+
+        /// <summary>
+        /// Trim the start of this property's value
+        /// </summary>
+        public bool trimStart { get; set; }
+
+        /// <summary>
+        /// Trim the end of this property's value
+        /// </summary>
+        public bool trimEnd { get; set; }
+
+        /// <summary>
         /// Serialize this property.
         /// </summary>
         public bool serialize { get; set; } = true;
