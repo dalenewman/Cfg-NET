@@ -41,9 +41,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Environment", "Cfg.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Parsers.YamlDotNet", "Cfg.Net.Parsers.YamlDotNet\Cfg.Net.Parsers.YamlDotNet.csproj", "{2008644B-DB1F-4A50-BB7E-550F55E704F0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Compatibility", "Compatibility", "{6E7A6AC1-0673-4840-85A9-C97B7F4325CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.40", "Cfg.Net.40\Cfg.Net.40.csproj", "{4E2AE038-16A9-4845-BB1B-51C09DB6F616}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Cfg.Net.Shared\Cfg.Net.Shared.projitems*{20ecb16c-d7e6-41ca-a8ed-3c197057eccd}*SharedItemsImports = 13
+		Cfg.Net.Shared\Cfg.Net.Shared.projitems*{4e2ae038-16a9-4845-bb1b-51c09db6f616}*SharedItemsImports = 4
 		Cfg.Net.Shared\Cfg.Net.Shared.projitems*{6ccfd0fd-c0b7-4b2b-ab17-2d8e3567b7e2}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -186,11 +191,29 @@ Global
 		{2008644B-DB1F-4A50-BB7E-550F55E704F0}.Release|x64.Build.0 = Release|Any CPU
 		{2008644B-DB1F-4A50-BB7E-550F55E704F0}.Release|x86.ActiveCfg = Release|Any CPU
 		{2008644B-DB1F-4A50-BB7E-550F55E704F0}.Release|x86.Build.0 = Release|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Debug|ARM.Build.0 = Debug|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Debug|x64.Build.0 = Debug|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Debug|x86.Build.0 = Debug|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Release|ARM.ActiveCfg = Release|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Release|ARM.Build.0 = Release|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Release|x64.ActiveCfg = Release|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Release|x64.Build.0 = Release|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Release|x86.ActiveCfg = Release|Any CPU
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{6CCFD0FD-C0B7-4B2B-AB17-2D8E3567B7E2} = {6E7A6AC1-0673-4840-85A9-C97B7F4325CC}
 		{8BF2C711-7979-40D0-AE9D-A4F57340C50E} = {937D9058-D53A-4341-B076-284442EADE2D}
+		{4E2AE038-16A9-4845-BB1B-51C09DB6F616} = {6E7A6AC1-0673-4840-85A9-C97B7F4325CC}
 	EndGlobalSection
 EndGlobal

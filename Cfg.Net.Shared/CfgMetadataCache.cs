@@ -43,7 +43,13 @@ namespace Cfg.Net {
                 var keyCache = new List<string>();
                 var listCache = new List<string>();
 
+#if NETS
                 var propertyInfos = type.GetRuntimeProperties().ToArray();
+#else
+                var propertyInfos = type.GetProperties();
+#endif
+
+
                 metadata = new Dictionary<string, CfgMetadata>(StringComparer.Ordinal);
                 foreach (var propertyInfo in propertyInfos) {
                     if (!propertyInfo.CanRead)
@@ -51,7 +57,12 @@ namespace Cfg.Net {
                     if (!propertyInfo.CanWrite)
                         continue;
 
+#if NETS
                     var attribute = (CfgAttribute)propertyInfo.GetCustomAttribute(typeof(CfgAttribute), true);
+#else
+                    var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
+#endif
+
                     if (attribute == null)
                         continue;
 
@@ -89,6 +100,8 @@ namespace Cfg.Net {
                         attribute.maxValue = maxValue;
                     }
 
+
+#if NETS
                     var propertyTypeInfo = propertyInfo.PropertyType.GetTypeInfo();
                     if (propertyTypeInfo.IsGenericType) {
                         listCache.Add(key);
@@ -99,6 +112,18 @@ namespace Cfg.Net {
                     } else {
                         keyCache.Add(key);
                     }
+#else
+                    if (propertyInfo.PropertyType.IsGenericType) {
+                        listCache.Add(key);
+                        item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
+                        if (item.ListType.IsSubclassOf(typeof(CfgNode))) {
+                            item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
+                        }
+                    } else {
+                        keyCache.Add(key);
+                    }
+#endif
+
 
                     if (string.IsNullOrEmpty(attribute.name)) {
                         attribute.name = key;
@@ -140,7 +165,11 @@ namespace Cfg.Net {
         }
 
         private static object GetDefaultValue(Type t) {
+#if NETS
             return t.GetTypeInfo().IsValueType ? Activator.CreateInstance(t) : null;
+#else
+            return t.IsValueType ? Activator.CreateInstance(t) : null;
+#endif
         }
 
         private static bool TryConvertValue(ref object value, Type conversionType) {
@@ -223,12 +252,20 @@ namespace Cfg.Net {
                 var cloneItems = (IList)Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType);
                 foreach (var item in items) {
                     var metaItem = GetMetadata(item.GetType());
-                    if (typeof(CfgNode).GetTypeInfo().IsAssignableFrom(pair.Value.ListType.GetTypeInfo())) {
-                        var cloneItem = Activator.CreateInstance(pair.Value.ListType);
-                        CloneProperties(metaItem, item, cloneItem);
-                        CloneLists(metaItem, item, cloneItem);
-                        cloneItems.Add(cloneItem);
-                    }
+
+                    bool isAssignable = false;
+#if NETS
+                    isAssignable = typeof (CfgNode).GetTypeInfo().IsAssignableFrom(pair.Value.ListType.GetTypeInfo());
+#else
+                    isAssignable = typeof (CfgNode).IsAssignableFrom(pair.Value.ListType);
+#endif
+                    if (!isAssignable)
+                        continue;
+
+                    var cloneItem = Activator.CreateInstance(pair.Value.ListType);
+                    CloneProperties(metaItem, item, cloneItem);
+                    CloneLists(metaItem, item, cloneItem);
+                    cloneItems.Add(cloneItem);
                 }
                 meta[pair.Key].Setter(clone, cloneItems);
             }

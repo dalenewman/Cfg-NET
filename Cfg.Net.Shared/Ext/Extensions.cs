@@ -30,8 +30,11 @@ namespace Cfg.Net.Ext {
 
             var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
             foreach (var pair in metadata) {
-                bool? isGenericType;
-                isGenericType = pair.Value.PropertyInfo.PropertyType.GetTypeInfo().IsGenericType;
+#if NETS
+                bool? isGenericType = pair.Value.PropertyInfo.PropertyType.GetTypeInfo().IsGenericType;
+#else
+                bool? isGenericType = pair.Value.PropertyInfo.PropertyType.IsGenericType;
+#endif
                 if (isGenericType.Value) {
                     var value = pair.Value.Getter(node);
                     if (value == null) {
@@ -61,8 +64,12 @@ namespace Cfg.Net.Ext {
         internal static void Clear(this CfgNode node, CfgEvents events) {
             var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
             foreach (var pair in metadata) {
-                bool? isGenericType;
-                isGenericType = pair.Value.PropertyInfo.PropertyType.GetTypeInfo().IsGenericType;
+#if NETS
+                bool? isGenericType = pair.Value.PropertyInfo.PropertyType.GetTypeInfo().IsGenericType;
+#else
+                bool? isGenericType = pair.Value.PropertyInfo.PropertyType.IsGenericType;
+#endif
+
                 if (isGenericType.Value) {
                     pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
                 } else {

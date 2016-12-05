@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET.Environment</id>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <title>Cfg-NET Environment</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -17,7 +17,7 @@
       <group targetFramework="netstandard1.0">
         <dependency id="NETStandard.Library" version="1.6.0" />
         <dependency id="System.Runtime" version="4.1.0" />
-        <dependency id="Cfg-NET" version="0.8.1" />
+        <dependency id="Cfg-NET" version="0.8.3" />
       </group>
       <group targetFramework="portable-net45+win8+wpa81+wp8" />
     </dependencies>    

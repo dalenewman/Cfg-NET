@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET</id>
-    <version>0.8.2</version>
+    <version>0.8.3</version>
     <title>Cfg-NET</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -19,10 +19,12 @@
         <dependency id="System.Runtime" version="4.1.0" />
       </group>
       <group targetFramework="portable-net45+win8+wpa81+wp8" />
+      <group targetFramework="net40" />
     </dependencies>
   </metadata>
   <files>
     <file src="bin\Release\CfgNet.dll" target="lib\netstandard1.0\CfgNet.dll" />
     <file src="bin\Release\CfgNet.dll" target="lib\portable-net45+win8+wpa81+wp8\CfgNet.dll" />
+    <file src="C:\code\Cfg.Net\Cfg.Net.40\bin\Release\CfgNet.dll" target="lib\net40\CfgNet.dll" />
   </files>
 </package>
