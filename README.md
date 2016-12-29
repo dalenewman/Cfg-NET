@@ -1,6 +1,14 @@
 Cfg-NET
 =======
 
+[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.svg)](https://www.nuget.org/packages/Cfg-NET)
+[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.Reader.svg)](https://www.nuget.org/packages/Cfg-NET.Reader)
+[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.Shorthand.svg)](https://www.nuget.org/packages/Cfg-NET.Shorthand)
+[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.Environment.svg)](https://www.nuget.org/packages/Cfg-NET.Environment)
+
+
+Cfg-NET.Environment
+
 An [open source](https://github.com/dalenewman/Cfg.Net) 
 configuration handler for .NET licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
 
