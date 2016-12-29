@@ -107,7 +107,7 @@ namespace Cfg.Test {
     </servers>
 </Cfg>";
             var actual = cfg.Serialize();
-            Assert.AreEqual(Regex.Replace(expected,@"\s",string.Empty), Regex.Replace(actual,@"\s",string.Empty));
+            Assert.AreEqual(expected.Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"));
 
         }
 

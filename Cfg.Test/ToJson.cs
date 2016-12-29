@@ -64,7 +64,7 @@ namespace Cfg.Test {
 
             var actual = cfg.Serialize();
             Console.WriteLine(actual);
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(expected.Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"));
         }
 
         class TestToJson : CfgNode {

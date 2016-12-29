@@ -56,7 +56,7 @@ namespace Cfg.Test {
   value: true
 - name: p2
   value: false
-", backToYaml);
+".Replace("\r\n", "\n"), backToYaml.Replace("\r\n", "\n"));
 
         }
 

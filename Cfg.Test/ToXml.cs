@@ -60,7 +60,7 @@ namespace Cfg.Test {
 
             var actual = cfg.Serialize();
             Console.WriteLine(actual);
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(expected.Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"));
 
             Assert.AreEqual("<add name=\"p1\" value=\"true\" />", cfg.Parameters[0].Serialize());
 
