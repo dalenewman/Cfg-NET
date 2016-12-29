@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using Cfg.Net;
 using NUnit.Framework;
-using Pipeline.Actions;
 
 namespace Cfg.Test {
 
