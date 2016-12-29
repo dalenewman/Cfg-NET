@@ -1,0 +1,5 @@
+version: 0.8.4.{build}
+before_build:
+- cmd: nuget restore
+build:
+  verbosity: minimal
