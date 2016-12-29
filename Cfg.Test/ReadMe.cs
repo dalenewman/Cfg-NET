@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Cfg.Net;
 using Cfg.Net.Contracts;
@@ -106,7 +107,7 @@ namespace Cfg.Test {
     </servers>
 </Cfg>";
             var actual = cfg.Serialize();
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(Regex.Replace(expected,@"\s",string.Empty), Regex.Replace(actual,@"\s",string.Empty));
 
         }
 

@@ -1,13 +1,11 @@
 Cfg-NET
 =======
 
-[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.svg)](https://www.nuget.org/packages/Cfg-NET)
-[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.Reader.svg)](https://www.nuget.org/packages/Cfg-NET.Reader)
-[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.Shorthand.svg)](https://www.nuget.org/packages/Cfg-NET.Shorthand)
-[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.Environment.svg)](https://www.nuget.org/packages/Cfg-NET.Environment)
-
-
-Cfg-NET.Environment
+[![Build status](https://ci.appveyor.com/api/projects/status/qm4auhkcv6b23abr?svg=true)](https://ci.appveyor.com/project/dalenewman/cfg-net)
+[![NuGet Cfg-Net](https://img.shields.io/nuget/v/Cfg-NET.svg?label=Nuget+Cfg-Net)](https://www.nuget.org/packages/Cfg-NET)
+[![NuGet Cfg-Net.Reader](https://img.shields.io/nuget/v/Cfg-NET.Reader.svg?label=Nuget+Reader)](https://www.nuget.org/packages/Cfg-NET.Reader)
+[![NuGet Cfg-Net.Shorthand](https://img.shields.io/nuget/v/Cfg-NET.Shorthand.svg?label=Nuget+Shorthand)](https://www.nuget.org/packages/Cfg-NET.Shorthand)
+[![NuGet Cfg-Net.Environment](https://img.shields.io/nuget/v/Cfg-NET.Environment.svg?label=Nuget+Environment)](https://www.nuget.org/packages/Cfg-NET.Environment)
 
 An [open source](https://github.com/dalenewman/Cfg.Net) 
 configuration handler for .NET licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
@@ -24,13 +22,13 @@ configuration handler for .NET licensed under [Apache 2](http://www.apache.org/l
 * supports collections
 * validates and reports errors and warnings
 * offers protection from `null`
-* allows you to store your configuration where you want
+* allows you to store your configuration where you want (e.g. web, file, string)
 * is extensible 
 * is composable
-* is small (~69 KB)
+* is small (~72 KB)
 * has zero dependencies
 * is portable (.NETStandard1.0 with PCL compatibility)
-* is available on [Nuget](https://www.nuget.org/packages/Cfg-NET/)
+* is available on [Nuget](https://www.nuget.org/packages/Cfg-NET)
 
 ### Configuration
 
@@ -59,7 +57,7 @@ An XML example:
 
 Or, if you prefer JSON:
 
-```js
+```json
 {
     "fruit": [
         { 
@@ -82,7 +80,7 @@ Or, if you prefer JSON:
 
 ### Code
 
-In code, you'd want to deal with a corresponding C# model like this:
+In code, you want to deal with a corresponding C# model like this:
 
 ```csharp
 using System.Collections.Generic;
@@ -101,8 +99,8 @@ class Color {
 }
 ```
 
-To make the above model work with Cfg-NET, make each 
-class inherit from `CfgNode` and decorate the properties 
+To make the above model work with Cfg-NET, have each 
+class inherit `CfgNode` and decorate the properties 
 with the `Cfg` custom attribute: 
 
 ```csharp
