@@ -24,8 +24,6 @@ namespace Cfg.Net {
         private object _maxValue;
         private int _minLength;
         private object _minValue;
-        private string _validators;
-        private string _modifiers;
         private object _value;
 
         // ReSharper disable InconsistentNaming
@@ -99,37 +97,7 @@ namespace Cfg.Net {
         }
 
         /// <summary>
-        /// A list of injected validators to validate this property.
-        /// Use <see cref="delimiter"/> to set the delimiter.
-        /// </summary>
-        public string validators
-        {
-            get { return _validators; }
-            set
-            {
-                if (value == null) return;
-                _validators = value;
-                ValidatorsSet = true;
-            }
-        }
-
-        /// <summary>
-        /// A list of injected modifiers to modify this property.
-        /// Use <see cref="delimiter"/> to set the delimiter.
-        /// </summary>
-        public string modifiers
-        {
-            get { return _modifiers; }
-            set
-            {
-                if (value == null) return;
-                _modifiers = value;
-                ModifiersSet = true;
-            }
-        }
-
-        /// <summary>
-        /// The delimiter used in <see cref="domain"/>, <see cref="validators"/>, and <see cref="modifiers"/>.
+        /// The delimiter used in <see cref="domain"/>.
         /// </summary>
         public char delimiter { get; set; } = ',';
 
@@ -202,8 +170,6 @@ namespace Cfg.Net {
         public bool MaxValueSet { get; private set; }
         public bool MinValueSet { get; private set; }
         public bool DomainSet { get; private set; }
-        public bool ValidatorsSet { get; private set; }
-        public bool ModifiersSet { get; private set; }
         public bool ValueIsSet { get; private set; }
 
         // ReSharper restore InconsistentNaming

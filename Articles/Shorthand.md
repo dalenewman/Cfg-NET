@@ -8,14 +8,14 @@ For example, writing transformations in `XML` is a bit verbose:
 
 ```xml
 <cfg>
-    <fields>
-        <add name="PhoneNumber" >
-            <transforms>
-                <add method="replace" old-value="-" new-value="." />
-                <add method="trim" trim-chars=" " />
-            </transforms>
-        </add>
-    </fields>
+  <fields>
+    <add name="PhoneNumber" >
+      <transforms>
+        <add method="replace" old-value="-" new-value="." />
+        <add method="trim" trim-chars=" " />
+      </transforms>
+    </add>
+  </fields>
 </cfg>
 ```
 
@@ -23,45 +23,46 @@ Using a simple shorthand setup, you can write this instead:
 
 ```xml
 <cfg>
-    <fields>
-        <add name="PhoneNumber" t="replace(-,.).trim( )" />
-    </fields>
+  <fields>
+    <add name="PhoneNumber" t="replace(-,.).trim( )" />
+  </fields>
 </cfg>
 ```
 
-The shorthand translator will expand `replace(-,.)` and `trim( )` into their
-`XML` equivalent.
+The shorthand translator will expand `replace(-,.)` and `trim( )` into 
+their verbose `XML` equivalent.
 
-In order to do this, Cfg-NET needs to know a few things.  This means shorthand 
-needs it's *own* configuration.
+In order to do this, Cfg-NET needs to know a few things. This means 
+shorthand needs it's *own* configuration.
 
 ### Configuration
 
-Here's a *shorthand.xml* configuration that supports the example above:
+Here's a *shorthand.xml* configuration that supports 
+the example above:
 
 ```xml
-<cfg>
+  <cfg>
     <signatures>
-        <add name="replace">
-            <parameters>
-                <add name="old-value" />
-                <add name="new-value" />
-            </parameters>
-        </add>
-        <add name="trim">
-            <parameters>
-                <add name="trim-chars" />
-            </parameters>
-        </add>
+      <add name="replace">
+        <parameters>
+          <add name="old-value" />
+          <add name="new-value" />
+        </parameters>
+      </add>
+      <add name="trim">
+        <parameters>
+          <add name="trim-chars" />
+        </parameters>
+      </add>
     </signatures>
-
+  
     <targets>
-        <add name="transforms" collection="transforms" property="method" />
+      <add name="transforms" collection="transforms" property="method" />
     </targets>
-
+  
     <methods>
-        <add name="replace" signature="replace" target="transforms" />
-        <add name="trim" signature="trim" target="transforms" />
+      <add name="replace" signature="replace" target="transforms" />
+      <add name="trim" signature="trim" target="transforms" />
     </methods>
 </cfg>
 ```
@@ -92,7 +93,5 @@ A shorthand modifier is injected into `CfgNode` like this:
 
 ```csharp
 var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-var root = new Cfg(xml, new ShorthandModifier(sh, "sh"));
+var root = new Cfg(xml, new ShorthandModifier(sh));
 ```
-
-You also have to decorate the property you want to run shorthand on with `[Cfg(modifiers="sh")]`.

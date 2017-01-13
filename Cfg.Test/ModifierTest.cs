@@ -45,43 +45,47 @@ namespace Cfg.Test {
             [Cfg]
             public List<TestModifierThing> Things { get; set; }
 
-            public TestModifierCfg(string xml) : base(new Replace2Dashes("2d"), new ReplaceGoodWithBad("gb")) {
+            public TestModifierCfg(string xml) : base(new Replace2Dashes(), new ReplaceGoodWithBad()) {
                 Load(xml);
             }
         }
 
         public class TestModifierThing : CfgNode {
-            [Cfg(modifiers = "2d,gb", toLower = true)]
+            [Cfg(toLower = true)]
             public string Value { get; set; }
         }
 
-        public class Replace2Dashes : IModifier {
+        public class Replace2Dashes : ICustomizer {
 
-            public Replace2Dashes(string name) {
-                Name = name;
+            public void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger) {
+                if (parent != "things")
+                    return;
+
+                IAttribute attr;
+                if (!node.TryAttribute("value", out attr))
+                    return;
+
+                var str = attr.Value.ToString();
+                attr.Value = str.Replace("--", "-");
             }
 
-            public string Name { get; set; }
-            public object Modify(string name, object value, IDictionary<string, string> parameters) {
-                var str = value as string;
-                if (str == null)
-                    return value;
-                return str.Replace("--", "-");
-            }
-
+            public void Customize(INode root, IDictionary<string, string> parameters, ILogger logger) { }
         }
 
-        public class ReplaceGoodWithBad : IModifier {
+        public class ReplaceGoodWithBad : ICustomizer {
 
-            public ReplaceGoodWithBad(string name) {
-                Name = name;
+            public void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger) {
+                if (parent != "things")
+                    return;
+
+                IAttribute attr;
+                if (node.TryAttribute("value", out attr)) {
+                    attr.Value = attr.Value.ToString().Replace("GOOD", "BAD");
+                }
+
             }
 
-            public string Name { get; set; }
-            public object Modify(string name, object value, IDictionary<string, string> parameters) {
-                return value.ToString().Replace("GOOD", "BAD");
-            }
-
+            public void Customize(INode root, IDictionary<string, string> parameters, ILogger logger){}
         }
 
     }

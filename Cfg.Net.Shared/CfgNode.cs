@@ -34,16 +34,7 @@ namespace Cfg.Net {
         internal IReader Reader { get; set; }
         internal ISerializer Serializer { get; set; }
         internal ILogger Logger { get; set; }
-
-        internal IDictionary<string, IValidator> Validators { get; set; } = new Dictionary<string, IValidator>();
-        internal IDictionary<string, INodeValidator> NodeValidators { get; set; } = new Dictionary<string, INodeValidator>();
-        internal IList<IGlobalValidator> GlobalValidators { get; set; } = new List<IGlobalValidator>();
-
-        internal IDictionary<string, IModifier> Modifiers { get; set; } = new Dictionary<string, IModifier>();
-        internal IDictionary<string, INodeModifier> NodeModifiers { get; set; } = new Dictionary<string, INodeModifier>();
-        internal IList<IGlobalModifier> GlobalModifiers { get; set; } = new List<IGlobalModifier>();
-        internal IList<IRootModifier> RootModifiers { get; set; } = new List<IRootModifier>();
-
+        internal IList<ICustomizer> Customizers { get; set; } = new List<ICustomizer>();
         internal Type Type { get; set; }
         internal CfgEvents Events { get; set; }
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
@@ -64,26 +55,8 @@ namespace Cfg.Net {
                         Serializer = dependency as ISerializer;
                     } else if (dependency is ILogger) {
                         Logger = dependency as ILogger;
-                    } else if (dependency is IGlobalModifier) {
-                        GlobalModifiers.Add(dependency as IGlobalModifier);
-                    } else if (dependency is INodeModifier) {
-                        var nodeModifier = dependency as INodeModifier;
-                        NodeModifiers[nodeModifier.Name] = nodeModifier;
-                    } else if (dependency is INodeValidator) {
-                        var nodeValidator = dependency as INodeValidator;
-                        NodeValidators[nodeValidator.Name] = nodeValidator;
-                    } else if (dependency is IGlobalValidator) {
-                        GlobalValidators.Add(dependency as IGlobalValidator);
-                    } else if (dependency is INamedDependency) {
-                        if (dependency is IModifier) {
-                            var modifier = dependency as IModifier;
-                            Modifiers[modifier.Name] = modifier;
-                        } else if (dependency is IValidator) {
-                            var validator = dependency as IValidator;
-                            Validators[validator.Name] = validator;
-                        }
-                    } else if (dependency is IRootModifier) {
-                        RootModifiers.Add(dependency as IRootModifier);
+                    } else if (dependency is ICustomizer) {
+                        Customizers.Add(dependency as ICustomizer);
                     }
                 }
             }
@@ -106,7 +79,8 @@ namespace Cfg.Net {
         /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
         public void Load(string cfg, IDictionary<string, string> parameters = null) {
 
-            Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), Logger));
+            var logger = new DefaultLogger(new MemoryLogger(), Logger);
+            Events = new CfgEvents(logger);
             this.Clear(Events);
 
             if (string.IsNullOrEmpty(cfg)) {
@@ -124,7 +98,7 @@ namespace Cfg.Net {
             INode node;
             try {
                 if (Reader != null) {
-                    cfg = Reader.Read(cfg, parameters, Events.Logger);
+                    cfg = Reader.Read(cfg, parameters, logger);
                     if (Events.Errors().Any()) {
                         this.SetDefaults();
                         return;
@@ -147,29 +121,32 @@ namespace Cfg.Net {
                 } else {
                     node = Parser.Parse(cfg);
                 }
-
-                if (Serializer == null) {
-                    switch (cfg[0]) {
-                        case '{':
-                            Serializer = new JsonSerializer();
-                            break;
-                        default:
-                            Serializer = new XmlSerializer();
-                            break;
-                    }
-                }
-
-                foreach (var modifier in RootModifiers) {
-                    modifier.Modify(node, parameters);
-                }
-
             } catch (Exception ex) {
                 Events.ParseException(ex.Message);
                 return;
             }
 
-            LoadProperties(node, null, parameters);
-            LoadCollections(node, null, parameters);
+            if (Serializer == null) {
+                switch (cfg[0]) {
+                    case '{':
+                        Serializer = new JsonSerializer();
+                        break;
+                    default:
+                        Serializer = new XmlSerializer();
+                        break;
+                }
+            }
+
+            foreach (var customizer in Customizers) {
+                try {
+                    customizer.Customize(node, parameters, Events.Logger);
+                } catch (Exception ex) {
+                    Events.Error($"{customizer.GetType().Name} error: {ex.Message}");
+                }
+            }
+
+            LoadProperties(node, string.Empty, parameters, Customizers);
+            LoadCollections(node, string.Empty, parameters);
             PreValidate();
             ValidateBasedOnAttributes(node, parameters);
             ValidateListsBasedOnAttributes(node.Name);
@@ -182,29 +159,17 @@ namespace Cfg.Net {
             string parent,
             ISerializer serializer,
             CfgEvents events,
-            IDictionary<string, IValidator> validators,
-            IDictionary<string, INodeValidator> nodeValidators,
-            IList<IGlobalValidator> globalValidators,
-            IDictionary<string, IModifier> modifiers,
-            IDictionary<string, INodeModifier> nodeModifiers,
-            IList<IGlobalModifier> globalModifiers,
-            IDictionary<string, string> parameters
+            IDictionary<string, string> parameters,
+            IList<ICustomizer> customizers
         ) {
             this.Clear(events);
 
             // parser, reader, and mergeParameters do not need to be passed in
 
-            Modifiers = modifiers;
-            NodeModifiers = nodeModifiers;
-            GlobalModifiers = globalModifiers;
-
-            Validators = validators;
-            NodeValidators = nodeValidators;
-            GlobalValidators = globalValidators;
-
+            Customizers = customizers;
             Serializer = serializer;
 
-            LoadProperties(node, parent, parameters);
+            LoadProperties(node, parent, parameters, customizers);
             LoadCollections(node, parent, parameters);
             PreValidate();
             ValidateBasedOnAttributes(node, parameters);
@@ -235,7 +200,7 @@ namespace Cfg.Net {
             return (Serializer ?? new XmlSerializer()).Serialize(this);
         }
 
-        void LoadCollections(INode node, string parentName, IDictionary<string, string> parameters = null) {
+        void LoadCollections(INode node, string parentName, IDictionary<string, string> parameters) {
             var metadata = CfgMetadataCache.GetMetadata(Type, Events);
             var elementNames = CfgMetadataCache.ElementNames(Type).ToList();
             var elements = new Dictionary<string, IList>();
@@ -267,7 +232,7 @@ namespace Cfg.Net {
                                 var isAssignable = typeof(IProperties).GetTypeInfo().IsAssignableFrom(listTypeInfo);
 #else
                                 var listTypeInfo = item.ListType;
-                                var isAssignable = typeof (IProperties).IsAssignableFrom(listTypeInfo);
+                                var isAssignable = typeof(IProperties).IsAssignableFrom(listTypeInfo);
 #endif
 
                                 if (isAssignable) {
@@ -325,7 +290,7 @@ namespace Cfg.Net {
                                     }
                                 }
                             } else {
-                                var loaded = item.Loader().Load(add, subNode.Name, Serializer, Events, Validators, NodeValidators, GlobalValidators, Modifiers, NodeModifiers, GlobalModifiers, parameters);
+                                var loaded = item.Loader().Load(add, subNode.Name, Serializer, Events, parameters, Customizers);
                                 elements[addKey].Add(loaded);
                             }
                         } else {
@@ -393,7 +358,7 @@ namespace Cfg.Net {
             }
         }
 
-        void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters = null) {
+        void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters, IList<ICustomizer> customizers) {
             var metadata = CfgMetadataCache.GetMetadata(Type, Events);
             var keys = CfgMetadataCache.PropertyNames(Type).ToArray();
 
@@ -403,45 +368,43 @@ namespace Cfg.Net {
             var keyHits = new HashSet<string>();
             var nullWarnings = new HashSet<string>();
 
-            for (var i = 0; i < node.Attributes.Count; i++) {
-                var attribute = node.Attributes[i];
+            // first pass, set default values and report invalid attributes
+            foreach (var attribute in node.Attributes) {
+
                 var attributeKey = CfgMetadataCache.NormalizeName(Type, attribute.Name);
                 if (metadata.ContainsKey(attributeKey)) {
                     var item = metadata[attributeKey];
 
-                    if (attribute.Value == null) {
-                        // if attribute is null, use the getter
-                        var maybe = item.Getter(this);
-                        if (maybe == null) {
-                            if (nullWarnings.Add(attribute.Name)) {
-                                Events.Warning($"'{attribute.Name}' in '{parentName}' is susceptible to nulls.");
-                            }
-                            continue;
-                        }
-                        attribute.Value = maybe;
-                    }
+                    if (attribute.Value != null)
+                        continue;
 
-                    // run injected property specific modifiers
-                    if (item.Attribute.ModifiersSet) {
-                        foreach (var modifier in item.Attribute.modifiers.Split(item.Attribute.delimiter)) {
-                            var isModifier = Modifiers.ContainsKey(modifier);
-                            var isNodeModifier = !isModifier && NodeModifiers.ContainsKey(modifier);
-                            if (isModifier || isNodeModifier) {
-                                if (isModifier) {
-                                    attribute.Value = Modifiers[modifier].Modify(attribute.Name, attribute.Value, parameters);
-                                } else {
-                                    NodeModifiers[modifier].Modify(node, attribute.Value, parameters);
-                                }
-                            } else {
-                                Events.Warning($"'{attribute.Name}' has a '{modifier}' modifier, but no '{modifier}' was injected.");
-                            }
+                    // if attribute is null, use the getter
+                    var maybe = item.Getter(this);
+                    if (maybe == null) {
+                        if (nullWarnings.Add(attribute.Name)) {
+                            Events.Warning($"'{attribute.Name}' in '{parentName}' is susceptible to nulls.");
                         }
+                        continue;
                     }
+                    attribute.Value = maybe;
+                } else {
+                    Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
+                }
+            }
 
-                    // run global modifiers
-                    foreach (var modifier in GlobalModifiers) {
-                        attribute.Value = modifier.Modify(attribute.Name, attribute.Value, parameters);
-                    }
+            foreach (var customizer in customizers) {
+                try {
+                    customizer.Customize(parentName, node, parameters, Events.Logger);
+                } catch (Exception ex) {
+                    Events.Error($"{customizer.GetType().Name} error: {ex.Message}");
+                }
+            }
+
+            // second pass, after customizers, adjust case and trim, set property value
+            foreach (var attribute in node.Attributes) {
+                var attributeKey = CfgMetadataCache.NormalizeName(Type, attribute.Name);
+                if (metadata.ContainsKey(attributeKey)) {
+                    var item = metadata[attributeKey];
 
                     if (item.PropertyInfo.PropertyType == typeof(string)) {
 
@@ -475,8 +438,6 @@ namespace Cfg.Net {
                             Events.SettingValue(attribute.Name, attribute.Value, parentName, node.Name, ex.Message);
                         }
                     }
-                } else {
-                    Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
                 }
             }
 
@@ -511,15 +472,6 @@ namespace Cfg.Net {
                     UniqueProperties[key] = stringValue;
                 }
 
-                // run global validators
-                foreach (var validator in GlobalValidators) {
-                    try {
-                        validator.Validate(key, stringValue, parameters, Events.Logger);
-                    } catch (Exception ex) {
-                        Events.ValidatorException(validator.GetType().Name, ex, stringValue);
-                    }
-                }
-
                 if (item.Attribute.DomainSet) {
                     if (!item.IsInDomain(stringValue)) {
                         Events.ValueNotInDomain(key, stringValue, item.Attribute.domain.Replace(item.Attribute.delimiter.ToString(), ", "));
@@ -530,30 +482,6 @@ namespace Cfg.Net {
 
                 CheckValueBoundaries(item.Attribute, key, objectValue);
 
-                CheckValidators(node, item, key, stringValue, parameters);
-            }
-        }
-
-        void CheckValidators(INode node, CfgMetadata item, string name, string value, IDictionary<string, string> parameters) {
-            if (!item.Attribute.ValidatorsSet)
-                return;
-
-            foreach (var validator in item.Validators()) {
-                var isValidator = Validators.ContainsKey(validator);
-                var isNodeValidator = !isValidator && NodeValidators.ContainsKey(validator);
-                if (isValidator || isNodeValidator) {
-                    try {
-                        if (isValidator) {
-                            Validators[validator].Validate(name, value, parameters, Events.Logger);
-                        } else {
-                            NodeValidators[validator].Validate(node, value, parameters, Events.Logger);
-                        }
-                    } catch (Exception ex) {
-                        Events.ValidatorException(validator, ex, value);
-                    }
-                } else {
-                    Events.MissingValidator(name, validator);
-                }
             }
         }
 

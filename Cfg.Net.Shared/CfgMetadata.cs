@@ -44,13 +44,6 @@ namespace Cfg.Net {
                 var comparer = attribute.ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
                 _domainSet = new HashSet<string>(attribute.domain.Split(new[] { attribute.delimiter }, StringSplitOptions.None).Distinct(), comparer);
             }
-
-            if (string.IsNullOrEmpty(attribute.validators)) return;
-
-            _validatorSet =
-                new HashSet<string>(
-                    attribute.validators.Split(new[] { attribute.delimiter }, StringSplitOptions.None).Distinct(),
-                    attribute.ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         }
 
         public bool IsInDomain(string value) {

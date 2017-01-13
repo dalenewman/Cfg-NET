@@ -2,16 +2,24 @@
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Shorthand {
-    public class ShorthandValidator : INodeValidator {
+    public class ShorthandValidator : ICustomizer {
         private readonly ShorthandRoot _root;
 
-        public ShorthandValidator(ShorthandRoot root, string name) {
+        public ShorthandValidator(ShorthandRoot root) {
             _root = root;
-            Name = name;
         }
 
-        public string Name { get; set; }
-        public void Validate(INode node, string value, IDictionary<string, string> parameters, ILogger logger) {
+        public void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger) {
+            if (parent != "fields" && parent != "calculated-fields")
+                return;
+
+            var value = string.Empty;
+
+            IAttribute attr;
+            if (node.TryAttribute("t", out attr) && attr.Value != null) {
+                value = attr.Value as string;
+            }
+
             if (string.IsNullOrEmpty(value))
                 return;
             var expressions = new Expressions(value);
@@ -22,5 +30,7 @@ namespace Cfg.Net.Shorthand {
                 }
             }
         }
+
+        public void Customize(INode root, IDictionary<string, string> parameters, ILogger logger){}
     }
 }

@@ -4,21 +4,26 @@ using System.Linq;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Shorthand {
-    public class ShorthandModifier : INodeModifier {
+    public class ShorthandModifier : ICustomizer {
         private readonly ShorthandRoot _root;
         internal static char NamedParameterSplitter = ':';
 
-        public ShorthandModifier(ShorthandRoot root, string name) {
+        public ShorthandModifier(ShorthandRoot root) {
             _root = root;
-            Name = name;
         }
 
-        public string Name { get; set; }
-        public void Modify(INode node, object value, IDictionary<string, string> parameters)
-        {
-            var str = value as string;
+        public void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger) {
+            if (parent != "fields" && parent != "calculated-fields" )
+                return;
 
-            if (str == null)
+            var str = string.Empty;
+
+            IAttribute attr;
+            if (node.TryAttribute("t", out attr) && attr.Value != null) {
+                str = attr.Value.ToString();
+            }
+
+            if (str == string.Empty)
                 return;
 
             var expressions = new Expressions(str);
@@ -93,5 +98,7 @@ namespace Cfg.Net.Shorthand {
                 }
             }
         }
+
+        public void Customize(INode root, IDictionary<string, string> parameters, ILogger logger){}
     }
 }

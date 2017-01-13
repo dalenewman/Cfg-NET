@@ -4,45 +4,67 @@ using System.Linq;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Environment {
-    public class EnvironmentModifier : IRootModifier {
-        private readonly IGlobalModifier _placeHolderReplacer;
-        private readonly IRootModifier _mergeParameters;
+    public class EnvironmentModifier : ICustomizer {
+        private readonly IPlaceHolderReplacer _placeHolderReplacer;
         private readonly string _environmentsElementName;
         private readonly string _defaultEnvironmentAttribute;
         private readonly string _environmentNameAttribute;
         private readonly string _parametersElementName;
+        private readonly string _parameterNameAttribute;
+        private readonly string _parameterValueAttribute;
 
-        public string Name { get; set; }
-
-        public EnvironmentModifier(
-            IGlobalModifier placeHolderReplacer,
-            IRootModifier mergeParameters) :
+        public EnvironmentModifier() :
             this(
-                placeHolderReplacer,
-                mergeParameters,
+                new PlaceHolderReplacer('@', '(', ')'),
                 "environments",
                 "environment",
                 "name",
-                "parameters"
+                "parameters",
+                "name",
+                "value"
             ) { }
 
         public EnvironmentModifier(
-            IGlobalModifier placeHolderReplacer,
-            IRootModifier mergeParameters,
+            IPlaceHolderReplacer placeHolderReplacer,
             string environmentsElementName,
             string defaultEnvironmentAttribute,
             string environmentNameAttribute,
-            string parametersElementName
+            string parametersElementName,
+            string parameterNameAttribute,
+            string parameterValueAttribute
             ) {
             _placeHolderReplacer = placeHolderReplacer;
-            _mergeParameters = mergeParameters;
             _environmentsElementName = environmentsElementName;
             _defaultEnvironmentAttribute = defaultEnvironmentAttribute;
             _environmentNameAttribute = environmentNameAttribute;
             _parametersElementName = parametersElementName;
+            _parameterNameAttribute = parameterNameAttribute;
+            _parameterValueAttribute = parameterValueAttribute;
         }
 
-        public void Modify(INode root, IDictionary<string, string> parameters) {
+        /// <summary>
+        /// This gets called for each node, after the parameters have been merged
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="node"></param>
+        /// <param name="parameters"></param>
+        /// <param name="logger"></param>
+        public void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger) {
+            if (parameters.Count == 0)
+                return;
+
+            foreach (var attribute in node.Attributes) {
+                attribute.Value = _placeHolderReplacer.Replace(attribute.Value.ToString(), parameters, logger);
+            }
+        }
+
+        /// <summary>
+        /// This gets called first, once, and will pick the right environment and merge the parameters
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="parameters"></param>
+        /// <param name="logger"></param>
+        public void Customize(INode root, IDictionary<string, string> parameters, ILogger logger) {
 
             var environments = root.SubNodes.FirstOrDefault(n => n.Name.Equals(_environmentsElementName, StringComparison.OrdinalIgnoreCase));
             if (environments == null) {
@@ -51,7 +73,7 @@ namespace Cfg.Net.Environment {
                     return;
                 if (rootParameters.SubNodes.Count == 0)
                     return;
-                _mergeParameters.Modify(rootParameters, parameters);
+                MergeParameters(rootParameters.SubNodes, parameters);
                 return;
             }
 
@@ -69,13 +91,13 @@ namespace Cfg.Net.Environment {
                         continue;
 
                     // for when the default environment is set with a place-holder (e.g. @(environment))
-                    var value = _placeHolderReplacer.Modify(_defaultEnvironmentAttribute, defaultEnvironment.Value, parameters);
+                    var value = _placeHolderReplacer.Replace(defaultEnvironment.Value.ToString(), parameters, logger);
 
                     if (!value.Equals(environmentName.Value) || node.SubNodes.Count == 0)
                         continue;
 
                     if (node.SubNodes[0].Name == _parametersElementName) {
-                        _mergeParameters.Modify(node.SubNodes[0], parameters);
+                        MergeParameters(node.SubNodes[0].SubNodes, parameters);
                     }
                 }
 
@@ -91,7 +113,31 @@ namespace Cfg.Net.Environment {
             if (parametersNode.Name != _parametersElementName || environment.SubNodes.Count == 0)
                 return;
 
-            _mergeParameters.Modify(parametersNode, parameters);
+            MergeParameters(parametersNode.SubNodes, parameters);
+        }
+
+        private void MergeParameters(IEnumerable<INode> nodes, IDictionary<string, string> parameters) {
+            foreach (var parameter in nodes) {
+                string name = null;
+                object value = null;
+                foreach (var attribute in parameter.Attributes) {
+                    if (attribute.Name == _parameterNameAttribute) {
+                        name = attribute.Value.ToString();
+                    } else if (attribute.Name == _parameterValueAttribute) {
+                        value = attribute.Value;
+                    }
+                }
+                if (name != null && value != null) {
+                    if (parameters.ContainsKey(name)) {  // parameter is going to set the attribute value
+                        IAttribute attr;
+                        if (parameter.TryAttribute(_parameterValueAttribute, out attr)) {
+                            attr.Value = parameters[name];
+                        }
+                    } else { // attribute value is going to set the parameter
+                        parameters[name] = value.ToString();
+                    }
+                }
+            }
         }
 
     }

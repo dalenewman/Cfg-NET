@@ -43,9 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnvironmentModifier.cs" />
-    <Compile Include="ParameterModifier.cs" />
-    <Compile Include="PlaceHolderModifier.cs" />
-    <Compile Include="PlaceHolderValidator.cs" />
+    <Compile Include="IPlaceHolderReplacer.cs" />
+    <Compile Include="PlaceHolderReplacer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

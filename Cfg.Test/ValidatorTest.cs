@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using Cfg.Net;
 using Cfg.Net.Contracts;
+using Cfg.Net.Shared;
 using NUnit.Framework;
 
 namespace Cfg.Test {
@@ -45,7 +46,7 @@ namespace Cfg.Test {
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
             Assert.AreEqual(
-                "The value 'bad-value' in the 'value' attribute is no good! It does not have two dashes like we agreed on.",
+                "The value 'BAD-value' in the 'value' attribute is no good! It does not have two dashes like we agreed on.",
                 problems[0]);
 
         }
@@ -67,9 +68,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual(
-                "The value 'bad-value' in the 'value' attribute is no good! It does not have two dashes like we agreed on.",
-                problems[0]);
+            Assert.AreEqual("The value 'BAD-value' in the 'value' attribute is no good! It does not have two dashes like we agreed on.", problems[0]);
 
         }
 
@@ -78,20 +77,20 @@ namespace Cfg.Test {
             var xml = @"
     <test>
         <things>
-            <add value='this-GOOD-value' />
+            <add value='this-good-value' />
             <add value='this-BAD-value' />
         </things>
     </test>
 ".Replace("'", "\"");
 
-            var cfg = new TestValidatorCfg2(xml, new Contains2Dashes("2dashes"), new ContainsGood("contains,good"));
+            var cfg = new TestValidatorCfg2(xml, new Contains2Dashes(), new ContainsGood());
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("The value 'this-bad-value' is missing good! I am deeply offended.", problems[0]);
+            Assert.AreEqual("The value 'this-BAD-value' is missing good! I am deeply offended.", problems[0]);
 
         }
 
@@ -100,13 +99,13 @@ namespace Cfg.Test {
             public List<TestValidatorThing> Things { get; set; }
 
             public TestValidatorCfg(string xml)
-                : base(new Contains2Dashes("2dashes")) {
+                : base(new Contains2Dashes()) {
                 Load(xml);
             }
         }
 
         public class TestValidatorThing : CfgNode {
-            [Cfg(validators = "2dashes", toLower = true)]
+            [Cfg(toLower = true)]
             public string Value { get; set; }
         }
 
@@ -121,39 +120,51 @@ namespace Cfg.Test {
         }
 
         public class TestValidatorThing2 : CfgNode {
-            [Cfg(validators = "2dashes|contains,good", delimiter = '|', toLower = true)]
+            [Cfg(toLower = true)]
             public string Value { get; set; }
         }
 
-        public class Contains2Dashes : IValidator {
+        public class Contains2Dashes : ICustomizer {
+            public void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger) {
 
-            public Contains2Dashes(string name) {
-                Name = name;
-            }
+                if (parent != "things")
+                    return;
 
-            public string Name { get; set; }
-            public void Validate(string name, string value, IDictionary<string,string> parameters, ILogger logger) {
-                var count = value.Split(new[] { '-' }, StringSplitOptions.None).Length - 1;
+                IAttribute attr;
+                if (!node.TryAttribute("value", out attr))
+                    return;
+                if (attr.Value == null) return;
+
+                var strValue = attr.Value.ToString();
+
+                var count = strValue.Split(new[] { '-' }, StringSplitOptions.None).Length - 1;
                 if (count != 2) {
-                    logger.Error("The value '{0}' in the '{1}' attribute is no good! It does not have two dashes like we agreed on.", value, name);
+                    logger.Error("The value '{0}' in the '{1}' attribute is no good! It does not have two dashes like we agreed on.", strValue, attr.Name);
                 }
+
             }
 
+            public void Customize(INode node, IDictionary<string, string> parameters, ILogger logger) { }
         }
 
-        public class ContainsGood : IValidator {
+        public class ContainsGood : ICustomizer {
+            public void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger) {
+                if (parent != "things")
+                    return;
 
-            public ContainsGood(string name) {
-                Name = name;
-            }
+                IAttribute attr;
+                if (!node.TryAttribute("value", out attr))
+                    return;
+                if (attr.Value == null) return;
 
-            public string Name { get; set; }
-            public void Validate(string name, string value, IDictionary<string,string> parameters, ILogger logger) {
-                if (!value.Contains("good")) {
-                    logger.Error("The value '{0}' is missing good! I am deeply offended.", value);
+                var strValue = attr.Value.ToString();
+
+                if (!strValue.Contains("good")) {
+                    logger.Error("The value '{0}' is missing good! I am deeply offended.", strValue);
                 }
             }
 
+            void ICustomizer.Customize(INode root, IDictionary<string, string> parameters, ILogger logger) { }
         }
 
     }

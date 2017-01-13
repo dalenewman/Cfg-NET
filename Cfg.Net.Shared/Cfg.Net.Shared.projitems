@@ -11,6 +11,8 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CfgAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgNodeTraverser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\ICustomizer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IProperties.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgMetadata.cs" />
@@ -19,19 +21,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)CfgReflectionHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IDependency.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IGlobalModifier.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IGlobalValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\ILogger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IModifier.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\INamedDependency.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\INode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\INodeModifier.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\INodeValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IReader.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IRootModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\ISerializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ext\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Loggers\DefaultLogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Loggers\MemoryLogger.cs" />

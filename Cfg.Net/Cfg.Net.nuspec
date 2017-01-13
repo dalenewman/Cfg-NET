@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET</id>
-    <version>0.8.4</version>
+    <version>0.9.1-beta</version>
     <title>Cfg-NET</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -10,8 +10,8 @@
     <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An alternative configuration handler.</description>
-    <releaseNotes>Added more targets and consolidated version.</releaseNotes>
-    <copyright>Copyright 2015-2016</copyright>
+    <releaseNotes>bumped file and assembly version to match nuget</releaseNotes>
+    <copyright>Copyright 2015-2017</copyright>
     <tags>configuration, settings</tags>
     <dependencies>
       <group targetFramework="netstandard1.0">

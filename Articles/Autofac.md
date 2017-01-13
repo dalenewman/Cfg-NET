@@ -45,13 +45,7 @@ Currently, an `IDependency` may be:
 * an `IParser` - for a different parser
 * an `ISerializer` - for a different serializer
 * an `ILogger` - for additional logging
-* an `IValidator` - for targeted property validation
-* an `INodeValidator` - for targeted `INode` validation
-* an `IGlobalValidator` - for global property validation
-* an `IModifier` - for targeted property modification
-* an `INodeModifier` - for targeted `INode` modification
-* an `IRootModifier` - for modifying the root `INode`
-* an `IGlobalModifer` - for global property modification
+* an `ICustomizer` - for customization
 
 ### An IReader
 

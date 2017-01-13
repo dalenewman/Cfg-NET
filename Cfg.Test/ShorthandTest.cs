@@ -58,7 +58,7 @@ namespace Cfg.Test {
             ";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -104,7 +104,7 @@ namespace Cfg.Test {
             ";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -141,7 +141,7 @@ namespace Cfg.Test {
                 </cfg>";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -164,7 +164,7 @@ namespace Cfg.Test {
                 </cfg>";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -187,7 +187,7 @@ namespace Cfg.Test {
                 </cfg>";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -212,7 +212,7 @@ namespace Cfg.Test {
             ";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh, "sh"), new ShorthandModifier(sh, "sh"));
+            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -265,7 +265,7 @@ namespace Cfg.Test {
         [Cfg(required = true)]
         public string Name { get; set; }
 
-        [Cfg(required = true, modifiers = "sh", validators = "sh")]
+        [Cfg(required = true)]
         public string T { get; set; }
 
         [Cfg]

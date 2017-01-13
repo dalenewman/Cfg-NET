@@ -62,7 +62,7 @@ namespace Cfg.Test {
 
             Assert.AreEqual(1, cfg.Errors().Length);
 
-            Assert.AreEqual("Missing a parameter value for @(p3).", cfg.Errors()[0]);
+            Assert.AreEqual("Missing parameter for place-holder @(p3).", cfg.Errors()[0]);
 
             Assert.AreEqual(2, cfg.Environments.Count);
             Assert.AreEqual(false, cfg.Environment == cfg.Environments[0].Name);
@@ -128,12 +128,7 @@ namespace Cfg.Test {
     /// Should be composed at composition root.
     /// </summary>
     public class MyCfg : CfgNode {
-        public MyCfg(string xml, IDictionary<string, string> parameters = null)
-            : base(
-                  new EnvironmentModifier(new PlaceHolderModifier(), new ParameterModifier()), 
-                  new PlaceHolderModifier(),
-                  new PlaceHolderValidator()
-            ) {
+        public MyCfg(string xml, IDictionary<string, string> parameters = null) : base(new EnvironmentModifier()) {
             Load(xml, parameters);
         }
 

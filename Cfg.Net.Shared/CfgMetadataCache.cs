@@ -221,15 +221,7 @@ namespace Cfg.Net {
             clone.Parser = node.Parser;
             clone.Reader = node.Reader;
             clone.Serializer = node.Serializer;
-
-            clone.Validators = node.Validators;
-            clone.NodeValidators = node.NodeValidators;
-            clone.GlobalValidators = node.GlobalValidators;
-
-            clone.Modifiers = node.Modifiers;
-            clone.NodeModifiers = node.NodeModifiers;
-            clone.GlobalModifiers = node.GlobalModifiers;
-
+            clone.Customizers = node.Customizers;
             clone.Type = node.Type;
             var logger = node.Events == null ? new NullLogger() : node.Events.Logger as ILogger;
             clone.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), logger));

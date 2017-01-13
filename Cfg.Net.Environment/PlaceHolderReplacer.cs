@@ -3,27 +3,24 @@ using System.Text;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Environment {
-    public class PlaceHolderModifier : IGlobalModifier {
+    public class PlaceHolderReplacer : IPlaceHolderReplacer {
+
         private readonly char _placeHolderMarker;
         private readonly char _placeHolderOpen;
         private readonly char _placeHolderClose;
 
-        public PlaceHolderModifier() : this('@', '(', ')') { }
+        public PlaceHolderReplacer() : this('@', '(', ')') { }
 
-        public PlaceHolderModifier(char placeHolderMarker, char placeHolderOpen, char placeHolderClose) {
+        public PlaceHolderReplacer(char placeHolderMarker, char placeHolderOpen, char placeHolderClose) {
             _placeHolderMarker = placeHolderMarker;
             _placeHolderOpen = placeHolderOpen;
             _placeHolderClose = placeHolderClose;
         }
 
-        public object Modify(string name, object value, IDictionary<string, string> parameters) {
+        public string Replace(string str, IDictionary<string, string> parameters, ILogger logger) {
 
-            var str = value as string;
-            if (str == null)
-                return value;
-
-            if (parameters.Count == 0 || str.IndexOf(_placeHolderMarker) < 0)
-                return value;
+            if (str.IndexOf(_placeHolderMarker) < 0)
+                return str;
 
             var builder = new StringBuilder();
             for (var j = 0; j < str.Length; j++) {
@@ -37,7 +34,9 @@ namespace Cfg.Net.Environment {
                         if (parameters.ContainsKey(key)) {
                             builder.Append(parameters[key]);
                         } else {
-                            builder.AppendFormat("@({0})", key);
+                            var placeHolder = $"@({key})";
+                            builder.Append(placeHolder);
+                            logger.Error($"Missing parameter for place-holder {placeHolder}.");
                         }
                     }
                     j = j + length;

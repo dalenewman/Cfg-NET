@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET.Reader</id>
-    <version>0.2.6</version>
+    <version>0.3.1-beta</version>
     <title>Cfg-NET Reader</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -10,11 +10,11 @@
     <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A reader implementation</description>
-    <releaseNotes>Target netstandard1.0 instead of PCL</releaseNotes>
-    <copyright>Copyright 2015-2016</copyright>
+    <releaseNotes>Updated to Cfg-Net's new interface.</releaseNotes>
+    <copyright>Copyright 2015-2017</copyright>
     <tags>configuration, settings</tags>
     <dependencies>
-      <dependency id="Cfg-NET" version="0.8.4" />
+      <dependency id="Cfg-NET" version="0.9.0-beta" />
     </dependencies>
   </metadata>
   <files>

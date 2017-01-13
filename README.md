@@ -193,7 +193,6 @@ As your configuration loads:
 1. `required` confirms a property value is input
 1. Default `value` is applied as necessary
 1. [`PreValidate()`](#PreValidate) is executed
-1. Injected `modifiers` are run
 1. `toLower` or `toUpper` may modify the value
 1. `trim`, `trimStart`, or `trimEnd` may trim the value
 1. `domain` checks value against valid values
@@ -201,7 +200,6 @@ As your configuration loads:
 1. `maxLength` checks value against a maximum length
 1. `minValue` checks value against a minimum value
 1. `maxValue` checks value against a maximum value
-1. Injected `validators` are run
 1. `unique` confirms attributes are unique within a list
 1. `required` confirms a list has items
 1. [`Validate`](#Validate) is executed
@@ -270,7 +268,6 @@ if you set default values (e.g. `[Cfg(value="default")]`), a
 property is never `null`.
 
 Play with the apples and bananas on [.NET Fiddle](https://dotnetfiddle.net/slRAf3).
-<iframe width="100%" height="475" src="https://dotnetfiddle.net/Widget/slRAf3" frameborder="0"></iframe>
 
 Validation and Modification
 ---------------------------
@@ -282,8 +279,7 @@ If it's not enough, you have 5 ways to extend:
 1. Overriding `PreValidate()`
 1. Overriding `Validate()`
 1. Overriding `PostValidate()`
-1. Injecting validator(s) into a model's contructor
-1. Injecting modifier(s) int model's constructor
+1. Injecting customizer(s) into a model's contructor
 
 ### PreValidate()
 
@@ -309,10 +305,10 @@ public class Connection : CfgNode {
     [Cfg(required = true, domain = "file,folder,other")]
     public string Provider { get; set; }
     
-    [Cfg]
+    [Cfg()]
     public string File { get; set; }
     
-    [Cfg]
+    [Cfg()]
     public string Folder { get; set; }
     
     /* CUSTOM VALIDATION */
@@ -343,53 +339,10 @@ protected override void PostValidate() {
 }
 ```
 
-### Injecting Modifiers and Validators into Model's Contructor
+### Injecting Customizers into Model's Contructor
 
-If you want to inject reusable validators and/or modifiers into 
-Cfg-NET, interfaces are defined to facilite this.
-
-#### Modifiers
-
-- `IRootModifier` is passed the 
-root-level node. It can add, modify, and delete 
-anything.
-- `IGlobalModifier` can modify any properties' value. 
-It is passed the attribute's name and value and is
-expected to return a value.
-
-#### Named Modifiers
-
-A named modifier is injected with a name and 
-only runs on properties with the same name 
-listed in the `modifiers` attribute.
-
-- `IModifier` modifies targeted properties' values.  
-It is passed the attribute's name and value and is 
-expected to return a value.
-- `INodeModifer` modifies targeted nodes.  It is 
-passed in an properties' value and it's node.  It 
-can add, modify, and delete anything it wants to in 
-that node.
-
-Try a modifier out on [.NET Fiddle](https://dotnetfiddle.net/qRFOxd).
-
-#### Validators
-
-All validators are passed Cfg-NET's `ILogger` implementation. When 
-a validator finds something wrong, it should add errors and/or warnings 
-accordingly.
-
-- `IGlobalValidator` validates every name-value pair.
-
-#### Named Validators
-
-- `IValidator` validates targeted properties. 
-It is passed a properties' name and value (as a `string`).
-- `INodeValidator` validates targeted nodes.  It is 
-passed a node.
-
-Try a validator out on [.NET Fiddle](https://dotnetfiddle.net/1Uz1c7).
-
+If you want to inject customizers into 
+Cfg-NET, an interface is defined for this. 
 Read more about injecting [here](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md).
 
 ### Serialize
