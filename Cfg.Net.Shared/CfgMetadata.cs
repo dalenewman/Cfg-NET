@@ -22,9 +22,7 @@ using System.Reflection;
 namespace Cfg.Net {
     sealed class CfgMetadata {
 
-
         private readonly HashSet<string> _domainSet;
-        private readonly HashSet<string> _validatorSet;
 
         public PropertyInfo PropertyInfo { get; set; }
         public CfgAttribute Attribute { get; set; }
@@ -50,8 +48,5 @@ namespace Cfg.Net {
             return _domainSet == null || (value != null && _domainSet.Contains(value));
         }
 
-        public IEnumerable<string> Validators() {
-            return _validatorSet ?? (IEnumerable<string>)new string[0];
-        }
     }
 }
