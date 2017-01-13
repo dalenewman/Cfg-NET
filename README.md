@@ -25,7 +25,7 @@ configuration handler for .NET licensed under [Apache 2](http://www.apache.org/l
 * allows you to store your configuration where you want (e.g. web, file, string)
 * is extensible 
 * is composable
-* is small (~72 KB)
+* is small (~68 KB)
 * has zero dependencies
 * is portable (.NETStandard1.0 with PCL compatibility)
 * is available on [Nuget](https://www.nuget.org/packages/Cfg-NET)
@@ -141,8 +141,6 @@ built-in options:
 * `domain` with `delimiter` and `ignoreCase` options
 * `minLength` and/or `maxLength`
 * `minValue` and/or `maxValue`
-* `modifiers` with `delimiter` option
-* `validators` with `delimiter` option
 
 If we want to make sure some fruit is defined in our configuration, we
 would add `required=true` to the fruit list like this:
@@ -274,7 +272,7 @@ Validation and Modification
 
 The `Cfg` attribute's optional properties 
 offer *configurable* validation.
-If it's not enough, you have 5 ways to extend:
+If it's not enough, you have 4 ways to extend:
 
 1. Overriding `PreValidate()`
 1. Overriding `Validate()`
