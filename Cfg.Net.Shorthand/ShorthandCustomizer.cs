@@ -4,22 +4,38 @@ using System.Linq;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Shorthand {
-    public class ShorthandModifier : ICustomizer {
+
+    public class ShorthandCustomizer : ICustomizer {
+
         private readonly ShorthandRoot _root;
+        private readonly HashSet<string> _shortHandCollections;
+        private readonly string _shortHandProperty;
+        private readonly string _longHandCollection;
+        private readonly string _longHandProperty;
         internal static char NamedParameterSplitter = ':';
 
-        public ShorthandModifier(ShorthandRoot root) {
+        public ShorthandCustomizer(
+            ShorthandRoot root,
+            IEnumerable<string> shortHandCollections,
+            string shortHandProperty,
+            string longHandCollection,
+            string longHandProperty
+        ) {
             _root = root;
+            _shortHandCollections = new HashSet<string>(shortHandCollections);
+            _shortHandProperty = shortHandProperty;
+            _longHandCollection = longHandCollection;
+            _longHandProperty = longHandProperty;
         }
 
-        public void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger) {
-            if (parent != "fields" && parent != "calculated-fields" )
+        public void Customize(string collection, INode node, IDictionary<string, string> parameters, ILogger logger) {
+            if (!_shortHandCollections.Contains(collection))
                 return;
 
             var str = string.Empty;
 
             IAttribute attr;
-            if (node.TryAttribute("t", out attr) && attr.Value != null) {
+            if (node.TryAttribute(_shortHandProperty, out attr) && attr.Value != null) {
                 str = attr.Value.ToString();
             }
 
@@ -32,14 +48,17 @@ namespace Cfg.Net.Shorthand {
             foreach (var expression in expressions) {
                 MethodData methodData;
 
-                if (!_root.MethodDataLookup.TryGetValue(expression.Method, out methodData))
+                if (!_root.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
+                    logger.Warn($"The short-hand expression method {expression.Method} is undefined.");
                     continue;
+                }
 
-                if (methodData.Target.Collection == string.Empty || methodData.Target.Property == string.Empty)
+                if (methodData.Method.Ignore) {
                     continue;
+                }
 
                 var shorthandNode = new Node("add");
-                shorthandNode.Attributes.Add(new ShorthandAttribute(methodData.Target.Property, expression.Method));
+                shorthandNode.Attributes.Add(new ShorthandAttribute(_longHandProperty, expression.Method));
 
                 var signatureParameters = methodData.Signature.Parameters.Select(p => new Parameter { Name = p.Name, Value = p.Value }).ToList();
                 var passedParameters = expression.Parameters.Select(p => new string(p.ToCharArray())).ToArray();
@@ -80,10 +99,10 @@ namespace Cfg.Net.Shorthand {
                     }
                 }
 
-                if (shorthandNodes.ContainsKey(methodData.Target.Collection)) {
-                    shorthandNodes[methodData.Target.Collection].Add(shorthandNode);
+                if (shorthandNodes.ContainsKey(_longHandCollection)) {
+                    shorthandNodes[_longHandCollection].Add(shorthandNode);
                 } else {
-                    shorthandNodes[methodData.Target.Collection] = new List<INode> { shorthandNode };
+                    shorthandNodes[_longHandCollection] = new List<INode> { shorthandNode };
                 }
             }
 
@@ -99,6 +118,6 @@ namespace Cfg.Net.Shorthand {
             }
         }
 
-        public void Customize(INode root, IDictionary<string, string> parameters, ILogger logger){}
+        public void Customize(INode root, IDictionary<string, string> parameters, ILogger logger) { }
     }
 }

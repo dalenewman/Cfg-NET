@@ -39,7 +39,6 @@ namespace Cfg.Test {
 
             Assert.AreEqual(0, root.Errors().Count());
             Assert.AreEqual(5, root.Signatures.Count);
-            Assert.AreEqual(2, root.Targets.Count);
             Assert.AreEqual(7, root.Methods.Count);
         }
 
@@ -52,13 +51,13 @@ namespace Cfg.Test {
                         <add name='right' t='right(2)' />
                         <add name='padleft' t='padleft(10,0)' />
                         <add name='padright' t='copy(x,y).padright(10).left(10).balls()' />
-                        <add name='in' t='copy(x).in(1,2)' />
+                        <add name='in' t='copy().in(1,2)' />
                     </fields>
                 </cfg>
             ";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
+            var sample = new ShTestCfg(xml, new ShorthandCustomizer(sh, new[] { "fields" }, "t", "transforms", "method"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -87,7 +86,6 @@ namespace Cfg.Test {
 
             Assert.AreEqual("in", sample.Fields[4].Transforms.First().Method);
             Assert.AreEqual("1,2", sample.Fields[4].Transforms.First().Domain);
-
         }
 
         [Test]
@@ -104,7 +102,7 @@ namespace Cfg.Test {
             ";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
+            var sample = new ShTestCfg(xml, new ShorthandCustomizer(sh, new[] { "fields" }, "t", "transforms", "method"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -141,7 +139,7 @@ namespace Cfg.Test {
                 </cfg>";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
+            var sample = new ShTestCfg(xml, new ShorthandCustomizer(sh, new[] { "fields" }, "t", "transforms", "method"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -164,7 +162,7 @@ namespace Cfg.Test {
                 </cfg>";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
+            var sample = new ShTestCfg(xml, new ShorthandCustomizer(sh, new[] { "fields" }, "t", "transforms", "method"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -187,7 +185,7 @@ namespace Cfg.Test {
                 </cfg>";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
+            var sample = new ShTestCfg(xml, new ShorthandCustomizer(sh, new[] { "fields" }, "t", "transforms", "method"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -212,7 +210,7 @@ namespace Cfg.Test {
             ";
 
             var sh = new ShorthandRoot(@"shorthand.xml", new FileReader());
-            var sample = new ShTestCfg(xml, new ShorthandValidator(sh), new ShorthandModifier(sh));
+            var sample = new ShTestCfg(xml, new ShorthandCustomizer(sh, new[] { "fields" }, "t", "transforms", "method"));
 
             foreach (var error in sample.Errors()) {
                 Console.WriteLine(error);
@@ -288,5 +286,8 @@ namespace Cfg.Test {
 
         [Cfg]
         public string Domain { get; set; }
+
+        [Cfg]
+        public string Parameter { get; set; }
     }
 }

@@ -15,19 +15,15 @@
 // limitations under the License.
 #endregion
 
-namespace Cfg.Net.Shorthand
-{
-    public class MethodData
-    {
-        public MethodData(Method method, Signature signature, Target target)
-        {
+namespace Cfg.Net.Shorthand {
+    public class MethodData {
+        public MethodData(Method method, Signature signature) {
             Method = method;
             Signature = signature;
-            Target = target;
         }
 
         public Method Method { get; set; }
         public Signature Signature { get; set; }
-        public Target Target { get; set; }
+
     }
 }

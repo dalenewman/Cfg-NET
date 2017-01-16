@@ -37,9 +37,6 @@ namespace Cfg.Net.Shorthand {
         public List<Signature> Signatures { get; set; }
 
         [Cfg(required = true)]
-        public List<Target> Targets { get; set; }
-
-        [Cfg(required = true)]
         public List<Method> Methods { get; set; }
 
         protected override void Validate() {
@@ -47,19 +44,11 @@ namespace Cfg.Net.Shorthand {
             foreach (var signature in signatures.Where(signature => Signatures.All(s => s.Name != signature))) {
                 Error("The shorthand signature {0} is undefined.", signature);
             }
-            var targets = Methods.Select(f => f.Target).Distinct();
-            foreach (var target in targets.Where(target => Targets.All(t => t.Name != target))) {
-                Error("The shorthand target {0} is undefined.", target);
-            }
         }
 
         private void InitializeMethodDataLookup() {
             foreach (var method in Methods) {
-                MethodDataLookup[method.Name] = new MethodData(
-                    method,
-                    Signatures.First(s => s.Name == method.Signature),
-                    Targets.First(t => t.Name == method.Target)
-                );
+                MethodDataLookup[method.Name] = new MethodData(method, Signatures.First(s => s.Name == method.Signature));
             }
         }
     }

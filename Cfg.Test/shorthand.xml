@@ -1,5 +1,15 @@
 ﻿<cfg>
 
+  <methods>
+    <add name="left" signature="length" />
+    <add name="right" signature="length" />
+    <add name="padleft" signature="padding" />
+    <add name="padright" signature="padding" />
+    <add name="javascript" signature="script" />
+    <add name="copy" signature="none" ignore="true" />
+    <add name="in" signature="domain" />
+  </methods>
+
   <signatures>
     <add name="padding">
       <parameters>
@@ -17,27 +27,12 @@
         <add name="script" />
       </parameters>
     </add>
-    <add name="none"/>
-    <add name="params">
+    <add name="domain">
       <parameters>
         <add name="domain" />
       </parameters>
     </add>
+    <add name="none" />
   </signatures>
-
-  <targets>
-    <add name="t" collection="transforms" property="method" />
-    <add name="none" collection="" property="" />
-  </targets>
-
-  <methods>
-    <add name="left" signature="length" target="t" />
-    <add name="right" signature="length" target="t" />
-    <add name="padleft" signature="padding" target="t" />
-    <add name="padright" signature="padding" target="t" />
-    <add name="javascript" signature="script" target="t" />
-    <add name="copy" signature="none" target="none" />
-    <add name="in" signature="params" target="t" />
-  </methods>
 
 </cfg>

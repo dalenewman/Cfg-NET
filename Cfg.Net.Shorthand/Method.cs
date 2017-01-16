@@ -14,17 +14,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
-namespace Cfg.Net.Shorthand
-{
-    public class Method : CfgNode
-    {
+namespace Cfg.Net.Shorthand {
+    public class Method : CfgNode {
         [Cfg(required = true, unique = true, toLower = true)]
         public string Name { get; set; }
 
         [Cfg(required = true, toLower = true)]
         public string Signature { get; set; }
 
-        [Cfg(required = true, toLower = true)]
-        public string Target { get; set; }
+        [Cfg(value=false)]
+        public bool Ignore { get; set; }
+
     }
 }

@@ -7,13 +7,13 @@ namespace Cfg.Net.Contracts {
     public interface ICustomizer : IDependency {
 
         /// <summary>
-        /// Customize every node (aka item, or object) using parent (aka container, or collection) as a filter (or not).
+        /// Customize every node (aka item, or object) using collection (aka container, or parent) as a filter (or not).
         /// </summary>
-        /// <param name="parent">The parent (aka container, or collection) name passed in by Cfg-NET.</param>
+        /// <param name="collection">The collection (aka container, or parent) name passed in by Cfg-NET.</param>
         /// <param name="node">The node (aka item, or object) passed in by Cfg-NET.</param>
         /// <param name="parameters">The parameters passed in from the outside world is passed in by Cfg-NET.</param>
         /// <param name="logger">The logger used to record warnings and errors is passed in by Cfg-NET.</param>
-        void Customize(string parent, INode node, IDictionary<string, string> parameters, ILogger logger);
+        void Customize(string collection, INode node, IDictionary<string, string> parameters, ILogger logger);
 
         /// <summary>
         /// Customize the root (top-level) node just after the configuration is parsed.

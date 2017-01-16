@@ -50,9 +50,8 @@
     <Compile Include="Parameter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShorthandAttribute.cs" />
-    <Compile Include="ShorthandModifier.cs" />
+    <Compile Include="ShorthandCustomizer.cs" />
     <Compile Include="ShorthandRoot.cs" />
-    <Compile Include="ShorthandValidator.cs" />
     <Compile Include="Signature.cs" />
     <Compile Include="Target.cs" />
     <Compile Include="Utility.cs" />
