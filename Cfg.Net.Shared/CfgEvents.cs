@@ -35,12 +35,12 @@ namespace Cfg.Net {
                 Suffix(parentName), validateAttributes);
         }
 
-        public void InvalidElement(string nodeName, string subNodeName) {
-            Logger.Error("A{2} '{0}' element has an invalid '{1}' element.  If you need a{2} '{1}' element, decorate it with the Cfg[()] attribute in your Cfg-NET model.", nodeName, subNodeName, Suffix(nodeName));
-        }
-
-        public void InvalidNestedElement(string parentName, string nodeName, string subNodeName) {
-            Logger.Error("A{3} '{0}' '{1}' element has an invalid '{2}' element.", parentName, nodeName, subNodeName, Suffix(parentName));
+        public void InvalidElement(string parentName, string nodeName, string subNodeName) {
+            if (string.IsNullOrEmpty(parentName)) {
+                Logger.Error("A{2} '{0}' element has an invalid '{1}' element. If you need a{2} '{1}' element, decorate it with the Cfg attribute.", nodeName, subNodeName, Suffix(nodeName));
+            } else {
+                Logger.Error("A{3} '{0}' '{1}' element has an invalid '{2}' element.", parentName, nodeName, subNodeName, Suffix(parentName));
+            }
         }
 
         public void MissingAttribute(string parentName, string nodeName, string attributeName) {
@@ -94,7 +94,7 @@ namespace Cfg.Net {
         }
 
         private static string Suffix(string thing) {
-            return thing == null || IsVowel(thing[0]) ? "n" : string.Empty;
+            return string.IsNullOrEmpty(thing) || IsVowel(thing[0]) ? "n" : string.Empty;
         }
 
         public void Error(string problem, params object[] args) {

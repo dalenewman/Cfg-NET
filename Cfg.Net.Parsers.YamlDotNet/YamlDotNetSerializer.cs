@@ -9,11 +9,9 @@ namespace Cfg.Net.Parsers.YamlDotNet {
 
         public YamlDotNetSerializer(
             SerializationOptions serializationOptions = SerializationOptions.None,
-            INamingConvention namingConvention = null,
-            YamlAttributeOverrides yamlAttributeOverrides = null
-            ) {
+            INamingConvention namingConvention = null) {
             _writer = new StringWriter();
-            _serializer = new Serializer(serializationOptions, namingConvention, yamlAttributeOverrides);
+            _serializer = new Serializer(serializationOptions, namingConvention);
         }
 
         public string Serialize(CfgNode node) {

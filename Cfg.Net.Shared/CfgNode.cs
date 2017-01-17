@@ -298,11 +298,7 @@ namespace Cfg.Net {
                         }
                     }
                 } else {
-                    if (parentName == null) {
-                        Events.InvalidElement(node.Name, subNode.Name);
-                    } else {
-                        Events.InvalidNestedElement(parentName, node.Name, subNode.Name);
-                    }
+                    Events.InvalidElement(parentName, node.Name, subNode.Name);
                 }
             }
         }
