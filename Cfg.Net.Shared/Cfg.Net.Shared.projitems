@@ -11,7 +11,6 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CfgAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgConstants.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CfgNodeTraverser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\ICustomizer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IProperties.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgEvents.cs" />
@@ -30,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Loggers\DefaultLogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Loggers\MemoryLogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Loggers\NullLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\CollectionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsers\fastJSON\JSON.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsers\fastJSON\JsonParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsers\JsonNode.cs" />
@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Parsers\nanoXML\NanoXmlNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsers\nanoXML\NanoXmlParsingException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsers\NodeAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsers\ObjectNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsers\XmlNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsers\XmlParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializers\JsonSerializer.cs" />

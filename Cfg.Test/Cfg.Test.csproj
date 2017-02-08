@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Clone.cs" />
     <Compile Include="FixIssue2.cs" />
+    <Compile Include="ConfigureWithCode.cs" />
     <Compile Include="Trim.cs" />
     <Compile Include="YamlDotNet.cs" />
     <Compile Include="ToJson.cs" />

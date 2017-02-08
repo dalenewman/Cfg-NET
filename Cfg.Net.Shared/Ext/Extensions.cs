@@ -1,13 +1,14 @@
 #region license
 // Cfg.Net
-// Copyright 2015 Dale Newman
-// 
+// An Alternative .NET Configuration Handler
+// Copyright 2015-2017 Dale Newman
+//  
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
+//   
+//       http://www.apache.org/licenses/LICENSE-2.0
+//   
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,68 +17,13 @@
 #endregion
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
 using Cfg.Net.Parsers;
 
 namespace Cfg.Net.Ext {
 
     public static class Extensions {
-
-        internal static void SetDefaults(this CfgNode node) {
-
-            var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
-            foreach (var pair in metadata) {
-#if NETS
-                bool? isGenericType = pair.Value.PropertyInfo.PropertyType.GetTypeInfo().IsGenericType;
-#else
-                bool? isGenericType = pair.Value.PropertyInfo.PropertyType.IsGenericType;
-#endif
-                if (isGenericType.Value) {
-                    var value = pair.Value.Getter(node);
-                    if (value == null) {
-                        pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
-                    }
-                } else {
-                    if (pair.Value.TypeMismatch || pair.Value.Attribute.value == null)
-                        continue;
-
-                    var value = pair.Value.Getter(node);
-
-                    if (value == null) {
-                        pair.Value.Setter(node, pair.Value.Attribute.value);
-                    } else if (value.Equals(pair.Value.Default)) {
-                        if (pair.Value.Default.Equals(pair.Value.Attribute.value)) {
-                            if (!pair.Value.Attribute.ValueIsSet) {
-                                pair.Value.Setter(node, pair.Value.Attribute.value);
-                            }
-                        } else {
-                            pair.Value.Setter(node, pair.Value.Attribute.value);
-                        }
-                    }
-                }
-            }
-        }
-
-        internal static void Clear(this CfgNode node, CfgEvents events) {
-            var metadata = CfgMetadataCache.GetMetadata(node.GetType(), node.Events);
-            foreach (var pair in metadata) {
-#if NETS
-                bool? isGenericType = pair.Value.PropertyInfo.PropertyType.GetTypeInfo().IsGenericType;
-#else
-                bool? isGenericType = pair.Value.PropertyInfo.PropertyType.IsGenericType;
-#endif
-
-                if (isGenericType.Value) {
-                    pair.Value.Setter(node, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
-                } else {
-                    pair.Value.Setter(node, pair.Value.TypeMismatch ? pair.Value.Default : pair.Value.Attribute.value);
-                }
-            }
-            node.Events = events ?? new CfgEvents(new DefaultLogger(new MemoryLogger(), null));
-        }
 
         /// <summary>
         /// When you want to clone yourself 
@@ -88,14 +34,13 @@ namespace Cfg.Net.Ext {
             return CfgMetadataCache.Clone(node);
         }
 
-
+        [Obsolete("This isn't necessary anymore.  Every object that inherits from CfgNode is created with defaults.")]
         public static T WithDefaults<T>(this T node) where T : CfgNode {
-            node.SetDefaults();
             return node;
         }
 
+        [Obsolete("Use Check method in CfgNode instead.")]
         public static T WithValidation<T>(this T node, string parent = "") where T : CfgNode {
-            node.WithDefaults();
             if (node.Events == null) {
                 node.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), null));
             }

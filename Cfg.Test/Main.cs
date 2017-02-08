@@ -1,13 +1,14 @@
 ﻿#region license
 // Cfg.Net
-// Copyright 2015 Dale Newman
-// 
+// An Alternative .NET Configuration Handler
+// Copyright 2015-2017 Dale Newman
+//  
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
+//   
+//       http://www.apache.org/licenses/LICENSE-2.0
+//   
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +20,7 @@ using System.Diagnostics;
 using System.Xml.Linq;
 using Cfg.Net;
 using Cfg.Net.Ext;
+using Cfg.Net.Parsers;
 using Cfg.Test.TestClasses;
 using NUnit.Framework;
 
@@ -31,14 +33,14 @@ namespace Cfg.Test {
         public void TestEmptyXmlCfg() {
             var cfg = new AttributeCfg(@"<cfg></cfg>");
             Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("A 'sites' element with at least one item is required in cfg.", cfg.Errors()[0]);
+            Assert.AreEqual("sites must be populated in cfg.", cfg.Errors()[0]);
         }
 
         [Test]
         public void TestEmptyJsonCfg() {
             var cfg = new AttributeCfg(@"{}");
             Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("A 'sites' element with at least one item is required.", cfg.Errors()[0]);
+            Assert.AreEqual("sites must be populated.", cfg.Errors()[0]);
         }
 
         [Test]
@@ -48,7 +50,7 @@ namespace Cfg.Test {
             Assert.IsNotNull(cfg.Sites);
             Assert.AreEqual(0, cfg.Sites.Count);
 
-            var sites = new AttributeSite().WithDefaults();
+            var sites = new AttributeSite();
             Assert.IsNotNull(sites);
             Assert.IsNotNull(sites.Something);
         }
@@ -60,7 +62,7 @@ namespace Cfg.Test {
             Assert.IsNotNull(cfg.Sites);
             Assert.AreEqual(0, cfg.Sites.Count);
 
-            var sites = new AttributeSite().WithDefaults();
+            var sites = new AttributeSite();
             Assert.IsNotNull(sites);
             Assert.IsNotNull(sites.Something);
         }
@@ -85,14 +87,14 @@ namespace Cfg.Test {
         public void TestEmptySites() {
             var cfg = new AttributeCfg(@"<cfg><sites/></cfg>");
             Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("A 'sites' element with at least one item is required in cfg.", cfg.Errors()[0]);
+            Assert.AreEqual("sites must be populated in cfg.", cfg.Errors()[0]);
         }
 
         [Test]
         public void TestEmptyJsonSites() {
             var cfg = new AttributeCfg("{\"sites\":[]}");
             Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("A 'sites' element with at least one item is required.", cfg.Errors()[0]);
+            Assert.AreEqual("sites must be populated.", cfg.Errors()[0]);
         }
 
         [Test]
@@ -112,8 +114,8 @@ namespace Cfg.Test {
             foreach (var problem in problems) {
                 Console.WriteLine(problem);
             }
-            Assert.IsTrue(problems[0] == "A 'sites' 'add' element is missing a 'name' attribute.");
-            Assert.IsTrue(problems[1] == "A 'sites' 'add' element is missing a 'url' attribute.");
+            Assert.IsTrue(problems[0] == "A sites item is missing name.");
+            Assert.IsTrue(problems[1] == "A sites item is missing url.");
         }
 
         [Test]
@@ -133,8 +135,8 @@ namespace Cfg.Test {
             }
 
             Assert.AreEqual(2, problems.Length);
-            Assert.AreEqual("A 'sites' 'add' element contains an invalid 'invalid' attribute.  Valid attributes are: name, url, something, numeric, common.", problems[0]);
-            Assert.AreEqual("A 'sites' 'add' element is missing a 'url' attribute.", problems[1]);
+            Assert.AreEqual("A sites item contains an invalid invalid.  It may only contain: name, url, something, numeric, common.", problems[0]);
+            Assert.AreEqual("A sites item is missing url.", problems[1]);
 
         }
 
@@ -149,12 +151,14 @@ namespace Cfg.Test {
                     </sites>
                 </cfg>".Replace("'", "\"");
 
+            var parser = new NanoXmlParser();
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            var cfg = new AttributeCfg(xml);
+            var x = parser.Parse(xml);
             stopWatch.Stop();
 
-            Console.WriteLine("cfg.net load ms:" + stopWatch.ElapsedMilliseconds);
+            Console.WriteLine("nano load ms:" + stopWatch.ElapsedMilliseconds);
 
             stopWatch.Restart();
             var doc = XDocument.Parse(xml);
@@ -162,8 +166,10 @@ namespace Cfg.Test {
 
             Console.WriteLine("xdoc parse ms:" + stopWatch.ElapsedMilliseconds);
 
+            Assert.IsNotNull(x);
             Assert.IsNotNull(doc);
 
+            var cfg = new AttributeCfg(xml);
             var problems = cfg.Errors();
 
             foreach (var problem in problems) {
@@ -171,8 +177,8 @@ namespace Cfg.Test {
             }
 
             Assert.AreEqual(2, problems.Length);
-            Assert.AreEqual("Could not set 'numeric' to 'x' inside 'sites' 'add'. Input string was not in a correct format.", problems[0]);
-            Assert.AreEqual("Duplicate 'name' value 'github' in 'sites'.", problems[1]);
+            Assert.AreEqual("Could not set numeric to x inside sites item. Input string was not in a correct format.", problems[0]);
+            Assert.AreEqual("Duplicate name value github in sites.", problems[1]);
 
             Assert.AreEqual(4, cfg.Sites.Count);
 

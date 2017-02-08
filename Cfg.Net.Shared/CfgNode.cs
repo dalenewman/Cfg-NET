@@ -1,13 +1,14 @@
 ﻿#region license
 // Cfg.Net
-// Copyright 2015 Dale Newman
-// 
+// An Alternative .NET Configuration Handler
+// Copyright 2015-2017 Dale Newman
+//  
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
+//   
+//       http://www.apache.org/licenses/LICENSE-2.0
+//   
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Cfg.Net.Contracts;
-using Cfg.Net.Ext;
 using Cfg.Net.Loggers;
 using Cfg.Net.Parsers;
 using Cfg.Net.Serializers;
@@ -39,29 +39,34 @@ namespace Cfg.Net {
         internal CfgEvents Events { get; set; }
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
 
+        protected CfgNode() {
+            Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), Logger));
+            Clear();
+            Type = GetType();
+        }
+
         /// <summary>
         /// Constructor for injecting anything marked with IDependency
         /// </summary>
         /// <param name="dependencies"></param>
-        protected CfgNode(params IDependency[] dependencies) {
+        protected CfgNode(params IDependency[] dependencies) : this() {
 
-            if (dependencies != null) {
-                foreach (var dependency in dependencies.Where(dependency => dependency != null)) {
-                    if (dependency is IReader) {
-                        Reader = dependency as IReader;
-                    } else if (dependency is IParser) {
-                        Parser = dependency as IParser;
-                    } else if (dependency is ISerializer) {
-                        Serializer = dependency as ISerializer;
-                    } else if (dependency is ILogger) {
-                        Logger = dependency as ILogger;
-                    } else if (dependency is ICustomizer) {
-                        Customizers.Add(dependency as ICustomizer);
-                    }
+            if (dependencies == null)
+                return;
+
+            foreach (var dependency in dependencies.Where(dependency => dependency != null)) {
+                if (dependency is IReader) {
+                    Reader = dependency as IReader;
+                } else if (dependency is IParser) {
+                    Parser = dependency as IParser;
+                } else if (dependency is ISerializer) {
+                    Serializer = dependency as ISerializer;
+                } else if (dependency is ILogger) {
+                    Logger = dependency as ILogger;
+                } else if (dependency is ICustomizer) {
+                    Customizers.Add(dependency as ICustomizer);
                 }
             }
-
-            Type = GetType();
         }
 
         protected internal void Error(string message, params object[] args) {
@@ -76,16 +81,14 @@ namespace Cfg.Net {
         /// Load the configuration into the root (top-most) node.
         /// </summary>
         /// <param name="cfg">by default, cfg should be XML or JSON, but can be other things depending on what IParser is injected.</param>
-        /// <param name="parameters">key, value pairs that replace @(PlaceHolders) with values.</param>
+        /// <param name="parameters">key, value pairs that may be used in ICustomizer implementations.</param>
         public void Load(string cfg, IDictionary<string, string> parameters = null) {
 
-            var logger = new DefaultLogger(new MemoryLogger(), Logger);
-            Events = new CfgEvents(logger);
-            this.Clear(Events);
+            Clear();
+            Events.Clear();
 
             if (string.IsNullOrEmpty(cfg)) {
-                Events.Error("The configuration passed in is null.");
-                this.SetDefaults();
+                Events.NullOrEmptyConfiguration();
                 return;
             }
 
@@ -98,9 +101,8 @@ namespace Cfg.Net {
             INode node;
             try {
                 if (Reader != null) {
-                    cfg = Reader.Read(cfg, parameters, logger);
-                    if (Events.Errors().Any()) {
-                        this.SetDefaults();
+                    cfg = Reader.Read(cfg, parameters, Events.Logger);
+                    if (Events.Logger.Errors().Any()) {
                         return;
                     }
                 }
@@ -114,8 +116,7 @@ namespace Cfg.Net {
                             node = new NanoXmlParser().Parse(cfg);
                             break;
                         default:
-                            Events.Error("Without a custom parser, the configuration should be XML or JSON. Your configuration starts with the character {0}.", cfg[0]);
-                            this.SetDefaults();
+                            Events.InvalidConfiguration(cfg[0]);
                             return;
                     }
                 } else {
@@ -145,16 +146,18 @@ namespace Cfg.Net {
                 }
             }
 
-            LoadProperties(node, string.Empty, parameters, Customizers);
-            LoadCollections(node, string.Empty, parameters);
-            PreValidate();
-            ValidateBasedOnAttributes(node, parameters);
-            ValidateListsBasedOnAttributes(node.Name);
-            Validate();
-            PostValidate();
+            Process(node, string.Empty, Serializer, Events, parameters, Customizers);
         }
 
-        CfgNode Load(
+        public void Check() {
+            Events.Clear();
+            var name = CfgMetadataCache.NormalizeName(Type, Type.Name);
+            var node = new ObjectNode(this, name);
+            Process(node, name, Serializer, Events, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), Customizers);
+        }
+
+
+        private CfgNode Process(
             INode node,
             string parent,
             ISerializer serializer,
@@ -162,10 +165,10 @@ namespace Cfg.Net {
             IDictionary<string, string> parameters,
             IList<ICustomizer> customizers
         ) {
-            this.Clear(events);
+            Clear();
 
-            // parser, reader, and mergeParameters do not need to be passed in
-
+            // preserving events, customizers, and serializer
+            Events = events;
             Customizers = customizers;
             Serializer = serializer;
 
@@ -290,8 +293,8 @@ namespace Cfg.Net {
                                     }
                                 }
                             } else {
-                                var loaded = item.Loader().Load(add, subNode.Name, Serializer, Events, parameters, Customizers);
-                                elements[addKey].Add(loaded);
+                                var processed = item.Loader().Process(add, subNode.Name, Serializer, Events, parameters, Customizers);
+                                elements[addKey].Add(processed);
                             }
                         } else {
                             Events.UnexpectedElement(add.Name, subNode.Name);
@@ -308,7 +311,7 @@ namespace Cfg.Net {
             var elementNames = CfgMetadataCache.ElementNames(Type).ToList();
             foreach (var listName in elementNames) {
                 var listMetadata = metadata[listName];
-                var list = (IList)metadata[listName].Getter(this);
+                var list = (IList)listMetadata.Getter(this);
                 ValidateUniqueAndRequiredProperties(parent, listName, listMetadata, list);
             }
         }
@@ -403,6 +406,9 @@ namespace Cfg.Net {
                     var item = metadata[attributeKey];
 
                     if (item.PropertyInfo.PropertyType == typeof(string)) {
+
+                        if (attribute.Value == null)  // user has not provided a default
+                            continue;
 
                         var stringValue = attribute.Value.ToString();
 
@@ -520,12 +526,25 @@ namespace Cfg.Net {
         }
 
         public string[] Errors() {
-            return Events == null ? new string[0] : Events.Errors();
+            return Events == null ? new string[0] : Events.Logger.Errors();
         }
 
         public string[] Warnings() {
-            return Events == null ? new string[0] : Events.Warnings();
+            return Events == null ? new string[0] : Events.Logger.Warnings();
         }
 
+        /// <summary>
+        /// Clears Cfg decorated properties.
+        /// </summary>
+        private void Clear() {
+            var metadata = CfgMetadataCache.GetMetadata(GetType(), Events);
+            foreach (var pair in metadata) {
+                if (pair.Value.ListType == null) {
+                    pair.Value.Setter(this, pair.Value.TypeMismatch ? pair.Value.TypeDefault : pair.Value.Attribute.value);
+                } else {
+                    pair.Value.Setter(this, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                }
+            }
+        }
     }
 }

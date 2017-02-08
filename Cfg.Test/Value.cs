@@ -1,13 +1,14 @@
 ﻿#region license
 // Cfg.Net
-// Copyright 2015 Dale Newman
-// 
+// An Alternative .NET Configuration Handler
+// Copyright 2015-2017 Dale Newman
+//  
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
+//   
+//       http://www.apache.org/licenses/LICENSE-2.0
+//   
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,10 +46,10 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(4, problems.Length);
-            Assert.IsTrue(problems[0] == "The 'value' attribute value '5' is too small. The minimum value allowed is '6'.");
-            Assert.IsTrue(problems[1] == "The 'longvalue' attribute value '5' is too small. The minimum value allowed is '6'.");
-            Assert.IsTrue(problems[2] == "The 'stringvalue' attribute value '6' is too big. The maximum value allowed is '5'.");
-            Assert.IsTrue(problems[3] == "The 'stringvalue' attribute value '\"10\"' is too small. The minimum value allowed is '1'.");
+            Assert.IsTrue(problems[0] == "The value value 5 is too small. The minimum value allowed is 6.");
+            Assert.IsTrue(problems[1] == "The longvalue value 5 is too small. The minimum value allowed is 6.");
+            Assert.IsTrue(problems[2] == "The stringvalue value 6 is too big. The maximum value allowed is 5.");
+            Assert.IsTrue(problems[3] == "The stringvalue value \"10\" is too small. The minimum value allowed is 1.");
 
         }
 
@@ -71,9 +72,9 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(3, problems.Length);
-            Assert.IsTrue(problems[0] == "The 'value' attribute value '5' is too small. The minimum value allowed is '6'.");
-            Assert.IsTrue(problems[1] == "The 'longvalue' attribute value '5' is too small. The minimum value allowed is '6'.");
-            Assert.IsTrue(problems[2] == "The 'stringvalue' attribute value '6' is too big. The maximum value allowed is '5'.");
+            Assert.IsTrue(problems[0] == "The value value 5 is too small. The minimum value allowed is 6.");
+            Assert.IsTrue(problems[1] == "The longvalue value 5 is too small. The minimum value allowed is 6.");
+            Assert.IsTrue(problems[2] == "The stringvalue value 6 is too big. The maximum value allowed is 5.");
 
         }
 

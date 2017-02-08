@@ -1,13 +1,14 @@
 ﻿#region license
 // Cfg.Net
-// Copyright 2015 Dale Newman
-// 
+// An Alternative .NET Configuration Handler
+// Copyright 2015-2017 Dale Newman
+//  
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
+//   
+//       http://www.apache.org/licenses/LICENSE-2.0
+//   
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,7 +44,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("An invalid value of 'bad-value' is in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
+            Assert.AreEqual("An invalid value of bad-value is in value.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }
 
@@ -64,7 +65,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("An invalid value of 'bad-value' is in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
+            Assert.AreEqual("An invalid value of bad-value is in value.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }
 
@@ -87,7 +88,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("An invalid value of 'bad' is in the 'value' attribute.  The valid domain is: GOOD, VALUE, ANOTHER, GOOD, VALUE.", problems[0]);
+            Assert.AreEqual("An invalid value of bad is in value.  The valid domain is: GOOD, VALUE, ANOTHER, GOOD, VALUE.", problems[0]);
 
         }
 
@@ -110,7 +111,7 @@ namespace Cfg.Test {
 
             var problems = cfg.Errors();
             Assert.AreEqual(1, problems.Length);
-            Assert.AreEqual("An invalid value of 'bad-value' is in the 'value' attribute.  The valid domain is: good-value, another-good-value.", problems[0]);
+            Assert.AreEqual("An invalid value of bad-value is in value.  The valid domain is: good-value, another-good-value.", problems[0]);
 
         }
     }

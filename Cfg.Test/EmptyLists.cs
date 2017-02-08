@@ -1,13 +1,14 @@
 ﻿#region license
 // Cfg.Net
-// Copyright 2015 Dale Newman
-// 
+// An Alternative .NET Configuration Handler
+// Copyright 2015-2017 Dale Newman
+//  
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
+//   
+//       http://www.apache.org/licenses/LICENSE-2.0
+//   
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +24,32 @@ namespace Cfg.Test {
 
     [TestFixture]
     public class EmptyLists {
+
+        [Test]
+        public void ShouldBeInitialized() {
+            var cfg = new EmptyListCfg();
+            Assert.IsNotNull(cfg.Connections);
+            Assert.AreEqual(0, cfg.Connections.Count);
+            Assert.IsNullOrEmpty(cfg.NullProperty);
+            Assert.IsNotNull(cfg.DefaultedProperty);
+            Assert.AreEqual("Default", cfg.DefaultedProperty);
+        }
+
+        [Test]
+        public void ShouldRespectObjectInitialization() {
+            var cfg = new EmptyListCfg {
+                DefaultedProperty = "Set",
+                NullProperty = "Null",
+                Connections = new List<EmptyListConnection> { new EmptyListConnection() }
+            };
+
+            Assert.IsNotNull(cfg.Connections);
+            Assert.AreEqual(1, cfg.Connections.Count);
+            Assert.IsNotNull(cfg.NullProperty);
+            Assert.IsNotNull(cfg.DefaultedProperty);
+            Assert.AreEqual("Null", cfg.NullProperty);
+            Assert.AreEqual("Set", cfg.DefaultedProperty);
+        }
 
         [Test]
         public void TestConnectionsXml() {
@@ -97,9 +124,19 @@ namespace Cfg.Test {
     }
 
     public sealed class EmptyListCfg : CfgNode {
+
+        public EmptyListCfg() {
+        }
+
         public EmptyListCfg(string xml) {
             Load(xml);
         }
+
+        [Cfg()]
+        public string NullProperty { get; set; }
+
+        [Cfg(value = "Default")]
+        public string DefaultedProperty { get; set; }
 
         [Cfg(required = false)]
         public List<EmptyListConnection> Connections { get; set; }

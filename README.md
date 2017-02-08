@@ -186,20 +186,15 @@ cfg.Load(xml);
 
 As your configuration loads:
 
-1. Corresponding objects are created. 
-1. List properties are initialized.
-1. `required` confirms a property value is input
-1. Default `value` is applied as necessary
-1. [`PreValidate()`](#PreValidate) is executed
-1. `toLower` or `toUpper` may modify the value
-1. `trim`, `trimStart`, or `trimEnd` may trim the value
-1. `domain` checks value against valid values
-1. `minLength` checks value against a minimum length
-1. `maxLength` checks value against a maximum length
-1. `minValue` checks value against a minimum value
-1. `maxValue` checks value against a maximum value
-1. `unique` confirms attributes are unique within a list
-1. `required` confirms a list has items
+1. `value` replaces `null`
+1. [`PreValidate()`](#PreValidate) runs
+1. `toLower` or `toUpper` modifies
+1. `trim`, `trimStart`, or `trimEnd` trims
+1. `domain` validates allowed values
+1. `minLength` and `maxLength` validate length
+1. `minValue` and `maxValue` validate range
+1. `unique` confirms uniqueness within lists
+1. `required` confirms things exist
 1. [`Validate`](#Validate) is executed
 1. [`PostValidate`](#PostValidate) is executed
 
@@ -235,7 +230,7 @@ so they can fix them. Here are some example errors:
 
 Remove the required fruit and...
 
-> A **fruit** element with at least one item is required in **cfg**.
+> **fruit** must be populated in **cfg**.
 
 Add another apple and...
 
@@ -243,7 +238,7 @@ Add another apple and...
 
 Add the color pink...
 
-> An invalid value of **pink** is in the **name** attribute. The valid domain is: red, yellow, green, purple, blue, orange.
+> An invalid value of **pink** is in **name**.  The valid domain is: red, yellow, green, purple, blue, orange.
 
 If Cfg-NET doesn't report issues, your configuration 
 is valid.  You can loop through your fruits and their 
@@ -267,17 +262,16 @@ property is never `null`.
 
 Play with the apples and bananas on [.NET Fiddle](https://dotnetfiddle.net/slRAf3).
 
-Validation and Modification
+Customization
 ---------------------------
 
 The `Cfg` attribute's optional properties 
-offer *configurable* validation.
-If it's not enough, you have 4 ways to extend:
+offer simple validation.  If it's not enough, 
+you have ways to extend:
 
 1. Overriding `PreValidate()`
 1. Overriding `Validate()`
 1. Overriding `PostValidate()`
-1. Injecting customizer(s) into a model's contructor
 
 ### PreValidate()
 
@@ -337,11 +331,12 @@ protected override void PostValidate() {
 }
 ```
 
-### Injecting Customizers into Model's Contructor
+### Customization
 
-If you want to inject customizers into 
-Cfg-NET, an interface is defined for this. 
-Read more about injecting [here](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md).
+If the attributes and methods aren't enough, 
+you may inject customizers (e.g. things 
+implementing `ICustomizer`) into 
+your model's contructor.
 
 ### Serialize
 
@@ -385,9 +380,33 @@ This produces a result of:
 </cfg>
 ```
 
-**Note**: Modifying your configuration code doesn't 
-set defaults for or validate your newly added objects.  Of course, 
-you can serialize and load again if that's what you want.
+### Configure with Code and Check
+
+Loading configurations is great.  However, sometimes 
+you need to write a configuration in code and *still* be 
+able to check it for errors and/or warnings.  To do this, 
+just create your object however you like, and the run the 
+`Check` method.
+
+```csharp
+var cfg = new Cfg {
+    Fruit = new List<Fruit> {
+        new Fruit {
+            Name = "Apple",
+            Colors = new List<Color> {
+                new Color {Name = "red"},
+                new Color {Name = "aqua"}
+            }
+        }
+    }
+};
+
+// Instead of using Load(), use Check()
+cfg.Check();
+
+// I put an error in there on purpose (hint: aqua is invalid)
+Assert.AreEqual(1, cfg.Errors().Length);
+```
 
 ### Credits
 *  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
