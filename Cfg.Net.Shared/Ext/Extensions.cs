@@ -41,9 +41,6 @@ namespace Cfg.Net.Ext {
 
         [Obsolete("Use Check method in CfgNode instead.")]
         public static T WithValidation<T>(this T node, string parent = "") where T : CfgNode {
-            if (node.Events == null) {
-                node.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), null));
-            }
             node.ValidateBasedOnAttributes(new XmlNode(), null);
             node.ValidateListsBasedOnAttributes(parent);
             return node;

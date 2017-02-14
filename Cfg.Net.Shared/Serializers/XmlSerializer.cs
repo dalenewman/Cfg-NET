@@ -24,7 +24,8 @@ using System.Text;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Serializers {
-    public sealed class XmlSerializer : ISerializer {
+
+    public class XmlSerializer : ISerializer {
         public string Serialize(CfgNode node) {
             return InnerSerialize(node);
         }

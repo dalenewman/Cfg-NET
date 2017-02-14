@@ -78,5 +78,10 @@ namespace Cfg.Net.Loggers {
             _errors.Clear();
             _warnings.Clear();
         }
+
+        public void ClearCache() {
+            _errorCache = null;
+            _warningCache = null;
+        }
     }
 }

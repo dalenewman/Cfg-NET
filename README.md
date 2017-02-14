@@ -2,10 +2,7 @@ Cfg-NET
 =======
 
 [![Build status](https://ci.appveyor.com/api/projects/status/qm4auhkcv6b23abr?svg=true)](https://ci.appveyor.com/project/dalenewman/cfg-net)
-[![NuGet Cfg-Net](https://img.shields.io/nuget/v/Cfg-NET.svg?label=Nuget+Cfg-Net)](https://www.nuget.org/packages/Cfg-NET)
-[![NuGet Cfg-Net.Reader](https://img.shields.io/nuget/v/Cfg-NET.Reader.svg?label=Nuget+Reader)](https://www.nuget.org/packages/Cfg-NET.Reader)
-[![NuGet Cfg-Net.Shorthand](https://img.shields.io/nuget/v/Cfg-NET.Shorthand.svg?label=Nuget+Shorthand)](https://www.nuget.org/packages/Cfg-NET.Shorthand)
-[![NuGet Cfg-Net.Environment](https://img.shields.io/nuget/v/Cfg-NET.Environment.svg?label=Nuget+Environment)](https://www.nuget.org/packages/Cfg-NET.Environment)
+[![NuGet](https://img.shields.io/nuget/v/Cfg-NET.svg?label=Nuget)](https://www.nuget.org/packages/Cfg-NET)
 
 An [open source](https://github.com/dalenewman/Cfg.Net) 
 configuration handler for .NET licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
@@ -25,7 +22,7 @@ configuration handler for .NET licensed under [Apache 2](http://www.apache.org/l
 * allows you to store your configuration where you want (e.g. web, file, string)
 * is extensible 
 * is composable
-* is small (~68 KB)
+* is small (~67 KB)
 * has zero dependencies
 * is portable (.NETStandard1.0 with PCL compatibility)
 * is available on [Nuget](https://www.nuget.org/packages/Cfg-NET)
@@ -141,6 +138,7 @@ built-in options:
 * `domain` with `delimiter` and `ignoreCase` options
 * `minLength` and/or `maxLength`
 * `minValue` and/or `maxValue`
+* `regex` with `ignoreCase` option
 
 If we want to make sure some fruit is defined in our configuration, we
 would add `required=true` to the fruit list like this:
@@ -179,24 +177,10 @@ Now that we have a model and our choice of JSON or XML
 configurations, we may load the configuration into the model like this:
 
 ```csharp
-// let's say the configuration is in the xml variable
+// pretending configuration is in xml
 var cfg = new Cfg();
 cfg.Load(xml);
 ```
-
-As your configuration loads:
-
-1. `value` replaces `null`
-1. [`PreValidate()`](#PreValidate) runs
-1. `toLower` or `toUpper` modifies
-1. `trim`, `trimStart`, or `trimEnd` trims
-1. `domain` validates allowed values
-1. `minLength` and `maxLength` validate length
-1. `minValue` and `maxValue` validate range
-1. `unique` confirms uniqueness within lists
-1. `required` confirms things exist
-1. [`Validate`](#Validate) is executed
-1. [`PostValidate`](#PostValidate) is executed
 
 ### Check the Configuration
 

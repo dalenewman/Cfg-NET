@@ -25,6 +25,7 @@ using Cfg.Net.Ext;
 
 namespace Cfg.Net.Serializers {
     public class JsonSerializer : ISerializer {
+
         public string Serialize(CfgNode node) {
             return InnerSerialize(node);
         }

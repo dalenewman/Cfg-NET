@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Cfg.Net {
     sealed class CfgMetadata {
@@ -29,11 +30,16 @@ namespace Cfg.Net {
         public CfgAttribute Attribute { get; set; }
         public Type ListType { get; set; }
         public Func<CfgNode> Loader { get; set; }
+        public Func<object> ListActivator { get; set; } 
         public string[] UniquePropertiesInList { get; set; }
         public Action<object, object> Setter { get; set; }
         public Func<object, object> Getter { get; set; }
         public bool TypeMismatch { get; set; }
         public object TypeDefault { get; set; }
+        public Regex Regex { get; set; }
+        public bool ImplementsProperties { get; set; }
+        public IEnumerable<ParameterInfo[]> Constructors { get; internal set; }
+        public List<string> Errors { get; internal set; } = new List<string>(); 
 
         public CfgMetadata(PropertyInfo propertyInfo, CfgAttribute attribute) {
             PropertyInfo = propertyInfo;

@@ -21,8 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Cfg.Net.Contracts;
-using Cfg.Net.Loggers;
 
 namespace Cfg.Net {
     internal static class CfgMetadataCache {
@@ -33,7 +33,7 @@ namespace Cfg.Net {
         private static readonly Dictionary<Type, List<string>> ElementCache = new Dictionary<Type, List<string>>();
         private static readonly Dictionary<Type, Dictionary<string, string>> NameCache = new Dictionary<Type, Dictionary<string, string>>();
 
-        internal static Dictionary<string, CfgMetadata> GetMetadata(Type type, CfgEvents events = null) {
+        internal static Dictionary<string, CfgMetadata> GetMetadata(Type type) {
             Dictionary<string, CfgMetadata> metadata;
             if (MetadataCache.TryGetValue(type, out metadata))
                 return metadata;
@@ -71,6 +71,19 @@ namespace Cfg.Net {
                         TypeDefault = GetDefaultValue(propertyInfo.PropertyType)
                     };
 
+                    // regex
+                    try {
+                        if (attribute.RegexIsSet) {
+#if NETS
+                            item.Regex = attribute.ignoreCase ? new Regex(attribute.regex, RegexOptions.IgnoreCase) : new Regex(attribute.regex);
+#else
+                            item.Regex = attribute.ignoreCase ? new Regex(attribute.regex, RegexOptions.Compiled | RegexOptions.IgnoreCase) : new Regex(attribute.regex, RegexOptions.Compiled);
+#endif
+                        }
+                    } catch (ArgumentException ex) {
+                        item.Errors.Add(CfgEvents.InvalidRegex(key, attribute.regex, ex));
+                    }
+
                     // check default value for type mismatch
                     if (attribute.ValueIsSet) {
                         if (attribute.value.GetType() != propertyInfo.PropertyType) {
@@ -79,33 +92,58 @@ namespace Cfg.Net {
                                 attribute.value = value;
                             } else {
                                 item.TypeMismatch = true;
-                                events?.TypeMismatch(key, value, propertyInfo.PropertyType);
+                                item.Errors.Add(CfgEvents.TypeMismatch(key, value, propertyInfo.PropertyType));
                             }
                         }
                     }
 
                     // type safety for value, min value, and max value
                     var defaultValue = attribute.value;
-                    if (ResolveType(() => attribute.ValueIsSet, ref defaultValue, key, item, events)) {
+                    if (ResolveType(() => attribute.ValueIsSet, ref defaultValue, key, item)) {
                         attribute.value = defaultValue;
                     }
 
                     var minValue = attribute.minValue;
-                    if (ResolveType(() => attribute.MinValueSet, ref minValue, key, item, events)) {
+                    if (ResolveType(() => attribute.MinValueSet, ref minValue, key, item)) {
                         attribute.minValue = minValue;
                     }
 
                     var maxValue = attribute.maxValue;
-                    if (ResolveType(() => attribute.MaxValueSet, ref maxValue, key, item, events)) {
+                    if (ResolveType(() => attribute.MaxValueSet, ref maxValue, key, item)) {
                         attribute.maxValue = maxValue;
                     }
+
+
+                    //foreach (var cp in constructors) {
+                    //    if (!cp.Any()) {
+                    //        obj = item.ListActivator();
+                    //        break;
+                    //    }
+
+                    //    if (cp.Count() == 1) {
+                    //        if (cp.First().ParameterType == typeof(int)) {
+                    //            obj = Activator.CreateInstance(item.ListType, add.Attributes.Count);
+                    //            break;
+                    //        }
+
+                    //        if (cp.First().ParameterType == typeof(string[])) {
+                    //            var names = add.Attributes.Select(a => a.Name).ToArray();
+                    //            obj = Activator.CreateInstance(item.ListType, new object[] { names });
+                    //            break;
+                    //        }
+                    //    }
+                    //}
 
 #if NETS
                     var propertyTypeInfo = propertyInfo.PropertyType.GetTypeInfo();
                     if (propertyTypeInfo.IsGenericType) {
                         listCache.Add(key);
                         item.ListType = propertyTypeInfo.GenericTypeArguments[0];
-                        if (item.ListType.GetTypeInfo().IsSubclassOf(typeof(CfgNode))) {
+                        var listTypeInfo = item.ListType.GetTypeInfo();
+                        item.ImplementsProperties = typeof(IProperties).GetTypeInfo().IsAssignableFrom(listTypeInfo);
+                        item.Constructors = propertyTypeInfo.DeclaredConstructors.Select(c => c.GetParameters());
+                        item.ListActivator = () => Activator.CreateInstance(propertyInfo.PropertyType);
+                        if (listTypeInfo.IsSubclassOf(typeof(CfgNode))) {
                             item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
                         }
                     } else {
@@ -115,6 +153,9 @@ namespace Cfg.Net {
                     if (propertyInfo.PropertyType.IsGenericType) {
                         listCache.Add(key);
                         item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
+                        item.ImplementsProperties = typeof(IProperties).IsAssignableFrom(item.ListType);
+                        item.Constructors = item.ListType.GetConstructors().Select(c => c.GetParameters());
+                        item.ListActivator = () => Activator.CreateInstance(propertyInfo.PropertyType);
                         if (item.ListType.IsSubclassOf(typeof(CfgNode))) {
                             item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
                         }
@@ -142,7 +183,7 @@ namespace Cfg.Net {
 
         }
 
-        private static bool ResolveType(Func<bool> isSet, ref object input, string key, CfgMetadata metadata, CfgEvents events) {
+        private static bool ResolveType(Func<bool> isSet, ref object input, string key, CfgMetadata metadata) {
             if (!isSet())
                 return true;
 
@@ -158,7 +199,7 @@ namespace Cfg.Net {
             }
 
             metadata.TypeMismatch = true;
-            events?.TypeMismatch(key, value, type);
+            metadata.Errors.Add(CfgEvents.TypeMismatch(key, value, type));
             return false;
         }
 
@@ -221,8 +262,6 @@ namespace Cfg.Net {
             clone.Serializer = node.Serializer;
             clone.Customizers = node.Customizers;
             clone.Type = node.Type;
-            var logger = node.Events == null ? new NullLogger() : node.Events.Logger as ILogger;
-            clone.Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), logger));
 
             var meta = GetMetadata(typeof(T));
             CloneProperties(meta, node, clone);
@@ -245,9 +284,9 @@ namespace Cfg.Net {
 
                     bool isAssignable = false;
 #if NETS
-                    isAssignable = typeof (CfgNode).GetTypeInfo().IsAssignableFrom(pair.Value.ListType.GetTypeInfo());
+                    isAssignable = typeof(CfgNode).GetTypeInfo().IsAssignableFrom(pair.Value.ListType.GetTypeInfo());
 #else
-                    isAssignable = typeof (CfgNode).IsAssignableFrom(pair.Value.ListType);
+                    isAssignable = typeof(CfgNode).IsAssignableFrom(pair.Value.ListType);
 #endif
                     if (!isAssignable)
                         continue;

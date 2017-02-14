@@ -33,14 +33,13 @@ namespace Cfg.Net {
         internal IParser Parser { get; set; }
         internal IReader Reader { get; set; }
         internal ISerializer Serializer { get; set; }
-        internal ILogger Logger { get; set; }
         internal IList<ICustomizer> Customizers { get; set; } = new List<ICustomizer>();
         internal Type Type { get; set; }
-        internal CfgEvents Events { get; set; }
+        internal CfgEvents Events { get; private set; }
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
-
+        private readonly List<string> _modelErrors = new List<string>();
         protected CfgNode() {
-            Events = new CfgEvents(new DefaultLogger(new MemoryLogger(), Logger));
+            Events = new CfgEvents(new DefaultLogger(new MemoryLogger()));
             Clear();
             Type = GetType();
         }
@@ -62,7 +61,7 @@ namespace Cfg.Net {
                 } else if (dependency is ISerializer) {
                     Serializer = dependency as ISerializer;
                 } else if (dependency is ILogger) {
-                    Logger = dependency as ILogger;
+                    Events.Logger.AddLogger(dependency as ILogger);
                 } else if (dependency is ICustomizer) {
                     Customizers.Add(dependency as ICustomizer);
                 }
@@ -84,8 +83,7 @@ namespace Cfg.Net {
         /// <param name="parameters">key, value pairs that may be used in ICustomizer implementations.</param>
         public void Load(string cfg, IDictionary<string, string> parameters = null) {
 
-            Clear();
-            Events.Clear();
+            Events.Clear(_modelErrors);
 
             if (string.IsNullOrEmpty(cfg)) {
                 Events.NullOrEmptyConfiguration();
@@ -150,13 +148,11 @@ namespace Cfg.Net {
         }
 
         public void Check() {
-            Events.Clear();
+            Events.Clear(_modelErrors);
             var name = CfgMetadataCache.NormalizeName(Type, Type.Name);
             var node = new ObjectNode(this, name);
             Process(node, name, Serializer, Events, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), Customizers);
         }
-
-
         private CfgNode Process(
             INode node,
             string parent,
@@ -204,7 +200,7 @@ namespace Cfg.Net {
         }
 
         void LoadCollections(INode node, string parentName, IDictionary<string, string> parameters) {
-            var metadata = CfgMetadataCache.GetMetadata(Type, Events);
+            var metadata = CfgMetadataCache.GetMetadata(Type);
             var elementNames = CfgMetadataCache.ElementNames(Type).ToList();
             var elements = new Dictionary<string, IList>();
             var elementHits = new HashSet<string>();
@@ -230,24 +226,11 @@ namespace Cfg.Net {
                             addHits.Add(addKey);
                             if (item.Loader == null) {
 
-#if NETS
-                                var listTypeInfo = item.ListType.GetTypeInfo();
-                                var isAssignable = typeof(IProperties).GetTypeInfo().IsAssignableFrom(listTypeInfo);
-#else
-                                var listTypeInfo = item.ListType;
-                                var isAssignable = typeof(IProperties).IsAssignableFrom(listTypeInfo);
-#endif
-
-                                if (isAssignable) {
+                                if (item.ImplementsProperties) {
                                     object obj = null;
 
-#if NETS
-                                    var constructors = listTypeInfo.DeclaredConstructors.Select(c => c.GetParameters());
-#else
-                                    var constructors = item.ListType.GetConstructors().Select(c => c.GetParameters());
-#endif
-
-                                    foreach (var cp in constructors) {
+                                    //todo: these activator.createinstances should be cached
+                                    foreach (var cp in item.Constructors) {
                                         if (!cp.Any()) {
                                             obj = Activator.CreateInstance(item.ListType);
                                             break;
@@ -307,7 +290,7 @@ namespace Cfg.Net {
         }
 
         protected internal void ValidateListsBasedOnAttributes(string parent) {
-            var metadata = CfgMetadataCache.GetMetadata(Type, Events);
+            var metadata = CfgMetadataCache.GetMetadata(Type);
             var elementNames = CfgMetadataCache.ElementNames(Type).ToList();
             foreach (var listName in elementNames) {
                 var listMetadata = metadata[listName];
@@ -327,7 +310,7 @@ namespace Cfg.Net {
             if (list.Count > 1) {
                 lock (Locker) {
                     if (listMetadata.UniquePropertiesInList == null) {
-                        listMetadata.UniquePropertiesInList = CfgMetadataCache.GetMetadata(listMetadata.ListType, Events)
+                        listMetadata.UniquePropertiesInList = CfgMetadataCache.GetMetadata(listMetadata.ListType)
                             .Where(p => p.Value.Attribute.unique)
                             .Select(p => p.Key)
                             .ToArray();
@@ -358,7 +341,7 @@ namespace Cfg.Net {
         }
 
         void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters, IList<ICustomizer> customizers) {
-            var metadata = CfgMetadataCache.GetMetadata(Type, Events);
+            var metadata = CfgMetadataCache.GetMetadata(Type);
             var keys = CfgMetadataCache.PropertyNames(Type).ToArray();
 
             if (!keys.Any())
@@ -454,7 +437,7 @@ namespace Cfg.Net {
         }
 
         internal void ValidateBasedOnAttributes(INode node, IDictionary<string, string> parameters) {
-            var metadata = CfgMetadataCache.GetMetadata(Type, Events);
+            var metadata = CfgMetadataCache.GetMetadata(Type);
             var keys = CfgMetadataCache.PropertyNames(Type).ToArray();
 
             if (!keys.Any())
@@ -484,6 +467,18 @@ namespace Cfg.Net {
 
                 CheckValueBoundaries(item.Attribute, key, objectValue);
 
+                CheckValueMatchesRegex(item, key, stringValue);
+
+            }
+        }
+
+        void CheckValueMatchesRegex(CfgMetadata metaData, string name, string value) {
+            if (!metaData.Attribute.RegexIsSet || metaData.Regex == null) {
+                return;
+            }
+
+            if (!metaData.Regex.IsMatch(value)) {
+                Events.ValueDoesNotMatchRegex(name, value, metaData.Attribute.regex);
             }
         }
 
@@ -526,23 +521,26 @@ namespace Cfg.Net {
         }
 
         public string[] Errors() {
-            return Events == null ? new string[0] : Events.Logger.Errors();
+            return Events.Logger.Errors();
         }
 
         public string[] Warnings() {
-            return Events == null ? new string[0] : Events.Logger.Warnings();
+            return Events.Logger.Warnings();
         }
 
         /// <summary>
         /// Clears Cfg decorated properties.
         /// </summary>
         private void Clear() {
-            var metadata = CfgMetadataCache.GetMetadata(GetType(), Events);
+            var metadata = CfgMetadataCache.GetMetadata(GetType());
             foreach (var pair in metadata) {
+                foreach (var error in pair.Value.Errors) {
+                    _modelErrors.Add(error);
+                }
                 if (pair.Value.ListType == null) {
                     pair.Value.Setter(this, pair.Value.TypeMismatch ? pair.Value.TypeDefault : pair.Value.Attribute.value);
                 } else {
-                    pair.Value.Setter(this, Activator.CreateInstance(pair.Value.PropertyInfo.PropertyType));
+                    pair.Value.Setter(this, pair.Value.ListActivator());
                 }
             }
         }

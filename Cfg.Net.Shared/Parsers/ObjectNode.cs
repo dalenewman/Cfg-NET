@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Parsers {
-    public class ObjectNode : INode {
+    internal sealed class ObjectNode : INode {
 
         private readonly Dictionary<string, IAttribute> _attributes = new Dictionary<string, IAttribute>();
 

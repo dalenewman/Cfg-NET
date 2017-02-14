@@ -26,6 +26,7 @@ namespace Cfg.Net {
         private int _minLength;
         private object _minValue;
         private object _value;
+        private string _regex;
 
         // ReSharper disable InconsistentNaming
 
@@ -162,6 +163,20 @@ namespace Cfg.Net {
         }
 
         /// <summary>
+        /// Regex validator for this property.
+        /// </summary>
+        public string regex
+        {
+            get { return _regex; }
+            set
+            {
+                if (value == null) return;
+                _regex = value;
+                RegexIsSet = true;
+            }
+        }
+
+        /// <summary>
         /// Serialization name for this property.
         /// </summary>
         public string name { get; set; }
@@ -172,6 +187,7 @@ namespace Cfg.Net {
         public bool MinValueSet { get; private set; }
         public bool DomainSet { get; private set; }
         public bool ValueIsSet { get; private set; }
+        public bool RegexIsSet { get; private set; }
 
         // ReSharper restore InconsistentNaming
     }

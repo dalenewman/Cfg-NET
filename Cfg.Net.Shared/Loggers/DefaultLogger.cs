@@ -16,19 +16,29 @@
 // limitations under the License.
 #endregion
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Loggers {
-    internal sealed class DefaultLogger : ILogger {
+    public class DefaultLogger : ILogger {
+
         private readonly List<ILogger> _loggers = new List<ILogger>();
         private readonly MemoryLogger _memorylogger;
 
-        public DefaultLogger(MemoryLogger memorylogger, ILogger logger) {
+        public DefaultLogger(MemoryLogger memorylogger) {
             _memorylogger = memorylogger;
             _loggers.Add(memorylogger);
-            if (logger != null) {
-                _loggers.Add(logger);
+        }
+
+        public void AddLogger(ILogger logger) {
+            foreach (var error in _memorylogger.Errors()) {
+                logger.Error(error);
             }
+            foreach (var warning in _memorylogger.Warnings()) {
+                logger.Warn(warning);
+            }
+            _memorylogger.ClearCache();
+            _loggers.Add(logger);
         }
 
         public void Warn(string message, params object[] args) {

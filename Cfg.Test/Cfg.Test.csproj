@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Clone.cs" />
+    <Compile Include="Regex.cs" />
     <Compile Include="FixIssue2.cs" />
     <Compile Include="ConfigureWithCode.cs" />
     <Compile Include="Trim.cs" />
@@ -118,6 +119,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Cfg.Net.45\Cfg.Net.45.csproj">
+      <Project>{4cfd5636-2e70-4f75-af99-aef8bb725f6f}</Project>
+      <Name>Cfg.Net.45</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Cfg.Net.Environment\Cfg.Net.Environment.csproj">
       <Project>{629f7c32-54ad-400c-a0bf-9d0772a58e3a}</Project>
       <Name>Cfg.Net.Environment</Name>
@@ -141,10 +146,6 @@
     <ProjectReference Include="..\Cfg.Net.Shorthand\Cfg.Net.Shorthand.csproj">
       <Project>{b74d8ffa-af9a-4b14-bc6d-3c43469d571d}</Project>
       <Name>Cfg.Net.Shorthand</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cfg.Net\Cfg.Net.csproj">
-      <Project>{6ccfd0fd-c0b7-4b2b-ab17-2d8e3567b7e2}</Project>
-      <Name>Cfg.Net</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -16,6 +16,7 @@
 // limitations under the License.
 #endregion
 using System;
+using System.Collections.Generic;
 using Cfg.Net.Loggers;
 
 namespace Cfg.Net {
@@ -99,8 +100,8 @@ namespace Cfg.Net {
             Logger.Error("{0} implementing IProperties has an incompatible constructor.  Cfg-Net needs a constructorless or single parameter constructor.  The single parameter may be a string[] of names, or an integer representing capacity.", CombineName(parentName, name));
         }
 
-        public void TypeMismatch(string key, object value, Type propertyType) {
-            Logger.Error("The {0} default of {1} is not a {2}.  Please cast it as such or change your type.", key, value, propertyType);
+        public static string TypeMismatch(string key, object value, Type propertyType) {
+            return $"The {key} default of {value} is not a {propertyType}.  Please cast it as such or change your type.";
         }
 
         public void ValueTooShort(string name, string value, int minLength) {
@@ -135,9 +136,19 @@ namespace Cfg.Net {
             Error($"Without a custom parser, the configuration should be XML or JSON. Your configuration starts with {character}.");
         }
 
-        public void Clear() {
+        public void Clear(IEnumerable<string> modelErrors) {
             Logger.Clear();
+            foreach (var error in modelErrors) {
+                Logger.Error(error);
+            }
         }
 
+        public static string InvalidRegex(string key, string regex, ArgumentException ex) {
+            return $"{key} has an invalid regex of {regex} {ex.Message}";
+        }
+
+        public void ValueDoesNotMatchRegex(string name, string value, string regex) {
+            Error($"{value} does not match regex {regex} in {name}");
+        }
     }
 }

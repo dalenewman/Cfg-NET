@@ -40,13 +40,16 @@ namespace Cfg.Test {
     </cfg>
 ".Replace("'", "\"");
 
-         var cfg = new CustomProblemCfg(xml, new TraceLogger());
+         var anotherLogger = new MemoryLogger();
+         var cfg = new CustomProblemCfg(xml, anotherLogger);
          var problems = cfg.Errors();
 
          Assert.AreEqual(3, problems.Length);
          Assert.IsTrue(problems[0] == "file provider needs file attribute.");
          Assert.IsTrue(problems[1] == "I don't like c:\\good.");
          Assert.IsTrue(problems[2] == "folder provider needs folder attribute.");
+
+         Assert.AreEqual(3, anotherLogger.Errors().Length);
       }
 
       [Test]

@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net;
 using Cfg.Net.Contracts;
-using Cfg.Net.Loggers;
 using NUnit.Framework;
 
 namespace Cfg.Test {
