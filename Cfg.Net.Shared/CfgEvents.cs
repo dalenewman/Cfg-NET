@@ -92,10 +92,6 @@ namespace Cfg.Net {
                    c == 'O' || c == 'U';
         }
 
-        public void OnlyOneAttributeAllowed(string parentName, string name, int count) {
-            Logger.Error("{0} does not inherit from CfgNode or implement IProperties, so you can only have one value in it.  You have {1} defined.", CombineName(parentName, name), count);
-        }
-
         public void ConstructorNotFound(string parentName, string name) {
             Logger.Error("{0} implementing IProperties has an incompatible constructor.  Cfg-Net needs a constructorless or single parameter constructor.  The single parameter may be a string[] of names, or an integer representing capacity.", CombineName(parentName, name));
         }

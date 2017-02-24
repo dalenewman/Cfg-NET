@@ -32,6 +32,8 @@ namespace Cfg.Test {
             var problems = cfg.Errors();
 
             Assert.AreEqual(0, problems.Length);
+            Assert.AreEqual(0, cfg.Sequence);
+            Assert.AreEqual(1, cfg.BigValues.First().Sequence);
             Assert.AreEqual(99999999, cfg.BigValues.First().BigValue);
         }
 

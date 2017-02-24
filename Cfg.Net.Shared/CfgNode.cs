@@ -38,6 +38,9 @@ namespace Cfg.Net {
         internal CfgEvents Events { get; private set; }
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
         private readonly List<string> _modelErrors = new List<string>();
+
+        public uint Sequence { get; private set; }
+
         protected CfgNode() {
             Events = new CfgEvents(new DefaultLogger(new MemoryLogger()));
             Clear();
@@ -144,14 +147,14 @@ namespace Cfg.Net {
                 }
             }
 
-            Process(node, string.Empty, Serializer, Events, parameters, Customizers);
+            Process(node, string.Empty, Serializer, Events, parameters, Customizers, 0);
         }
 
         public void Check() {
             Events.Clear(_modelErrors);
             var name = CfgMetadataCache.NormalizeName(Type, Type.Name);
             var node = new ObjectNode(this, name);
-            Process(node, name, Serializer, Events, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), Customizers);
+            Process(node, name, Serializer, Events, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), Customizers, 0);
         }
         private CfgNode Process(
             INode node,
@@ -159,17 +162,18 @@ namespace Cfg.Net {
             ISerializer serializer,
             CfgEvents events,
             IDictionary<string, string> parameters,
-            IList<ICustomizer> customizers
+            IList<ICustomizer> customizers,
+            uint sequence
         ) {
+            Sequence = sequence;
             Clear();
-
             // preserving events, customizers, and serializer
             Events = events;
             Customizers = customizers;
             Serializer = serializer;
 
             LoadProperties(node, parent, parameters, customizers);
-            LoadCollections(node, parent, parameters);
+            LoadCollections(node, parent, parameters, sequence);
             PreValidate();
             ValidateBasedOnAttributes(node, parameters);
             ValidateListsBasedOnAttributes(node.Name);
@@ -199,7 +203,7 @@ namespace Cfg.Net {
             return (Serializer ?? new XmlSerializer()).Serialize(this);
         }
 
-        void LoadCollections(INode node, string parentName, IDictionary<string, string> parameters) {
+        void LoadCollections(INode node, string parentName, IDictionary<string, string> parameters, uint sequence) {
             var metadata = CfgMetadataCache.GetMetadata(Type);
             var elementNames = CfgMetadataCache.ElementNames(Type).ToList();
             var elements = new Dictionary<string, IList>();
@@ -259,25 +263,9 @@ namespace Cfg.Net {
                                         }
                                         elements[addKey].Add(obj);
                                     }
-                                } else {
-                                    if (add.Attributes.Count == 1) {
-                                        var attrValue = add.Attributes[0].Value;
-                                        if (item.ListType == typeof(string) || item.ListType == typeof(object)) {
-                                            elements[addKey].Add(attrValue);
-                                        } else {
-                                            try {
-                                                elements[addKey].Add(CfgConstants.Converter[item.ListType](attrValue));
-                                            } catch (Exception ex) {
-                                                Events.SettingValue(subNode.Name, attrValue, parentName, subNode.Name, ex.Message);
-                                            }
-                                        }
-                                    } else {
-                                        Events.OnlyOneAttributeAllowed(parentName, subNode.Name, add.Attributes.Count);
-                                    }
                                 }
                             } else {
-                                var processed = item.Loader().Process(add, subNode.Name, Serializer, Events, parameters, Customizers);
-                                elements[addKey].Add(processed);
+                                elements[addKey].Add(item.Loader().Process(add, subNode.Name, Serializer, Events, parameters, Customizers, ++sequence));
                             }
                         } else {
                             Events.UnexpectedElement(add.Name, subNode.Name);
@@ -370,7 +358,9 @@ namespace Cfg.Net {
                     }
                     attribute.Value = maybe;
                 } else {
-                    Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
+                    if (attributeKey != "sequence") {
+                        Events.InvalidAttribute(parentName, node.Name, attribute.Name, string.Join(", ", keys));
+                    }
                 }
             }
 

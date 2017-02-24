@@ -34,18 +34,6 @@ namespace Cfg.Net.Ext {
             return CfgMetadataCache.Clone(node);
         }
 
-        [Obsolete("This isn't necessary anymore.  Every object that inherits from CfgNode is created with defaults.")]
-        public static T WithDefaults<T>(this T node) where T : CfgNode {
-            return node;
-        }
-
-        [Obsolete("Use Check method in CfgNode instead.")]
-        public static T WithValidation<T>(this T node, string parent = "") where T : CfgNode {
-            node.ValidateBasedOnAttributes(new XmlNode(), null);
-            node.ValidateListsBasedOnAttributes(parent);
-            return node;
-        }
-
         public static void TrimEnd(this StringBuilder sb, string trimChars) {
             var length = sb.Length;
             if (length != 0) {

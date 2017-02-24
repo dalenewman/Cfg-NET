@@ -83,7 +83,6 @@
     <Compile Include="Value.cs" />
     <Compile Include="Length.cs" />
     <Compile Include="ElementNameVariations.cs" />
-    <Compile Include="ListOfString.cs" />
     <Compile Include="PropertyManipulation.cs" />
     <Compile Include="EmptyLists.cs" />
     <Compile Include="Domain.cs" />

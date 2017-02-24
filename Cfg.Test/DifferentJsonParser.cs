@@ -51,7 +51,7 @@ namespace Cfg.Test {
             Assert.AreEqual(false, cfg.Parameters.Last().Value);
 
             var backToJson = cfg.Serialize();
-            Assert.AreEqual("{\"parameters\":[{\"name\":\"p1\",\"value\":true},{\"name\":\"p2\",\"value\":false}]}", backToJson);
+            Assert.AreEqual("{\"parameters\":[{\"name\":\"p1\",\"value\":true,\"sequence\":1},{\"name\":\"p2\",\"value\":false,\"sequence\":2}],\"sequence\":0}", backToJson);
 
         }
 

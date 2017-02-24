@@ -55,8 +55,11 @@ namespace Cfg.Test {
             Assert.AreEqual(@"parameters:
 - name: p1
   value: true
+  sequence: 1
 - name: p2
   value: false
+  sequence: 2
+sequence: 0
 ".Replace("\r\n", "\n"), backToYaml.Replace("\r\n", "\n"));
 
         }

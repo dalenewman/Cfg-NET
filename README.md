@@ -22,7 +22,7 @@ configuration handler for .NET licensed under [Apache 2](http://www.apache.org/l
 * allows you to store your configuration where you want (e.g. web, file, string)
 * is extensible 
 * is composable
-* is small (~67 KB)
+* is small (~68 KB)
 * has zero dependencies
 * is portable (.NETStandard1.0 with PCL compatibility)
 * is available on [Nuget](https://www.nuget.org/packages/Cfg-NET)
@@ -124,7 +124,15 @@ class Color : CfgNode {
  
 ### Design the Configuration
 
-Inheriting from `CfgNode` gives you a `Load()` method for your configuration.
+Inheriting from `CfgNode` provides:
+
+* a constructor allowing for dependency injection
+* a `Load()` method for processing an external configuration
+* a `Check()` method for processing an model you created in code
+* a `Sequence` property indicating the order your configuration was processed
+* an `Errors()` method to get errors in your configuration (after Load, or Check called)
+* an `Warnings()` method to get warnings in your configuration (after Load, or Check called)
+* a `Serialize()` method to get your model out as a string (xml, json, etc.) 
 
 The `Cfg` attributes add validation and modification 
 instructions.  An attribute has these 
@@ -139,6 +147,8 @@ built-in options:
 * `minLength` and/or `maxLength`
 * `minValue` and/or `maxValue`
 * `regex` with `ignoreCase` option
+
+---
 
 If we want to make sure some fruit is defined in our configuration, we
 would add `required=true` to the fruit list like this:
@@ -177,18 +187,17 @@ Now that we have a model and our choice of JSON or XML
 configurations, we may load the configuration into the model like this:
 
 ```csharp
-// pretending configuration is in xml
+// let xml be your configuration
 var cfg = new Cfg();
 cfg.Load(xml);
 ```
 
-### Check the Configuration
+### Examine for Errors and/or Warnings
 
 When you load a configuration, Cfg-NET doesn't throw 
-exceptions (on purpose). Instead, it collects errors 
-and/or warnings. 
+exceptions. Instead, it collects errors and/or warnings. 
 
-After loading, always check your model for any 
+After loading, always examine your model for any 
 issues using the `Errors()` and `Warnings()` methods:
 
 ```csharp
@@ -369,7 +378,7 @@ This produces a result of:
 Loading configurations is great.  However, sometimes 
 you need to write a configuration in code and *still* be 
 able to check it for errors and/or warnings.  To do this, 
-just create your object however you like, and the run the 
+just create your model however you like, and the run the 
 `Check` method.
 
 ```csharp
@@ -391,6 +400,9 @@ cfg.Check();
 // I put an error in there on purpose (hint: aqua is invalid)
 Assert.AreEqual(1, cfg.Errors().Length);
 ```
+
+### Conclusion
+So, if you need really great configurations for your programs, give Cfg-NET a try. I use it in just about all the programs I write, and I am very happy with it. Thank you for taking the time to read this. I appreciate the stars and feedback.
 
 ### Credits
 *  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
