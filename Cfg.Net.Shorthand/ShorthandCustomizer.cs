@@ -29,7 +29,7 @@ namespace Cfg.Net.Shorthand {
         private readonly string _shortHandProperty;
         private readonly string _longHandCollection;
         private readonly string _longHandProperty;
-        internal static char NamedParameterSplitter = ':';
+        private Dictionary<string, MethodData> MethodDataLookup { get; set; } = new Dictionary<string, MethodData>(StringComparer.OrdinalIgnoreCase);
 
         public ShorthandCustomizer(
             ShorthandRoot root,
@@ -43,6 +43,7 @@ namespace Cfg.Net.Shorthand {
             _shortHandProperty = shortHandProperty;
             _longHandCollection = longHandCollection;
             _longHandProperty = longHandProperty;
+            InitializeMethodDataLookup();
         }
 
         public void Customize(string collection, INode node, IDictionary<string, string> parameters, ILogger logger) {
@@ -65,7 +66,7 @@ namespace Cfg.Net.Shorthand {
             foreach (var expression in expressions) {
                 MethodData methodData;
 
-                if (!_root.MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
+                if (!MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
                     logger.Warn($"The short-hand expression method {expression.Method} is undefined.");
                     continue;
                 }
@@ -90,25 +91,29 @@ namespace Cfg.Net.Shorthand {
                     shorthandNode.Attributes.Add(new ShorthandAttribute(name, val));
                 } else {
                     // named parameters
-                    foreach (var parameter in passedParameters) {
-                        var split = Utility.Split(parameter, NamedParameterSplitter);
-                        if (split.Length != 2)
-                            continue;
+                    if(methodData.Signature.NamedParameterIndicator != string.Empty) {
+                        foreach (var parameter in passedParameters) {
+                            var split = Utility.Split(parameter, methodData.Signature.NamedParameterIndicator[0]);
+                            if (split.Length != 2)
+                                continue;
 
-                        var name = Utility.NormalizeName(split[0]);
-                        shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
-                        signatureParameters.RemoveAll(p => Utility.NormalizeName(p.Name) == name);
-                        var parameter1 = parameter;
-                        expression.Parameters.RemoveAll(p => p == parameter1);
+                            var name = Utility.NormalizeName(split[0]);
+                            shorthandNode.Attributes.Add(new ShorthandAttribute(name, split[1]));
+                            signatureParameters.RemoveAll(p => Utility.NormalizeName(p.Name) == name);
+                            var parameter1 = parameter;
+                            expression.Parameters.RemoveAll(p => p == parameter1);
+                        }
                     }
+
 
                     // ordered nameless parameters
                     for (var m = 0; m < signatureParameters.Count; m++) {
                         var signatureParameter = signatureParameters[m];
                         var parameterValue = m < expression.Parameters.Count ? expression.Parameters[m] : (signatureParameter.Value ?? string.Empty);
 
-                        if (parameterValue.Contains("\\" + NamedParameterSplitter)) {
-                            parameterValue = parameterValue.Replace("\\" + NamedParameterSplitter, NamedParameterSplitter.ToString());
+
+                        if (methodData.Signature.NamedParameterIndicator != string.Empty && parameterValue.Contains("\\" + methodData.Signature.NamedParameterIndicator[0])) {
+                            parameterValue = parameterValue.Replace("\\" + methodData.Signature.NamedParameterIndicator[0], methodData.Signature.NamedParameterIndicator);
                         }
 
                         var attribute = new ShorthandAttribute(signatureParameter.Name, parameterValue);
@@ -136,5 +141,12 @@ namespace Cfg.Net.Shorthand {
         }
 
         public void Customize(INode root, IDictionary<string, string> parameters, ILogger logger) { }
+
+        private void InitializeMethodDataLookup() {
+            foreach (var method in _root.Methods) {
+                MethodDataLookup[method.Name] = new MethodData(method, _root.Signatures.First(s => s.Name == method.Signature));
+            }
+        }
+
     }
 }

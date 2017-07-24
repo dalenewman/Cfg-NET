@@ -23,15 +23,13 @@ using Cfg.Net.Contracts;
 namespace Cfg.Net.Shorthand {
     public class ShorthandRoot : CfgNode {
 
+        public ShorthandRoot() {
+        }
+
         public ShorthandRoot(string cfg, params IDependency[] dependencies)
             : base(dependencies) {
             Load(cfg);
-            if (!Errors().Any()) {
-                InitializeMethodDataLookup();
-            }
         }
-
-        public Dictionary<string, MethodData> MethodDataLookup { get; set; } = new Dictionary<string, MethodData>(StringComparer.OrdinalIgnoreCase);
 
         [Cfg(required = true)]
         public List<Signature> Signatures { get; set; }
@@ -46,10 +44,5 @@ namespace Cfg.Net.Shorthand {
             }
         }
 
-        private void InitializeMethodDataLookup() {
-            foreach (var method in Methods) {
-                MethodDataLookup[method.Name] = new MethodData(method, Signatures.First(s => s.Name == method.Signature));
-            }
-        }
     }
 }

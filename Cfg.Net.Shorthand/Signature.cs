@@ -17,14 +17,15 @@
 #endregion
 using System.Collections.Generic;
 
-namespace Cfg.Net.Shorthand
-{
-    public class Signature : CfgNode
-    {
+namespace Cfg.Net.Shorthand {
+    public class Signature : CfgNode {
         [Cfg(required = true, unique = true, toLower = true)]
         public string Name { get; set; }
 
         [Cfg(required = false)]
         public List<Parameter> Parameters { get; set; }
+
+        [Cfg(value = ":", maxLength = 1)]
+        public string NamedParameterIndicator { get; set; }
     }
 }
