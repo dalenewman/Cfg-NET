@@ -41,6 +41,17 @@ namespace Cfg.Net.Environment {
                 "value"
             ) { }
 
+        public EnvironmentModifier(IPlaceHolderReplacer replacer) :
+            this(
+                replacer,
+                "environments",
+                "environment",
+                "name",
+                "parameters",
+                "name",
+                "value"
+            ) { }
+
         public EnvironmentModifier(
             IPlaceHolderReplacer placeHolderReplacer,
             string environmentsElementName,

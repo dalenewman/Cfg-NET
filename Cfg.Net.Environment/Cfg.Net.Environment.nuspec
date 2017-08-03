@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET.Environment</id>
-    <version>0.2.2</version>
+    <version>0.3.0</version>
     <title>Cfg-NET Environment</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -10,14 +10,14 @@
     <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>allow manipulation from the outside via paramenters, environments, and place-holders</description>
-    <releaseNotes>Updated to Cfg-Net's new interface.</releaseNotes>
-    <copyright>Copyright 2015-2016</copyright>
+    <releaseNotes>Added one more constructor to default implementation</releaseNotes>
+    <copyright>Copyright 2015-2017</copyright>
     <tags>configuration, settings</tags>
     <dependencies>
       <group targetFramework="netstandard1.0">
         <dependency id="NETStandard.Library" version="1.6.0" />
         <dependency id="System.Runtime" version="4.1.0" />
-        <dependency id="Cfg-NET" version="0.9.2" />
+        <dependency id="Cfg-NET" version="0.10.0" />
       </group>
       <group targetFramework="portable-net45+win8+wpa81+wp8" />
     </dependencies>    
