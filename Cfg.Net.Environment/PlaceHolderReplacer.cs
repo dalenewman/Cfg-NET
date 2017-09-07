@@ -51,7 +51,7 @@ namespace Cfg.Net.Environment {
                         if (parameters.ContainsKey(key)) {
                             builder.Append(parameters[key]);
                         } else {
-                            var placeHolder = $"@({key})";
+                            var placeHolder = string.Concat(_placeHolderMarker,_placeHolderOpen,key,_placeHolderClose);
                             builder.Append(placeHolder);
                             logger.Error($"Missing parameter for place-holder {placeHolder}.");
                         }

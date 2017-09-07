@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "targets": {
     ".NETStandard,Version=v1.0": {
       "Microsoft.NETCore.Jit/1.0.2": {
@@ -2055,7 +2055,21 @@
       "projectName": "Cfg.Net.Environment",
       "projectPath": "C:\\Code\\Cfg.Net\\Cfg.Net.Environment\\Cfg.Net.Environment.csproj",
       "projectJsonPath": "C:\\Code\\Cfg.Net\\Cfg.Net.Environment\\project.json",
+      "packagesPath": "C:\\Users\\dnewman\\.nuget\\packages\\",
+      "outputPath": "C:\\Code\\Cfg.Net\\Cfg.Net.Environment\\obj\\",
       "projectStyle": "ProjectJson",
+      "configFilePaths": [
+        "C:\\Users\\dnewman\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "c:\\temp\\modules": {},
+        "http://ssitdev.scope-services.local/NugetServer/nuget": {},
+        "https://api.nuget.org/v3/index.json": {},
+        "https://ci.appveyor.com/nuget/solrnet-022x5w7kmuba": {},
+        "https://dotnet.myget.org/F/dotnet-corefxlab/": {}
+      },
       "frameworks": {
         "netstandard1.0": {
           "projectReferences": {
