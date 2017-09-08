@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET.Shorthand</id>
-    <version>0.2.8</version>
+    <version>0.2.9</version>
     <title>Cfg-NET Shorthand</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -16,7 +16,7 @@
     <dependencies>
       <group targetFramework="netstandard1.0">
         <dependency id="NETStandard.Library" version="1.6.0" />
-        <dependency id="Cfg-NET" version="0.9.2" />
+        <dependency id="Cfg-NET" version="0.10.1" />
       </group>
       <group targetFramework="portable-net45+win8+wpa81+wp8" />
     </dependencies>

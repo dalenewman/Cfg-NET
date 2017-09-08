@@ -119,8 +119,8 @@ namespace Cfg.Test {
     public class TestCfg : CfgNode {
         [Cfg()]
         public List<TestThing> Things { get; set; }
-        public TestCfg(string xml) {
-            Load(xml);
+        public TestCfg(string xml, IDictionary<string, string> parameters = null) {
+            Load(xml, parameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
         }
     }
 

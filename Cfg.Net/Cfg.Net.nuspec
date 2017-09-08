@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET</id>
-    <version>0.10.0</version>
+    <version>0.10.1</version>
     <title>Cfg-NET</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An alternative configuration handler.</description>
-    <releaseNotes>Added public Sequence property to CfgNode so the consumer might know what order the nodes were loaded</releaseNotes>
+    <releaseNotes>if you pass in a DisableValidation = true parameter into Load method, CfgNode will not perform any validation (but will still run customizers)</releaseNotes>
     <copyright>Copyright 2015-2017</copyright>
     <tags>configuration, settings</tags>
     <dependencies>

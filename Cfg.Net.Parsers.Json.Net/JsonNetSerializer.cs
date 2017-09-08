@@ -15,6 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
 using Cfg.Net.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -34,4 +35,5 @@ namespace Cfg.Net.Parsers.Json.Net {
             return JsonConvert.SerializeObject(node, _settings);
         }
     }
+
 }

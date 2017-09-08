@@ -79,8 +79,8 @@ namespace Cfg.Test {
     public class TestLength : CfgNode {
         [Cfg()]
         public List<LengthThing> Things { get; set; }
-        public TestLength(string xml) {
-            Load(xml);
+        public TestLength(string xml, IDictionary<string,string> parameters = null) {
+            Load(xml, parameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
         }
     }
 

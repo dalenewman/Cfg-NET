@@ -25,8 +25,9 @@ namespace Cfg.Net.Parsers.YamlDotNet {
         private readonly Serializer _serializer;
 
         public YamlDotNetSerializer(
-            SerializationOptions serializationOptions = SerializationOptions.None,
-            INamingConvention namingConvention = null) {
+            SerializationOptions serializationOptions = SerializationOptions.None, 
+            INamingConvention namingConvention = null
+        ) {
             _writer = new StringWriter();
             _serializer = new Serializer(serializationOptions, namingConvention);
         }

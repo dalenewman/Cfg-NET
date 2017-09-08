@@ -46,9 +46,9 @@
     <Compile Include="XDocumentParser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cfg.Net\Cfg.Net.csproj">
-      <Project>{6ccfd0fd-c0b7-4b2b-ab17-2d8e3567b7e2}</Project>
-      <Name>Cfg.Net</Name>
+    <ProjectReference Include="..\Cfg.Net.45\Cfg.Net.45.csproj">
+      <Project>{4cfd5636-2e70-4f75-af99-aef8bb725f6f}</Project>
+      <Name>Cfg.Net.45</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

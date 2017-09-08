@@ -26,6 +26,7 @@ using Cfg.Net.Parsers;
 using Cfg.Net.Serializers;
 
 namespace Cfg.Net {
+
     public abstract class CfgNode {
 
         static readonly object Locker = new object();
@@ -40,6 +41,8 @@ namespace Cfg.Net {
         private readonly List<string> _modelErrors = new List<string>();
 
         public uint Sequence { get; private set; }
+        private const string DisableValidationKey = "DisableValidation";
+        private bool Enabled { get; set; } = true;
 
         protected CfgNode() {
             Events = new CfgEvents(new DefaultLogger(new MemoryLogger()));
@@ -99,6 +102,17 @@ namespace Cfg.Net {
                 parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
 
+            // kind of a secret, but it allows me to disable validation without changing contracts
+            // TODO: Make this a visible setting in next major version
+            if (parameters.ContainsKey(DisableValidationKey)) {
+                var value = (parameters[DisableValidationKey] ?? "false").ToLower();
+                if (bool.TryParse(value, out var disabled)) {
+                    if (disabled) {
+                        Enabled = false;
+                    }
+                }
+            }
+
             INode node;
             try {
                 if (Reader != null) {
@@ -147,14 +161,14 @@ namespace Cfg.Net {
                 }
             }
 
-            Process(node, string.Empty, Serializer, Events, parameters, Customizers, 0);
+            Process(node, string.Empty, Serializer, Events, parameters, Customizers, 0, Enabled);
         }
 
         public void Check() {
             Events.Clear(_modelErrors);
             var name = CfgMetadataCache.NormalizeName(Type, Type.Name);
             var node = new ObjectNode(this, name);
-            Process(node, name, Serializer, Events, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), Customizers, 0);
+            Process(node, name, Serializer, Events, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), Customizers, 0, Enabled);
         }
         private CfgNode Process(
             INode node,
@@ -163,22 +177,28 @@ namespace Cfg.Net {
             CfgEvents events,
             IDictionary<string, string> parameters,
             IList<ICustomizer> customizers,
-            uint sequence
+            uint sequence,
+            bool enabled
         ) {
             Sequence = sequence;
             Clear();
-            // preserving events, customizers, and serializer
+
+            // preserving events, customizers, and serializer, and where or not it's enabled
             Events = events;
             Customizers = customizers;
             Serializer = serializer;
+            Enabled = enabled;
 
             LoadProperties(node, parent, parameters, customizers);
             LoadCollections(node, parent, parameters, sequence);
-            PreValidate();
-            ValidateBasedOnAttributes(node, parameters);
-            ValidateListsBasedOnAttributes(node.Name);
-            Validate();
-            PostValidate();
+
+            if (Enabled) {
+                PreValidate();
+                ValidateBasedOnAttributes(node, parameters);
+                ValidateListsBasedOnAttributes(node.Name);
+                Validate();
+                PostValidate();
+            }
             return this;
         }
 
@@ -265,7 +285,7 @@ namespace Cfg.Net {
                                     }
                                 }
                             } else {
-                                elements[addKey].Add(item.Loader().Process(add, subNode.Name, Serializer, Events, parameters, Customizers, ++sequence));
+                                elements[addKey].Add(item.Loader().Process(add, subNode.Name, Serializer, Events, parameters, Customizers, ++sequence, Enabled));
                             }
                         } else {
                             Events.UnexpectedElement(add.Name, subNode.Name);
@@ -328,7 +348,7 @@ namespace Cfg.Net {
             }
         }
 
-        void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters, IList<ICustomizer> customizers) {
+        private void LoadProperties(INode node, string parentName, IDictionary<string, string> parameters, IList<ICustomizer> customizers) {
             var metadata = CfgMetadataCache.GetMetadata(Type);
             var keys = CfgMetadataCache.PropertyNames(Type).ToArray();
 
@@ -385,20 +405,22 @@ namespace Cfg.Net {
 
                         var stringValue = attribute.Value.ToString();
 
-                        if (item.Attribute.toLower) {
-                            stringValue = stringValue.ToLower();
-                        } else if (item.Attribute.toUpper) {
-                            stringValue = stringValue.ToUpper();
-                        }
-
-                        if (item.Attribute.trim || item.Attribute.trimStart && item.Attribute.trimEnd) {
-                            stringValue = stringValue.Trim();
-                        } else {
-                            if (item.Attribute.trimStart) {
-                                stringValue = stringValue.TrimStart();
+                        if (Enabled) {
+                            if (item.Attribute.toLower) {
+                                stringValue = stringValue.ToLower();
+                            } else if (item.Attribute.toUpper) {
+                                stringValue = stringValue.ToUpper();
                             }
-                            if (item.Attribute.trimEnd) {
-                                stringValue = stringValue.TrimEnd();
+
+                            if (item.Attribute.trim || item.Attribute.trimStart && item.Attribute.trimEnd) {
+                                stringValue = stringValue.Trim();
+                            } else {
+                                if (item.Attribute.trimStart) {
+                                    stringValue = stringValue.TrimStart();
+                                }
+                                if (item.Attribute.trimEnd) {
+                                    stringValue = stringValue.TrimEnd();
+                                }
                             }
                         }
 
@@ -417,10 +439,12 @@ namespace Cfg.Net {
             }
 
             // missing any required attributes?
-            foreach (var key in keys.Except(keyHits)) {
-                var item = metadata[key];
-                if (item.Attribute.required) {
-                    Events.MissingAttribute(parentName, node.Name, key);
+            if (Enabled) {
+                foreach (var key in keys.Except(keyHits)) {
+                    var item = metadata[key];
+                    if (item.Attribute.required) {
+                        Events.MissingAttribute(parentName, node.Name, key);
+                    }
                 }
             }
 
