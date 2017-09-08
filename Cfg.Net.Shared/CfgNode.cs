@@ -19,7 +19,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
 using Cfg.Net.Parsers;
@@ -106,7 +105,8 @@ namespace Cfg.Net {
             // TODO: Make this a visible setting in next major version
             if (parameters.ContainsKey(DisableValidationKey)) {
                 var value = (parameters[DisableValidationKey] ?? "false").ToLower();
-                if (bool.TryParse(value, out var disabled)) {
+                bool disabled;
+                if (bool.TryParse(value, out disabled)) {
                     if (disabled) {
                         Enabled = false;
                     }
