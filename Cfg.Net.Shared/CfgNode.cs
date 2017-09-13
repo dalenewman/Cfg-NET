@@ -183,7 +183,7 @@ namespace Cfg.Net {
             Sequence = sequence;
             Clear();
 
-            // preserving events, customizers, and serializer, and where or not it's enabled
+            // preserving events, customizers, and serializer, and whether or not it's enabled
             Events = events;
             Customizers = customizers;
             Serializer = serializer;
@@ -276,8 +276,11 @@ namespace Cfg.Net {
                                     if (obj == null) {
                                         Events.ConstructorNotFound(parentName, subNode.Name);
                                     } else {
-                                        var properties = obj as IProperties;
+                                        var properties = (IProperties)obj;
                                         for (var k = 0; k < add.Attributes.Count; k++) {
+                                            foreach (var c in Customizers) {
+                                                c.Customize(string.Empty, add, parameters, Events.Logger);
+                                            }
                                             var attribute = add.Attributes[k];
                                             properties[attribute.Name] = attribute.Value;
                                         }

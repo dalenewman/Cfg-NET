@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET</id>
-    <version>0.10.1</version>
+    <version>0.10.2</version>
     <title>Cfg-NET</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -10,9 +10,9 @@
     <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An alternative configuration handler.</description>
-    <releaseNotes>if you pass in a DisableValidation = true parameter into Load method, CfgNode will not perform any validation (but will still run customizers)</releaseNotes>
+    <releaseNotes>allow customizers to run against things that implement IProperties (free form nodes)</releaseNotes>
     <copyright>Copyright 2015-2017</copyright>
-    <tags>configuration, settings</tags>
+    <tags>configuration, settings, xml, json</tags>
     <dependencies>
       <group targetFramework="netstandard1.0">
         <dependency id="NETStandard.Library" version="1.6.0" />

@@ -16,10 +16,13 @@
 // limitations under the License.
 #endregion
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Cfg.Net;
+using Cfg.Net.Contracts;
 using Cfg.Net.Environment;
 using NUnit.Framework;
+using System.Linq;
 
 namespace Cfg.Test {
 
@@ -48,6 +51,10 @@ namespace Cfg.Test {
             <add name='thing-1' value='@(p1)' />
             <add name='thing-2' value='@(p2)' invalid='@(p3)' />
         </things>
+        <free-form-things>
+            <add anything='something' />
+            <add something='@(p1)' />
+        </free-form-things>
     </cfg>
 ".Replace("'", "\"");
 
@@ -71,6 +78,8 @@ namespace Cfg.Test {
 
             Assert.AreEqual("i am the new p1", cfg.Things[0].Value, "I should be passed in for p1.");
             Assert.AreEqual("two-2", cfg.Things[1].Value, "I am the default value for p2 in the default environment two.");
+
+            Assert.AreEqual("i am the new p1", cfg.FreeFormThings[1]["something"], "Even free form things should be subject to customizers");
 
         }
 
@@ -98,6 +107,9 @@ namespace Cfg.Test {
         'things':[
             { 'name':'thing-1', 'value':'@(p1)' }
             { 'name':'thing-2', 'value':'@(p2)' }
+        ],
+        'free-form-things':[
+            { 'something':'@(p1)' }
         ]
     }
 ".Replace("'", "\"");
@@ -121,6 +133,8 @@ namespace Cfg.Test {
             Assert.AreEqual("i am the new p1", cfg.Things[0].Value, "I should be passed in for p1.");
             Assert.AreEqual("two-2", cfg.Things[1].Value, "I am the default value for p2 in the default environment two.");
 
+            Assert.AreEqual("i am the new p1", cfg.FreeFormThings[0]["something"], "Even free form things should be subject to customizers");
+
         }
 
     }
@@ -141,6 +155,9 @@ namespace Cfg.Test {
 
         [Cfg(required = true)]
         public List<MyThing> Things { get; set; }
+
+        [Cfg]
+        public List<MyFreeFormThing> FreeFormThings { get; set; }
     }
 
     public class MyThing : CfgNode {
@@ -151,8 +168,36 @@ namespace Cfg.Test {
         [Cfg(required = true)]
         public string Value { get; set; }
 
-        [Cfg(value="hi")]
+        [Cfg(value = "hi")]
         public string Invalid { get; set; }
+    }
+
+    public class MyFreeFormThing : IProperties
+    {
+        public object[] Storage;
+        public Dictionary<string, short> Map { get; set; }
+
+        public MyFreeFormThing(string[] names) {
+            Storage = new object[names.Length];
+            Map = new Dictionary<string, short>(names.Length);
+            for (short i = 0; i < Convert.ToInt16(names.Length); i++) {
+                var name = names[i];
+                Map[name] = i;
+            }
+        }
+
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() {
+            return Map.ToDictionary(item => item.Key, item => Storage[item.Value]).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
+        }
+
+        public object this[string name] {
+            get { return Storage[Map[name]]; }
+            set { Storage[Map[name]] = value; }
+        }
     }
 
     public class MyEnvironment : CfgNode {

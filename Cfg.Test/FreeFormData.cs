@@ -60,29 +60,6 @@ namespace Cfg.Test {
 
         }
 
-        /*
-        [Test]
-        public void TestJson() {
-            var json = @"{
-        'things': [
-            { 'lowerValue':'Proper Case!'},
-            { 'upperValue':'Proper Case!'}
-        ]
-    }".Replace("'", "\"");
-
-            var cfg = new TestCase(json);
-
-            foreach (var problem in cfg.Errors()) {
-                Console.WriteLine(problem);
-            }
-
-            var problems = cfg.Errors();
-            Assert.AreEqual(0, problems.Count);
-
-            Assert.AreEqual("proper case!", cfg.Things.First().LowerValue);
-            Assert.AreEqual("PROPER CASE!", cfg.Things.Last().UpperValue);
-        } */
-
     }
 
     public class TestMessage : CfgNode {
