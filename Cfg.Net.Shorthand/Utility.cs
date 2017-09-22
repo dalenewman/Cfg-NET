@@ -23,23 +23,20 @@ using System.Text;
 namespace Cfg.Net.Shorthand {
     internal static class Utility {
 
+        internal static readonly string[] ExpressionSplitter = { ")." };
+        internal const string Close = ")";
+        internal const string Escape = "\\";
+        internal const char ParameterSplitter = ',';
+        internal const char Open = '(';
         internal static string ControlString = ((char)31).ToString();
-        internal static char ControlChar = (char)31;
+        internal const char ControlChar = (char)31;
 
         internal static string[] Split(string arg, char splitter, int skip = 0) {
             if (arg.Equals(string.Empty))
                 return new string[0];
 
             var split = arg.Replace("\\" + splitter, ControlString).Split(splitter);
-            return split.Select(s => s.Replace(ControlChar, splitter)).Skip(skip).Where(s => s != null).ToArray();
-        }
-
-        internal static string[] Split(string arg, string[] splitter, int skip = 0) {
-            if (arg.Equals(string.Empty))
-                return new string[0];
-
-            var split = arg.Replace("\\" + splitter[0], ControlString).Split(splitter, StringSplitOptions.None);
-            return split.Select(s => s.Replace(ControlString, splitter[0])).Skip(skip).Where(s => s != null).ToArray();
+            return split.Where(s => s != null).Skip(skip).Select(s => s.Replace(ControlChar, splitter)).ToArray();
         }
 
         public static string NormalizeName(string name) {

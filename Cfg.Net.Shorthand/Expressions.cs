@@ -15,18 +15,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Cfg.Net.Shorthand
-{
-    public class Expressions : List<Expression>
-    {
-        private static readonly string[] ExpressionSplitter = {")."};
+namespace Cfg.Net.Shorthand {
+    public class Expressions : List<Expression> {
 
-        public Expressions(string value)
-        {
-            AddRange(Utility.Split(value, ExpressionSplitter).Select(e => new Expression(e)));
+        public Expressions(string value) {
+            AddRange(Split(value).Select(e => new Expression(e)));
         }
+
+        private static IEnumerable<string> Split(string arg, int skip = 0) {
+
+            if (string.IsNullOrEmpty(arg))
+                yield break;
+
+            var split = arg.Replace(Utility.Escape + Utility.Close, Utility.ControlString).Split(Utility.ExpressionSplitter, StringSplitOptions.None);
+
+            if (split.Length == 1) { // there was no split
+                yield return split[0].Replace(Utility.ControlString, Utility.Close);
+            } else {  // there was a split and we have to add the closer back on to where we split it
+                var last = split.Length - 1;
+                for (var i = 0; i < last; i++) {
+                    yield return split[i].Replace(Utility.ControlString, Utility.Close) + Utility.Close;
+                }
+                yield return split[last].Replace(Utility.ControlString, Utility.Close);
+
+            }
+        }
+
     }
 }

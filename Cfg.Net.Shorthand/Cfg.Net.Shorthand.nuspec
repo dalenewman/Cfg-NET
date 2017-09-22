@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET.Shorthand</id>
-    <version>0.2.9</version>
+    <version>0.2.10</version>
     <title>Cfg-NET Shorthand</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A way to write more configuration with less typing</description>
-    <releaseNotes>Moved method data lookup into customerizer, added ability to change named parameter indicator (or turn it off)</releaseNotes>
+    <releaseNotes>more careful handling of expression splitter, preserving the trailing parenthesis</releaseNotes>
     <copyright>Copyright 2015-2017</copyright>
     <tags>configuration, settings</tags>
     <dependencies>

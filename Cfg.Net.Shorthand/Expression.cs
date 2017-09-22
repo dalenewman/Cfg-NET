@@ -21,22 +21,18 @@ using System.Linq;
 
 namespace Cfg.Net.Shorthand {
     public class Expression {
-        private const char ParameterSplitter = ',';
-        private const char Open = '(';
-        private const string Close = ")";
 
         public Expression(string expression) {
+
             OriginalExpression = expression;
-            var openIndex = expression.IndexOf(Open);
+            var openIndex = expression.IndexOf(Utility.Open);
 
             if (openIndex > 0) {
                 Method = expression.Substring(0, openIndex).ToLower();
                 var parameters = expression.Remove(0, openIndex + 1);
-                if (parameters.EndsWith(Close, StringComparison.Ordinal)) {
-                    parameters = parameters.Substring(0, parameters.Length - 1);
-                }
+                parameters = parameters.Substring(0, parameters.Length - 1);
                 SingleParameter = parameters;
-                Parameters = Utility.Split(parameters, ParameterSplitter).ToList();
+                Parameters = Utility.Split(parameters, Utility.ParameterSplitter).ToList();
             } else {
                 Method = expression;
                 SingleParameter = string.Empty;
