@@ -27,8 +27,8 @@
   <files>
     <file src="bin\Release\CfgNet.dll" target="lib\netstandard1.0\CfgNet.dll" />
     <file src="bin\Release\CfgNet.dll" target="lib\portable-net45+win8+wpa81+wp8\CfgNet.dll" />
-    <file src="C:\code\Cfg.Net\Cfg.Net.40\bin\Release\CfgNet.dll" target="lib\net40\CfgNet.dll" />
-    <file src="C:\code\Cfg.Net\Cfg.Net.45\bin\Release\CfgNet.dll" target="lib\net45\CfgNet.dll" />
-    <file src="C:\code\Cfg.Net\Cfg.Net.452\bin\Release\CfgNet.dll" target="lib\net452\CfgNet.dll" />
+    <file src="d:\code\Cfg-NET\Cfg.Net.40\bin\Release\CfgNet.dll" target="lib\net40\CfgNet.dll" />
+    <file src="d:\code\Cfg-NET\Cfg.Net.45\bin\Release\CfgNet.dll" target="lib\net45\CfgNet.dll" />
+    <file src="d:\code\Cfg-NET\Cfg.Net.452\bin\Release\CfgNet.dll" target="lib\net452\CfgNet.dll" />
   </files>
 </package>

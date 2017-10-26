@@ -343,14 +343,14 @@
   },
   "libraries": {
     "Microsoft.NETCore.Jit/1.0.2": {
-      "sha512": "R4gOH11FAZlEU0+5pAfgmbzFPRAIHugCKTi1phb3lnfW/pnR/pZdn0qeSPVnUn8YgIKD4B2kK2+w8cwrbhmpOw==",
+      "sha512": "Ok2vWofa6X8WD9vc4pfLHwvJz1/B6t3gOAoZcjrjrQf7lQOlNIuZIZtLn3wnWX28DuQGpPJkRlBxFj7Z5txNqw==",
       "type": "package",
       "path": "microsoft.netcore.jit/1.0.2",
       "files": [
-        "Microsoft.NETCore.Jit.1.0.2.nupkg.sha512",
-        "Microsoft.NETCore.Jit.nuspec",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
+        "microsoft.netcore.jit.1.0.2.nupkg.sha512",
+        "microsoft.netcore.jit.nuspec",
         "runtime.json"
       ]
     },
@@ -450,39 +450,39 @@
       ]
     },
     "Microsoft.NETCore.Runtime.CoreCLR/1.0.2": {
-      "sha512": "jfVkF7nt/6sSdYF0hmaXyic25TkKbAQWp11EeETxPYwXnuGwVe1SW1FuujutQ3UhGGSv1P8/q5x/PrJ1Tbu4ng==",
+      "sha512": "A0x1xtTjYJWZr2DRzgfCOXgB0JkQg8twnmtTJ79wFje+IihlLbXtx6Z2AxyVokBM5ruwTedR6YdCmHk39QJdtQ==",
       "type": "package",
       "path": "microsoft.netcore.runtime.coreclr/1.0.2",
       "files": [
-        "Microsoft.NETCore.Runtime.CoreCLR.1.0.2.nupkg.sha512",
-        "Microsoft.NETCore.Runtime.CoreCLR.nuspec",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
+        "microsoft.netcore.runtime.coreclr.1.0.2.nupkg.sha512",
+        "microsoft.netcore.runtime.coreclr.nuspec",
         "runtime.json"
       ]
     },
     "Microsoft.NETCore.Targets/1.0.1": {
-      "sha512": "CvY7WmMmTcX1kZOZ7k+OIbpK4vnBrBykVMB60lw9qL4n6giooPgtt73CxT4QoWwV89O92ezC3jh0YIvPrmycsQ==",
+      "sha512": "rkn+fKobF/cbWfnnfBOQHKVKIOpxMZBvlSHkqDWgBpwGDcLRduvs3D9OLGeV6GWGvVwNlVi2CBbTjuPmtHvyNw==",
       "type": "package",
       "path": "microsoft.netcore.targets/1.0.1",
       "files": [
-        "Microsoft.NETCore.Targets.1.0.1.nupkg.sha512",
-        "Microsoft.NETCore.Targets.nuspec",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/netstandard1.0/_._",
+        "microsoft.netcore.targets.1.0.1.nupkg.sha512",
+        "microsoft.netcore.targets.nuspec",
         "runtime.json"
       ]
     },
     "Microsoft.NETCore.Windows.ApiSets/1.0.1": {
-      "sha512": "b9VHNznF3qjwerosSflKUEMYy6aC2gQGhLb1yRfhRA1KjLMOm+11uTm2wnrDmxzq8CgpYJmkszIr3UszMe6nUw==",
+      "sha512": "SaToCvvsGMxTgtLv/BrFQ5IFMPRE1zpWbnqbpwykJa8W5XiX82CXI6K2o7yf5xS7EP6t/JzFLV0SIDuWpvBZVw==",
       "type": "package",
       "path": "microsoft.netcore.windows.apisets/1.0.1",
       "files": [
-        "Microsoft.NETCore.Windows.ApiSets.1.0.1.nupkg.sha512",
-        "Microsoft.NETCore.Windows.ApiSets.nuspec",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
+        "microsoft.netcore.windows.apisets.1.0.1.nupkg.sha512",
+        "microsoft.netcore.windows.apisets.nuspec",
         "runtime.json"
       ]
     },
@@ -2037,12 +2037,12 @@
   },
   "project": {
     "restore": {
-      "projectUniqueName": "C:\\Code\\Cfg.Net\\Cfg.Net\\Cfg.Net.csproj",
+      "projectUniqueName": "D:\\Code\\Cfg-NET\\Cfg.Net\\Cfg.Net.csproj",
       "projectName": "Cfg.Net",
-      "projectPath": "C:\\Code\\Cfg.Net\\Cfg.Net\\Cfg.Net.csproj",
-      "projectJsonPath": "C:\\Code\\Cfg.Net\\Cfg.Net\\project.json",
+      "projectPath": "D:\\Code\\Cfg-NET\\Cfg.Net\\Cfg.Net.csproj",
+      "projectJsonPath": "D:\\Code\\Cfg-NET\\Cfg.Net\\project.json",
       "packagesPath": "C:\\Users\\dnewman\\.nuget\\packages\\",
-      "outputPath": "C:\\Code\\Cfg.Net\\Cfg.Net\\obj\\",
+      "outputPath": "D:\\Code\\Cfg-NET\\Cfg.Net\\obj\\",
       "projectStyle": "ProjectJson",
       "configFilePaths": [
         "C:\\Users\\dnewman\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -2050,11 +2050,9 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "c:\\temp\\modules": {},
         "http://ssitdev.scope-services.local/NugetServer/nuget": {},
         "https://api.nuget.org/v3/index.json": {},
-        "https://ci.appveyor.com/nuget/solrnet-022x5w7kmuba": {},
-        "https://dotnet.myget.org/F/dotnet-corefxlab/": {}
+        "https://ci.appveyor.com/nuget/solrnet-022x5w7kmuba": {}
       }
     },
     "dependencies": {

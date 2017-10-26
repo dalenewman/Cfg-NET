@@ -105,8 +105,7 @@ namespace Cfg.Net {
             // TODO: Make this a visible setting in next major version
             if (parameters.ContainsKey(DisableValidationKey)) {
                 var value = (parameters[DisableValidationKey] ?? "false").ToLower();
-                bool disabled;
-                if (bool.TryParse(value, out disabled)) {
+                if (bool.TryParse(value, out var disabled)) {
                     if (disabled) {
                         Enabled = false;
                     }

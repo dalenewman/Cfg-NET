@@ -21,6 +21,9 @@ using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Shorthand {
     internal class Node : INode {
+
+        private Dictionary<string, IAttribute> _attributes;
+
         public Node(string name) {
             Name = name;
             Attributes = new List<IAttribute>();
@@ -32,7 +35,19 @@ namespace Cfg.Net.Shorthand {
         public List<INode> SubNodes { get; }
 
         public bool TryAttribute(string name, out IAttribute attr) {
-            throw new NotImplementedException();
+            if (_attributes == null) {
+                _attributes = new Dictionary<string, IAttribute>();
+                for (int i = 0; i < Attributes.Count; i++) {
+                    _attributes[Attributes[i].Name] = Attributes[i];
+                }
+            }
+            if (_attributes.ContainsKey(name)) {
+                attr = _attributes[name];
+                return true;
+            }
+            attr = null;
+            return false;
         }
+
     }
 }
