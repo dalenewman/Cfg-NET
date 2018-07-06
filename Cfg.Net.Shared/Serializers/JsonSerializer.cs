@@ -233,7 +233,8 @@ namespace Cfg.Net.Serializers {
             {typeof(double), v=> v.ToString() },
             {typeof(float), v=> v.ToString() },
             {typeof(decimal), v=> v.ToString() },
-            {typeof(char), v=> "\"" + Encode(v.ToString()) + "\""}
+            {typeof(char), v=> "\"" + Encode(v.ToString()) + "\""},
+            {typeof(byte), v=> v.ToString() }
         };
 
         private static string ValueToString(Type type, object value) {

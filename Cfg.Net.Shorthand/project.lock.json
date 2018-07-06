@@ -2063,7 +2063,8 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "http://ssitdev.scope-services.local/NugetServer/nuget": {},
+        "c:\\temp\\modules": {},
+        "http://ssitdev2.scope-services.local/Nuget/nuget": {},
         "https://api.nuget.org/v3/index.json": {},
         "https://ci.appveyor.com/nuget/solrnet-022x5w7kmuba": {}
       },
@@ -2078,8 +2079,8 @@
       }
     },
     "dependencies": {
-      "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
-      "NETStandard.Library": "1.6.0"
+      "Microsoft.NETCore.Portable.Compatibility": "[1.0.1, )",
+      "NETStandard.Library": "[1.6.0, )"
     },
     "frameworks": {
       "netstandard1.0": {}
