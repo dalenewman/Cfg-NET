@@ -46,7 +46,7 @@
     <Compile Include="XDocumentParser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cfg.Net.45\Cfg.Net.45.csproj">
+    <ProjectReference Include="..\Compatibility\Cfg.Net.45\Cfg.Net.45.csproj">
       <Project>{4cfd5636-2e70-4f75-af99-aef8bb725f6f}</Project>
       <Name>Cfg.Net.45</Name>
     </ProjectReference>

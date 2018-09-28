@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Cfg-NET.Shorthand</id>
+    <version>0.2.11</version>
+    <title>Cfg-NET Shorthand</title>
+    <authors>Dale Newman</authors>
+    <owners>Dale Newman</owners>
+    <licenseUrl>https://github.com/dalenewman/Cfg-NET/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A way to write more configuration with less typing</description>
+    <releaseNotes>Implemented TryAttribute in Node</releaseNotes>
+    <copyright>Copyright 2015-2018</copyright>
+    <tags>configuration, settings</tags>
+    <dependencies>
+      <group targetFramework="netstandard1.0">
+        <dependency id="NETStandard.Library" version="1.6.0" />
+        <dependency id="Cfg-NET" version="0.10.2" />
+      </group>
+      <group targetFramework="portable-net45+win8+wpa81+wp8" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\Cfg.Net.Shorthand\bin\Release\Cfg.Net.Shorthand.dll" target="lib\netstandard1.0\Cfg.Net.Shorthand.dll" />
+    <file src="..\Cfg.Net.Shorthand\bin\Release\Cfg.Net.Shorthand.dll" target="lib\portable-net45+win8+wpa81+wp8\Cfg.Net.Shorthand.dll" />
+  </files>
+</package>
