@@ -37,8 +37,11 @@ namespace UnitTest {
     - name: p2
       value: false
 ";
+            var builder = new SerializerBuilder();
+            builder.EmitDefaults();
+            builder.WithNamingConvention(new HyphenatedNamingConvention());
 
-            var cfg = new TestYamlParser(yaml, new YamlDotNetParser(), new YamlDotNetSerializer(SerializationOptions.EmitDefaults, new HyphenatedNamingConvention()));
+            var cfg = new TestYamlParser(yaml, new YamlDotNetParser(), new YamlDotNetSerializer(builder.Build()));
 
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);

@@ -14,20 +14,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System.IO;
-using Cfg.Net.Contracts;
-using YamlDotNet.Serialization;
+using ISerializer = Cfg.Net.Contracts.ISerializer;
 
 namespace Cfg.Net.Parsers.YamlDotNet {
     public class YamlDotNetSerializer : ISerializer {
         private readonly StringWriter _writer;
-        private readonly Serializer _serializer;
+        private readonly global::YamlDotNet.Serialization.ISerializer _serializer;
 
-        public YamlDotNetSerializer(
-            SerializationOptions serializationOptions = SerializationOptions.None, 
-            INamingConvention namingConvention = null
-        ) {
+        public YamlDotNetSerializer(global::YamlDotNet.Serialization.ISerializer serializer) {
             _writer = new StringWriter();
-            _serializer = new Serializer(serializationOptions, namingConvention);
+            _serializer = serializer;
         }
 
         public string Serialize(CfgNode node) {

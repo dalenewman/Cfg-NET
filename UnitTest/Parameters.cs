@@ -37,6 +37,7 @@ namespace UnitTest {
                 <parameters>
                     <add name='p1' value='one-1' />
                     <add name='p2' value='one-2' />
+                    <add name='p4' value='0' />
                 </parameters>
             </add>
             <add name='two'>
@@ -47,8 +48,8 @@ namespace UnitTest {
             </add>
         </environments>
         <things>
-            <add name='thing-1' value='@(p1)' />
-            <add name='thing-2' value='@(p2)' invalid='@(p3)' />
+            <add name='thing-1' value='@(p1)' int-value='1' />
+            <add name='thing-2' value='@(p2)' invalid='@(p3)' int-value='@(p4)' />
         </things>
         <free-form-things>
             <add anything='something' />
@@ -169,6 +170,9 @@ namespace UnitTest {
 
         [Cfg(value = "hi")]
         public string Invalid { get; set; }
+
+        [Cfg(value=0)]
+        public int IntValue { get; set; }
     }
 
     public class MyFreeFormThing : IProperties
