@@ -2051,8 +2051,7 @@
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "c:\\temp\\modules": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://ci.appveyor.com/nuget/solrnet-022x5w7kmuba": {}
+        "https://api.nuget.org/v3/index.json": {}
       }
     },
     "dependencies": {

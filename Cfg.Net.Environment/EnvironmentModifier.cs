@@ -19,6 +19,8 @@ using System.Linq;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Environment {
+
+    /// <inheritdoc />
     public class EnvironmentModifier : ICustomizer {
         private readonly IPlaceHolderReplacer _placeHolderReplacer;
         private readonly string _environmentsElementName;
@@ -28,6 +30,7 @@ namespace Cfg.Net.Environment {
         private readonly string _parameterNameAttribute;
         private readonly string _parameterValueAttribute;
 
+        /// <inheritdoc />
         public EnvironmentModifier() :
             this(
                 new PlaceHolderReplacer('@', '(', ')'),
@@ -39,6 +42,7 @@ namespace Cfg.Net.Environment {
                 "value"
             ) { }
 
+        /// <inheritdoc />
         public EnvironmentModifier(IPlaceHolderReplacer replacer) :
             this(
                 replacer,
@@ -50,6 +54,7 @@ namespace Cfg.Net.Environment {
                 "value"
             ) { }
 
+        /// <inheritdoc />
         public EnvironmentModifier(
             IPlaceHolderReplacer placeHolderReplacer,
             string environmentsElementName,
@@ -68,6 +73,7 @@ namespace Cfg.Net.Environment {
             _parameterValueAttribute = parameterValueAttribute;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// This gets called for each node, after the parameters have been merged
         /// </summary>
