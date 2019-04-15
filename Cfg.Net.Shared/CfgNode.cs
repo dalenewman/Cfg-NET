@@ -13,14 +13,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Cfg.Net.Contracts;
 using Cfg.Net.Loggers;
 using Cfg.Net.Parsers;
 using Cfg.Net.Serializers;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Cfg.Net {
 
@@ -35,7 +35,7 @@ namespace Cfg.Net {
         internal Type Type { get; set; }
         internal CfgEvents Events { get; private set; }
         protected Dictionary<string, string> UniqueProperties { get; } = new Dictionary<string, string>();
-        private readonly List<string> _modelErrors = new List<string>();
+        private readonly HashSet<string> _modelErrors = new HashSet<string>();
 
         public uint Sequence { get; private set; }
         private const string DisableValidationKey = "DisableValidation";

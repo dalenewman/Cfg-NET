@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cfg-NET.Environment</id>
-    <version>0.3.3</version>
+    <version>0.3.4</version>
     <title>Cfg-NET Environment</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -10,8 +10,8 @@
     <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>allow manipulation from the outside via paramenters, environments, and place-holders</description>
-    <releaseNotes>don't replace parameter if supplied value is null</releaseNotes>
-    <copyright>Copyright 2015-2018</copyright>
+    <releaseNotes>added a parameter modifier in case you don't use environments</releaseNotes>
+    <copyright>Copyright 2015-2019</copyright>
     <tags>configuration, settings</tags>
     <dependencies>
       <group targetFramework="netstandard1.0">

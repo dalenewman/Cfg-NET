@@ -13,9 +13,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using Cfg.Net.Contracts;
 using System;
 using System.Collections.Generic;
-using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Reader {
     public class DefaultReader : IReader {
@@ -43,8 +43,10 @@ namespace Cfg.Net.Reader {
                     return resource;
                 default:
                     try {
-                        return new Uri(resource).IsFile ? _fileReader.Read(resource, parameters, logger) : _webReader.Read(resource, parameters, logger);
-                    } catch (Exception) {
+                        return new Uri(resource).IsFile
+                            ? _fileReader.Read(resource, parameters, logger)
+                            : _webReader.Read(resource, parameters, logger);
+                    } catch (UriFormatException) {
                         return _fileReader.Read(resource, parameters, logger);
                     }
             }

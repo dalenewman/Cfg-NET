@@ -2062,7 +2062,6 @@
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "c:\\temp\\modules": {},
         "https://api.nuget.org/v3/index.json": {}
       },

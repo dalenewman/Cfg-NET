@@ -32,8 +32,7 @@ namespace Cfg.Net {
         private static readonly Dictionary<Type, Dictionary<string, string>> NameCache = new Dictionary<Type, Dictionary<string, string>>();
 
         internal static Dictionary<string, CfgMetadata> GetMetadata(Type type) {
-            Dictionary<string, CfgMetadata> metadata;
-            if (MetadataCache.TryGetValue(type, out metadata))
+            if (MetadataCache.TryGetValue(type, out var metadata))
                 return metadata;
 
             lock (Locker) {
@@ -155,6 +154,7 @@ namespace Cfg.Net {
                         item.Constructors = item.ListType.GetConstructors().Select(c => c.GetParameters());
                         item.ListActivator = () => Activator.CreateInstance(propertyInfo.PropertyType);
                         if (item.ListType.IsSubclassOf(typeof(CfgNode))) {
+                            
                             item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
                         }
                     } else {
@@ -220,8 +220,7 @@ namespace Cfg.Net {
 
         internal static string NormalizeName(Type type, string name) {
             lock (Locker) {
-                string value;
-                if (NameCache[type].TryGetValue(name, out value)) {
+                if (NameCache[type].TryGetValue(name, out var value)) {
                     return value;
                 }
 
@@ -237,13 +236,11 @@ namespace Cfg.Net {
 
 
         public static IEnumerable<string> PropertyNames(Type type) {
-            List<string> names;
-            return PropertyCache.TryGetValue(type, out names) ? names : new List<string>();
+            return PropertyCache.TryGetValue(type, out var names) ? names : new List<string>();
         }
 
         public static IEnumerable<string> ElementNames(Type type) {
-            List<string> names;
-            return ElementCache.TryGetValue(type, out names) ? names : new List<string>();
+            return ElementCache.TryGetValue(type, out var names) ? names : new List<string>();
         }
 
         /// <summary>

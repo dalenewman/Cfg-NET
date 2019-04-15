@@ -37,7 +37,7 @@ namespace Cfg.Net.Shorthand {
             string longHandProperty
         ) {
             _root = root;
-            _shortHandCollections = new HashSet<string>(shortHandCollections);
+            _shortHandCollections = new HashSet<string>(shortHandCollections, StringComparer.OrdinalIgnoreCase);
             _shortHandProperty = shortHandProperty;
             _longHandCollection = longHandCollection;
             _longHandProperty = longHandProperty;
@@ -50,8 +50,7 @@ namespace Cfg.Net.Shorthand {
 
             var str = string.Empty;
 
-            IAttribute attr;
-            if (node.TryAttribute(_shortHandProperty, out attr) && attr.Value != null) {
+            if (node.TryAttribute(_shortHandProperty, out var attr) && attr.Value != null) {
                 str = attr.Value.ToString();
             }
 
@@ -62,9 +61,8 @@ namespace Cfg.Net.Shorthand {
             var shorthandNodes = new Dictionary<string, List<INode>>();
 
             foreach (var expression in expressions) {
-                MethodData methodData;
 
-                if (!MethodDataLookup.TryGetValue(expression.Method, out methodData)) {
+                if (!MethodDataLookup.TryGetValue(expression.Method, out var methodData)) {
                     logger.Warn($"The short-hand expression method {expression.Method} is undefined.");
                     continue;
                 }

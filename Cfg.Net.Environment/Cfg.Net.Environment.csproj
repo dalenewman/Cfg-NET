@@ -36,6 +36,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ParameterModifier.cs" />
     <Compile Include="EnvironmentModifier.cs" />
     <Compile Include="IPlaceHolderReplacer.cs" />
     <Compile Include="PlaceHolderReplacer.cs" />

@@ -37,7 +37,7 @@ namespace Cfg.Net {
         public Regex Regex { get; set; }
         public bool ImplementsProperties { get; set; }
         public IEnumerable<ParameterInfo[]> Constructors { get; internal set; }
-        public List<string> Errors { get; internal set; } = new List<string>(); 
+        public HashSet<string> Errors { get; internal set; } = new HashSet<string>(); 
 
         public CfgMetadata(PropertyInfo propertyInfo, CfgAttribute attribute) {
             PropertyInfo = propertyInfo;

@@ -26,17 +26,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace UnitTest {
 
     [TestClass]
-    public class Parameters {
+    public class EnvironmentParameters {
 
         [TestMethod]
         public void TestXml() {
             var xml = @"
-    <cfg>
-        <parameters>
-            <add name='p1' value='one-1' />
-            <add name='p2' value='one-2' />
-            <add name='p4' value='0' />
-        </parameters>
+    <cfg environment='two'>
+        <environments>
+            <add name='one'>
+                <parameters>
+                    <add name='p1' value='one-1' />
+                    <add name='p2' value='one-2' />
+                    <add name='p4' value='0' />
+                </parameters>
+            </add>
+            <add name='two'>
+                <parameters>
+                    <add name='p1' value='two-1' />
+                    <add name='p2' value='two-2' />
+                </parameters>
+            </add>
+        </environments>
         <things>
             <add name='thing-1' value='@(p1)' int-value='1' />
             <add name='thing-2' value='@(p2)' invalid='@(p3)' int-value='@(p4)' />
@@ -52,7 +62,7 @@ namespace UnitTest {
                 {"p1", "i am the new p1"}
             };
 
-            var cfg = new MyCfg2(xml, parameters);
+            var cfg = new MyCfg(xml, parameters);
 
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
@@ -62,8 +72,12 @@ namespace UnitTest {
 
             Assert.AreEqual("Missing parameter for place-holder @(p3).", cfg.Errors()[0]);
 
+            Assert.AreEqual(2, cfg.Environments.Count);
+            Assert.AreEqual(false, cfg.Environment == cfg.Environments[0].Name);
+            Assert.AreEqual(true, cfg.Environment == cfg.Environments[1].Name);
+
             Assert.AreEqual("i am the new p1", cfg.Things[0].Value, "I should be passed in for p1.");
-            Assert.AreEqual("one-2", cfg.Things[1].Value, "I am the default value for p2.");
+            Assert.AreEqual("two-2", cfg.Things[1].Value, "I am the default value for p2 in the default environment two.");
 
             Assert.AreEqual("i am the new p1", cfg.FreeFormThings[1]["something"], "Even free form things should be subject to customizers");
 
@@ -74,10 +88,22 @@ namespace UnitTest {
         public void TestJson() {
             var json = @"
     {
-        'parameters':[
-            { 'name':'p1', 'value':'one-1' }
-            { 'name':'p2', 'value':'one-2' }
-         ],
+        'environment':'two',
+        'environments': [ {
+                'name':'one',
+                'parameters':[
+                    { 'name':'p1', 'value':'one-1' }
+                    { 'name':'p2', 'value':'one-2' }
+                ]
+            },
+            {
+                'name':'two',
+                'parameters':[
+                    { 'name':'p1', 'value':'two-1' }
+                    { 'name':'p2', 'value':'two-2' }
+                ]
+            }
+        ],
         'things':[
             { 'name':'thing-1', 'value':'@(p1)' }
             { 'name':'thing-2', 'value':'@(p2)' }
@@ -92,7 +118,7 @@ namespace UnitTest {
                 {"p1", "i am the new p1"}
             };
 
-            var cfg = new MyCfg2(json, parameters);
+            var cfg = new MyCfg(json, parameters);
 
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
@@ -100,8 +126,12 @@ namespace UnitTest {
 
             Assert.AreEqual(0, cfg.Errors().Length);
 
+            Assert.AreEqual(2, cfg.Environments.Count);
+            Assert.AreEqual(false, cfg.Environment == cfg.Environments[0].Name);
+            Assert.AreEqual(true, cfg.Environment == cfg.Environments[1].Name);
+
             Assert.AreEqual("i am the new p1", cfg.Things[0].Value, "I should be passed in for p1.");
-            Assert.AreEqual("one-2", cfg.Things[1].Value, "I am the default value for p2.");
+            Assert.AreEqual("two-2", cfg.Things[1].Value, "I am the default value for p2 in the default environment two.");
 
             Assert.AreEqual("i am the new p1", cfg.FreeFormThings[0]["something"], "Even free form things should be subject to customizers");
 
@@ -112,22 +142,25 @@ namespace UnitTest {
     /// <summary>
     /// Should be composed at composition root.
     /// </summary>
-    public class MyCfg2 : CfgNode {
-        public MyCfg2(string xml, IDictionary<string, string> parameters = null) : base(new ParameterModifier()) {
+    public class MyCfg : CfgNode {
+        public MyCfg(string xml, IDictionary<string, string> parameters = null) : base(new EnvironmentModifier()) {
             Load(xml, parameters);
         }
 
+        [Cfg(value = "")]
+        public string Environment { get; set; }
+
         [Cfg(required = false)]
-        public List<MyParameter2> Parameters { get; set; }
+        public List<MyEnvironment> Environments { get; set; }
 
         [Cfg(required = true)]
-        public List<MyThing2> Things { get; set; }
+        public List<MyThing> Things { get; set; }
 
         [Cfg]
-        public List<MyFreeFormThing2> FreeFormThings { get; set; }
+        public List<MyFreeFormThing> FreeFormThings { get; set; }
     }
 
-    public class MyThing2 : CfgNode {
+    public class MyThing : CfgNode {
 
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
@@ -142,12 +175,12 @@ namespace UnitTest {
         public int IntValue { get; set; }
     }
 
-    public class MyFreeFormThing2 : IProperties
+    public class MyFreeFormThing : IProperties
     {
         public object[] Storage;
         public Dictionary<string, short> Map { get; set; }
 
-        public MyFreeFormThing2(string[] names) {
+        public MyFreeFormThing(string[] names) {
             Storage = new object[names.Length];
             Map = new Dictionary<string, short>(names.Length);
             for (short i = 0; i < Convert.ToInt16(names.Length); i++) {
@@ -170,7 +203,17 @@ namespace UnitTest {
         }
     }
 
-    public class MyParameter2 : CfgNode {
+    public class MyEnvironment : CfgNode {
+
+        [Cfg(required = true)]
+        public string Name { get; set; }
+
+        [Cfg(required = true)]
+        public List<MyParameter> Parameters { get; set; }
+
+    }
+
+    public class MyParameter : CfgNode {
         [Cfg(required = true, unique = true)]
         public string Name { get; set; }
         [Cfg(required = true)]

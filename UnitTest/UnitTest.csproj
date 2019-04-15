@@ -63,12 +63,13 @@
     <Compile Include="Domain.cs" />
     <Compile Include="ElementNameVariations.cs" />
     <Compile Include="EmptyLists.cs" />
+    <Compile Include="Parameters.cs" />
     <Compile Include="FixIssue2.cs" />
     <Compile Include="FreeFormData.cs" />
     <Compile Include="Length.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="ModifierTest.cs" />
-    <Compile Include="Parameters.cs" />
+    <Compile Include="EnvironmentParameters.cs" />
     <Compile Include="PassInLogger.cs" />
     <Compile Include="PreValidateTest.cs" />
     <Compile Include="PropertyManipulation.cs" />
