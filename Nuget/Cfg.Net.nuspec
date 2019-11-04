@@ -9,9 +9,9 @@
     <licenseUrl>https://github.com/dalenewman/Cfg-NET/blob/master/LICENSE.md</licenseUrl>
     <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>An alternative configuration handler.</description>
-    <releaseNotes>added .net 4.6.2 target</releaseNotes>
-    <copyright>Copyright 2015-2018</copyright>
+    <description>alternative configuration handler</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2015-2019</copyright>
     <tags>configuration, settings, xml, json</tags>
     <dependencies>
       <group targetFramework="netstandard1.0">
@@ -26,11 +26,11 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Compatibility\Cfg.Net\bin\Release\CfgNet.dll" target="lib\netstandard1.0\CfgNet.dll" />
-    <file src="..\Compatibility\Cfg.Net\bin\Release\CfgNet.dll" target="lib\portable-net45+win8+wpa81+wp8\CfgNet.dll" />
-    <file src="..\Compatibility\Cfg.Net.40\bin\Release\CfgNet.dll" target="lib\net40\CfgNet.dll" />
-    <file src="..\Compatibility\Cfg.Net.45\bin\Release\CfgNet.dll" target="lib\net45\CfgNet.dll" />
-    <file src="..\Compatibility\Cfg.Net.452\bin\Release\CfgNet.dll" target="lib\net452\CfgNet.dll" />
-    <file src="..\Compatibility\Cfg.Net.462\bin\Release\CfgNet.dll" target="lib\net462\CfgNet.dll" />
+    <file src="..\src\Cfg.NET\Cfg.Net\bin\Release\CfgNet.dll" target="lib\netstandard1.0\CfgNet.dll" />
+    <file src="..\src\Cfg.NET\Cfg.Net\bin\Release\CfgNet.dll" target="lib\portable-net45+win8+wpa81+wp8\CfgNet.dll" />
+    <file src="..\src\Cfg.NET\Cfg.Net.40\bin\Release\CfgNet.dll" target="lib\net40\CfgNet.dll" />
+    <file src="..\src\Cfg.NET\Cfg.Net.45\bin\Release\CfgNet.dll" target="lib\net45\CfgNet.dll" />
+    <file src="..\src\Cfg.NET\Cfg.Net.452\bin\Release\CfgNet.dll" target="lib\net452\CfgNet.dll" />
+    <file src="..\src\Cfg.NET\Cfg.Net.462\bin\Release\CfgNet.dll" target="lib\net462\CfgNet.dll" />
   </files>
 </package>
