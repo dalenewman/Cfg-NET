@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Dale Newman")]
 [assembly: AssemblyProduct("Cfg.Net")]
-[assembly: AssemblyCopyright("Copyright © 2015-2018")]
+[assembly: AssemblyCopyright("Copyright © 2015-2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -42,7 +42,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("0.10.4.0")]
-[assembly: AssemblyFileVersion("0.10.4.0")]
+[assembly: AssemblyVersion("0.10.5.0")]
+[assembly: AssemblyFileVersion("0.10.5.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
 

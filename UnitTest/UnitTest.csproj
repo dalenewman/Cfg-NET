@@ -137,9 +137,9 @@
       <Project>{b74d8ffa-af9a-4b14-bc6d-3c43469d571d}</Project>
       <Name>Cfg.Net.Shorthand</Name>
     </ProjectReference>
-    <ProjectReference Include="..\src\Cfg.NET\Cfg.Net.462\Cfg.Net.462.csproj">
-      <Project>{b65fc5ae-d51a-408d-b324-ab4729ade4d7}</Project>
-      <Name>Cfg.Net.462</Name>
+    <ProjectReference Include="..\src\Cfg.NET\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj">
+      <Project>{19c13ae3-c408-40e2-b3ef-ca80528a9d83}</Project>
+      <Name>Cfg.Net.Standard.20</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
