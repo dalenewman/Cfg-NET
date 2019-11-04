@@ -2037,12 +2037,12 @@
   },
   "project": {
     "restore": {
-      "projectUniqueName": "D:\\Code\\Cfg-NET\\Compatibility\\Cfg.Net\\Cfg.Net.csproj",
+      "projectUniqueName": "D:\\Code\\Cfg-NET\\src\\Cfg.NET\\Cfg.Net\\Cfg.Net.csproj",
       "projectName": "Cfg.Net",
-      "projectPath": "D:\\Code\\Cfg-NET\\Compatibility\\Cfg.Net\\Cfg.Net.csproj",
-      "projectJsonPath": "D:\\Code\\Cfg-NET\\Compatibility\\Cfg.Net\\project.json",
+      "projectPath": "D:\\Code\\Cfg-NET\\src\\Cfg.NET\\Cfg.Net\\Cfg.Net.csproj",
+      "projectJsonPath": "D:\\Code\\Cfg-NET\\src\\Cfg.NET\\Cfg.Net\\project.json",
       "packagesPath": "C:\\Users\\dnewman\\.nuget\\packages\\",
-      "outputPath": "D:\\Code\\Cfg-NET\\Compatibility\\Cfg.Net\\obj\\",
+      "outputPath": "D:\\Code\\Cfg-NET\\src\\Cfg.NET\\Cfg.Net\\obj\\",
       "projectStyle": "ProjectJson",
       "configFilePaths": [
         "C:\\Users\\dnewman\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -2050,6 +2050,7 @@
       ],
       "sources": {
         "c:\\temp\\modules": {},
+        "http://ssitdev2.scope-services.local/Nuget/nuget": {},
         "https://api.nuget.org/v3/index.json": {}
       }
     },

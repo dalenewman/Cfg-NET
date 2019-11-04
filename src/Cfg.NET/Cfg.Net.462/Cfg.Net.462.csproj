@@ -44,6 +44,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <Import Project="..\..\Cfg.Net.Shared\Cfg.Net.Shared.projitems" Label="Shared" />
+  <Import Project="..\Cfg.Net.Shared\Cfg.Net.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

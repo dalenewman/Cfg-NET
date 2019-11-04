@@ -2034,8 +2034,8 @@
     },
     "Cfg.Net/1.0.0": {
       "type": "project",
-      "path": "../Compatibility/Cfg.Net/project.json",
-      "msbuildProject": "../Compatibility/Cfg.Net/Cfg.Net.csproj"
+      "path": "../src/Cfg.NET/Cfg.Net/project.json",
+      "msbuildProject": "../src/Cfg.NET/Cfg.Net/Cfg.Net.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -2063,13 +2063,14 @@
       ],
       "sources": {
         "c:\\temp\\modules": {},
+        "http://ssitdev2.scope-services.local/Nuget/nuget": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netstandard1.0": {
           "projectReferences": {
-            "D:\\Code\\Cfg-NET\\Compatibility\\Cfg.Net\\Cfg.Net.csproj": {
-              "projectPath": "D:\\Code\\Cfg-NET\\Compatibility\\Cfg.Net\\Cfg.Net.csproj"
+            "D:\\Code\\Cfg-NET\\src\\Cfg.NET\\Cfg.Net\\Cfg.Net.csproj": {
+              "projectPath": "D:\\Code\\Cfg-NET\\src\\Cfg.NET\\Cfg.Net\\Cfg.Net.csproj"
             }
           }
         }

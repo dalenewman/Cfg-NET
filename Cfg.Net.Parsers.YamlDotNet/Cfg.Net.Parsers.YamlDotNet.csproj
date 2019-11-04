@@ -51,13 +51,13 @@
     <Compile Include="YamlDotNetSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Compatibility\Cfg.Net.45\Cfg.Net.45.csproj">
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\Cfg.NET\Cfg.Net.45\Cfg.Net.45.csproj">
       <Project>{4cfd5636-2e70-4f75-af99-aef8bb725f6f}</Project>
       <Name>Cfg.Net.45</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

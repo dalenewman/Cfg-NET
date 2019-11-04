@@ -137,7 +137,7 @@
       <Project>{b74d8ffa-af9a-4b14-bc6d-3c43469d571d}</Project>
       <Name>Cfg.Net.Shorthand</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Compatibility\Cfg.Net.462\Cfg.Net.462.csproj">
+    <ProjectReference Include="..\src\Cfg.NET\Cfg.Net.462\Cfg.Net.462.csproj">
       <Project>{b65fc5ae-d51a-408d-b324-ab4729ade4d7}</Project>
       <Name>Cfg.Net.462</Name>
     </ProjectReference>
