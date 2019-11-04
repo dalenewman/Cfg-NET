@@ -37,12 +37,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultReader.cs" />
-    <Compile Include="FileReader.cs" />
-    <Compile Include="HttpUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReTryingReader.cs" />
-    <Compile Include="WebReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="LICENSE.txt">
@@ -50,11 +45,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Cfg.NET\Cfg.Net.45\Cfg.Net.45.csproj">
+    <ProjectReference Include="..\..\..\Main\Cfg.Net.45\Cfg.Net.45.csproj">
       <Project>{4cfd5636-2e70-4f75-af99-aef8bb725f6f}</Project>
       <Name>Cfg.Net.45</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="..\Cfg.Net.Reader.Shared\Cfg.Net.Reader.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

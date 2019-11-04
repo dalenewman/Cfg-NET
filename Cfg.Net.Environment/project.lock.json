@@ -2034,8 +2034,8 @@
     },
     "Cfg.Net/1.0.0": {
       "type": "project",
-      "path": "../src/Cfg.NET/Cfg.Net/project.json",
-      "msbuildProject": "../src/Cfg.NET/Cfg.Net/Cfg.Net.csproj"
+      "path": "../src/Main/Cfg.Net/project.json",
+      "msbuildProject": "../src/Main/Cfg.Net/Cfg.Net.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -2070,8 +2070,8 @@
       "frameworks": {
         "netstandard1.0": {
           "projectReferences": {
-            "D:\\Code\\Cfg-NET\\src\\Cfg.NET\\Cfg.Net\\Cfg.Net.csproj": {
-              "projectPath": "D:\\Code\\Cfg-NET\\src\\Cfg.NET\\Cfg.Net\\Cfg.Net.csproj"
+            "D:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj": {
+              "projectPath": "D:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj"
             }
           }
         }

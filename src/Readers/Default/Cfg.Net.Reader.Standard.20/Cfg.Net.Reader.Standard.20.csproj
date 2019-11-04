@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Cfg.Net.Reader.Standard._20</RootNamespace>
+  </PropertyGroup>
+
+  <Import Project="..\Cfg.Net.Reader.Shared\Cfg.Net.Reader.Shared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj" />
+  </ItemGroup>
+
+</Project>

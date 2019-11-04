@@ -129,17 +129,17 @@
       <Project>{2008644b-db1f-4a50-bb7e-550f55e704f0}</Project>
       <Name>Cfg.Net.Parsers.YamlDotNet</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Cfg.Net.Reader\Cfg.Net.Reader.csproj">
-      <Project>{93afd9a7-5dc8-4392-8632-a553723bd3ac}</Project>
-      <Name>Cfg.Net.Reader</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Cfg.Net.Shorthand\Cfg.Net.Shorthand.csproj">
       <Project>{b74d8ffa-af9a-4b14-bc6d-3c43469d571d}</Project>
       <Name>Cfg.Net.Shorthand</Name>
     </ProjectReference>
-    <ProjectReference Include="..\src\Cfg.NET\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj">
-      <Project>{19c13ae3-c408-40e2-b3ef-ca80528a9d83}</Project>
+    <ProjectReference Include="..\src\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj">
+      <Project>{50beb203-fea0-47fd-9bc1-4b2eccc91377}</Project>
       <Name>Cfg.Net.Standard.20</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\Readers\Default\Cfg.Net.Reader.Standard.20\Cfg.Net.Reader.Standard.20.csproj">
+      <Project>{44c47fc7-e690-4fce-839a-95ca28ce51b6}</Project>
+      <Name>Cfg.Net.Reader.Standard.20</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

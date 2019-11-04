@@ -46,7 +46,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Cfg.NET\Cfg.Net\Cfg.Net.csproj">
+    <ProjectReference Include="..\src\Main\Cfg.Net\Cfg.Net.csproj">
       <Project>{6ccfd0fd-c0b7-4b2b-ab17-2d8e3567b7e2}</Project>
       <Name>Cfg.Net</Name>
     </ProjectReference>

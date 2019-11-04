@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>c76fc002-10fd-4a69-af1a-1c9260ec6807</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Cfg.Net.Reader.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DefaultReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HttpUtility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ReTryingReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WebReader.cs" />
+  </ItemGroup>
+</Project>
