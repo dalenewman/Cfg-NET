@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{093898FA-64E6-4E71-8DFF-141C8888BFBE}</ProjectGuid>
+    <ProjectGuid>{2008644B-DB1F-4A50-BB7E-550F55E704F0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Cfg.Net.Parsers.Xml.Linq</RootNamespace>
-    <AssemblyName>Cfg.Net.Parsers.Xml.Linq</AssemblyName>
+    <RootNamespace>Cfg.Net.Parsers.YamlDotNet</RootNamespace>
+    <AssemblyName>Cfg.Net.Parsers.YamlDotNet</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -37,16 +37,24 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="YamlDotNet, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.5.2.1\lib\net45\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="YamlDotNetNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="XDocumentNode.cs" />
-    <Compile Include="XDocumentParser.cs" />
+    <Compile Include="YamlDotNetParser.cs" />
+    <Compile Include="YamlDotNetSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Main\Cfg.Net.45\Cfg.Net.45.csproj">
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Main\Cfg.Net.45\Cfg.Net.45.csproj">
       <Project>{4cfd5636-2e70-4f75-af99-aef8bb725f6f}</Project>
       <Name>Cfg.Net.45</Name>
     </ProjectReference>

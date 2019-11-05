@@ -2034,15 +2034,14 @@
     },
     "Cfg.Net/1.0.0": {
       "type": "project",
-      "path": "../src/Main/Cfg.Net/project.json",
-      "msbuildProject": "../src/Main/Cfg.Net/Cfg.Net.csproj"
+      "path": "../../../Main/Cfg.Net/project.json",
+      "msbuildProject": "../../../Main/Cfg.Net/Cfg.Net.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "": [
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.1",
-      "NETStandard.Library >= 1.6.0",
-      "System.Runtime >= 4.1.0"
+      "NETStandard.Library >= 1.6.0"
     ],
     ".NETStandard,Version=v1.0": []
   },
@@ -2051,12 +2050,12 @@
   },
   "project": {
     "restore": {
-      "projectUniqueName": "D:\\Code\\Cfg-NET\\Cfg.Net.Environment\\Cfg.Net.Environment.csproj",
-      "projectName": "Cfg.Net.Environment",
-      "projectPath": "D:\\Code\\Cfg-NET\\Cfg.Net.Environment\\Cfg.Net.Environment.csproj",
-      "projectJsonPath": "D:\\Code\\Cfg-NET\\Cfg.Net.Environment\\project.json",
+      "projectUniqueName": "D:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\Cfg.Net.Shorthand.csproj",
+      "projectName": "Cfg.Net.Shorthand",
+      "projectPath": "D:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\Cfg.Net.Shorthand.csproj",
+      "projectJsonPath": "D:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\project.json",
       "packagesPath": "C:\\Users\\dnewman\\.nuget\\packages\\",
-      "outputPath": "D:\\Code\\Cfg-NET\\Cfg.Net.Environment\\obj\\",
+      "outputPath": "D:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\obj\\",
       "projectStyle": "ProjectJson",
       "configFilePaths": [
         "C:\\Users\\dnewman\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -2079,8 +2078,7 @@
     },
     "dependencies": {
       "Microsoft.NETCore.Portable.Compatibility": "[1.0.1, )",
-      "NETStandard.Library": "[1.6.0, )",
-      "System.Runtime": "[4.1.0, )"
+      "NETStandard.Library": "[1.6.0, )"
     },
     "frameworks": {
       "netstandard1.0": {}

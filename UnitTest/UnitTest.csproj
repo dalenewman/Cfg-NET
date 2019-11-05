@@ -113,29 +113,29 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cfg.Net.Environment\Cfg.Net.Environment.csproj">
+    <ProjectReference Include="..\src\Customizers\Environment\Cfg.Net.Environment\Cfg.Net.Environment.csproj">
       <Project>{629f7c32-54ad-400c-a0bf-9d0772a58e3a}</Project>
       <Name>Cfg.Net.Environment</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Cfg.Net.Parsers.Json.Net\Cfg.Net.Parsers.Json.Net.csproj">
-      <Project>{d64515c8-95b0-459b-bf6c-9f54e170211f}</Project>
-      <Name>Cfg.Net.Parsers.Json.Net</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cfg.Net.Parsers.Xml.Linq\Cfg.Net.Parsers.Xml.Linq.csproj">
-      <Project>{093898fa-64e6-4e71-8dff-141c8888bfbe}</Project>
-      <Name>Cfg.Net.Parsers.Xml.Linq</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cfg.Net.Parsers.YamlDotNet\Cfg.Net.Parsers.YamlDotNet.csproj">
-      <Project>{2008644b-db1f-4a50-bb7e-550f55e704f0}</Project>
-      <Name>Cfg.Net.Parsers.YamlDotNet</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cfg.Net.Shorthand\Cfg.Net.Shorthand.csproj">
+    <ProjectReference Include="..\src\Customizers\Shorthand\Cfg.Net.Shorthand\Cfg.Net.Shorthand.csproj">
       <Project>{b74d8ffa-af9a-4b14-bc6d-3c43469d571d}</Project>
       <Name>Cfg.Net.Shorthand</Name>
     </ProjectReference>
     <ProjectReference Include="..\src\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj">
       <Project>{50beb203-fea0-47fd-9bc1-4b2eccc91377}</Project>
       <Name>Cfg.Net.Standard.20</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\Parsers\Cfg.Net.Parsers.Json.Net\Cfg.Net.Parsers.Json.Net.csproj">
+      <Project>{d64515c8-95b0-459b-bf6c-9f54e170211f}</Project>
+      <Name>Cfg.Net.Parsers.Json.Net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\Parsers\Cfg.Net.Parsers.Xml.Linq\Cfg.Net.Parsers.Xml.Linq.csproj">
+      <Project>{093898fa-64e6-4e71-8dff-141c8888bfbe}</Project>
+      <Name>Cfg.Net.Parsers.Xml.Linq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\Parsers\Cfg.Net.Parsers.YamlDotNet\Cfg.Net.Parsers.YamlDotNet.csproj">
+      <Project>{2008644b-db1f-4a50-bb7e-550f55e704f0}</Project>
+      <Name>Cfg.Net.Parsers.YamlDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\src\Readers\Default\Cfg.Net.Reader.Standard.20\Cfg.Net.Reader.Standard.20.csproj">
       <Project>{44c47fc7-e690-4fce-839a-95ca28ce51b6}</Project>
