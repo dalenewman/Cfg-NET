@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Cfg.Net.Environment</RootNamespace>
+    <AssemblyName>Cfg.Net.Environment</AssemblyName>
+    <Version>0.3.5</Version>
+  </PropertyGroup>
+
+  <Import Project="..\Cfg.Net.Environment.Shared\Cfg.Net.Environment.Shared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj" />
+  </ItemGroup>
+
+</Project>

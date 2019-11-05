@@ -113,13 +113,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Customizers\Environment\Cfg.Net.Environment\Cfg.Net.Environment.csproj">
-      <Project>{629f7c32-54ad-400c-a0bf-9d0772a58e3a}</Project>
-      <Name>Cfg.Net.Environment</Name>
+    <ProjectReference Include="..\src\Customizers\Environment\Cfg.Net.Environment.Standard.20\Cfg.Net.Environment.Standard.20.csproj">
+      <Project>{ec2f5376-3078-412c-9ef6-3f4167b08f2b}</Project>
+      <Name>Cfg.Net.Environment.Standard.20</Name>
     </ProjectReference>
-    <ProjectReference Include="..\src\Customizers\Shorthand\Cfg.Net.Shorthand\Cfg.Net.Shorthand.csproj">
-      <Project>{b74d8ffa-af9a-4b14-bc6d-3c43469d571d}</Project>
-      <Name>Cfg.Net.Shorthand</Name>
+    <ProjectReference Include="..\src\Customizers\Shorthand\Cfg.Net.Shorthand.Standard.20\Cfg.Net.Shorthand.Standard.20.csproj">
+      <Project>{43fa3f95-0516-4d66-938e-266c0f961c79}</Project>
+      <Name>Cfg.Net.Shorthand.Standard.20</Name>
     </ProjectReference>
     <ProjectReference Include="..\src\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj">
       <Project>{50beb203-fea0-47fd-9bc1-4b2eccc91377}</Project>

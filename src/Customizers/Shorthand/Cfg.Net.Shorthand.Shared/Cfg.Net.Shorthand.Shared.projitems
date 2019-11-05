@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>28da6c7f-a14d-4787-9d61-457997288d99</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Cfg.Net.Shorthand.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Expression.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Expressions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Method.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MethodData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parameter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShorthandAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShorthandCustomizer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShorthandRoot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Signature.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Target.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility.cs" />
+  </ItemGroup>
+</Project>

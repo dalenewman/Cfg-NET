@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>d17d76ea-69c0-4ec1-8e35-d15c4eb3f4b0</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Cfg.Net.Environment.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)EnvironmentModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IPlaceHolderReplacer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParameterModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PlaceHolderReplacer.cs" />
+  </ItemGroup>
+</Project>
