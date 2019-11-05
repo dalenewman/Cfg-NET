@@ -82,9 +82,9 @@ class Color {
 }
 ```
 
-To make the above model work with Cfg-NET, have 
-each class inherit `CfgNode` and decorate 
-the properties with the `Cfg` custom attribute: 
+To enable configurations, have each class 
+inherit `CfgNode` and decorate the properties 
+with the `Cfg` custom attribute: 
 
 ```csharp
 using System.Collections.Generic;
@@ -112,8 +112,7 @@ class Color : CfgNode {
 
 Inheriting from `CfgNode` provides:
 
-* a `Load()` method for processing an external configuration
-* a `Check()` method for processing an model you created in code
+* a `Load()` method for processing a configuration
 * an `Errors()` method to get errors in your configuration (after Load, or Check called)
 * an `Warnings()` method to get warnings in your configuration (after Load, or Check called)
 * a `Serialize()` method to get your model out as a string (xml, json, etc.) 
@@ -167,8 +166,7 @@ class Color : CfgNode {
 
 ### Load the Configuration
 
-Now that we have a model and our choice of JSON or XML 
-configurations, we may load the configuration into the model like this:
+Load the configuration into the model like this:
 
 ```csharp
 // let xml be your configuration
@@ -178,11 +176,9 @@ cfg.Load(xml);
 
 ### Examine for Errors and/or Warnings
 
-When you load a configuration, Cfg-NET doesn't throw 
-exceptions. Instead, it collects errors and/or warnings. 
-
 After loading, always examine your model for any 
-issues using the `Errors()` and `Warnings()` methods:
+issues using the `Errors()` 
+and `Warnings()` methods:
 
 ```csharp
 //LOAD CONFIGURATION
@@ -233,7 +229,7 @@ foreach (var fruit in cfg.Fruit) {
 ```
 
 You never have to worry about a `Cfg` decorated list being `null` 
-because they are initialized as the configuration loads.  Moreover, 
+because it is initialized as the configuration loads.  Moreover, 
 if you set default values (e.g. `[Cfg(value="default")]`), a 
 property is never `null`.
 
@@ -243,8 +239,8 @@ Customization
 ---------------------------
 
 The `Cfg` attribute's optional properties 
-offer simple validation.  If it's not enough, 
-you have ways to extend:
+offer simple validation and transformation. 
+If it's not enough, you have options:
 
 1. Overriding `PreValidate()`
 1. Overriding `Validate()`
@@ -252,14 +248,14 @@ you have ways to extend:
 
 ### PreValidate()
 
-If you want to modify the configuration before validation,
-override `PreValidate()` like this:
+If you want to modify a configuration before 
+validation, override `PreValidate()` like this:
 
 ```csharp
 protected override void PreValidate() {
     if (Provider == "Bad Words") {
-        Provider = "Good Words. Ha!";
-        Warn("Please watch your language.");
+        Provider = "Good Words";
+        Warn("Watch your language!");
     }
 }
 ```
@@ -357,13 +353,14 @@ This produces a result of:
 </cfg>
 ```
 
-### Configure with Code and Check
+**Note**: If you loaded XML, it serializes to XML. 
+If you loaded JSON, it serializes to JSON.
 
-Loading configurations is great.  However, sometimes 
-you need to write a configuration in code and *still* be 
-able to check it for errors and/or warnings.  To do this, 
-just create your model however you like, and the run the 
-`Check` method.
+### Configure with Code
+
+Sometimes you need to write a configuration in 
+code.  If you do this, be sure to call `Load()` 
+without parameters.
 
 ```csharp
 var cfg = new Cfg {
@@ -378,24 +375,27 @@ var cfg = new Cfg {
     }
 };
 
-// Instead of using Load(), use Check()
-cfg.Check();
+// Call Load() to check for errors and warnings
+cfg.Load();
 
 // I put an error in there on purpose (hint: aqua is invalid)
 Assert.AreEqual(1, cfg.Errors().Length);
 ```
 
 ### Conclusion
-So, if you need really great configurations for your programs, give Cfg-NET a try. I use it in just about all the programs I write, and I am very happy with it. Thank you for taking the time to read this. I appreciate the stars and feedback.
+So, if you need configurations for your programs, 
+give Cfg-NET a try. I use it in all the programs 
+I write, and I am very happy with it. 
+Thank you for taking the time to read this. 
+I appreciate the stars and feedback.
 
 ### Credits
 *  a modified version of `NanoXmlParser` found [here](http://www.codeproject.com/Tips/682245/NanoXML-Simple-and-fast-XML-parser).
 *  a modified version of `fastJSON` found [here](http://www.codeproject.com/Articles/159450/fastJSON)
 *  .NET Source of `WebUtility.HtmlDecode` found [here](http://referencesource.microsoft.com/#System/net/System/Net/WebUtility.cs), used as reference.
 
-### Further Reading
+#### Further Reading (optional)
 
 * [Using Dependency Injection & Autofac with Cfg-NET](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
 * [Using Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
 * [Using Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
-* [Using Extension Methods](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Methods.md)

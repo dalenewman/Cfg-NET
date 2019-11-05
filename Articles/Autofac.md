@@ -1,8 +1,8 @@
 Dependency Injection with Autofac
 ==================================
 
-The `CfgNode` class constructor accepts an optional array 
-of dependencies.
+The `CfgNode` class constructor accepts an 
+optional array of dependencies.
 
 ### Cfg-NET by Default
 
