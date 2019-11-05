@@ -44,12 +44,13 @@ namespace UnitTest {
             var problems = cfg.Errors();
             Assert.AreEqual(3, problems.Length);
 #if CORE
-            Assert.AreEqual("invalid has an invalid regex of [ Invalid pattern '[' at offset 1. Unterminated [] set.", problems[0]);
+            // Assert.AreEqual("invalid has an invalid regex of [ Invalid pattern '[' at offset 1. Unterminated [] set.", problems[0]);
+         Assert.AreEqual("invalid has an invalid regex of [ parsing '[' - Unterminated [] set.", problems[0]);
 #else
-            Assert.AreEqual("invalid has an invalid regex of [ parsing \"[\" - Unterminated [] set.", problems[0]);
+         Assert.AreEqual("invalid has an invalid regex of [ parsing \"[\" - Unterminated [] set.", problems[0]);
 #endif
 
-         Assert.AreEqual("bad value does not match regex ^[a-z0-9]*$ in value", problems[1]);
+                 Assert.AreEqual("bad value does not match regex ^[a-z0-9]*$ in value", problems[1]);
             Assert.AreEqual("bad-value does not match regex ^[a-zA-Z]*$ in name", problems[2]);
         }
     }
