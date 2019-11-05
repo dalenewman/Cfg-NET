@@ -38,7 +38,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{5FE37D04
 		Nuget\Cfg.Net.Reader.nuspec = Nuget\Cfg.Net.Reader.nuspec
 		Nuget\Cfg.Net.Shorthand.nuspec = Nuget\Cfg.Net.Shorthand.nuspec
 		Nuget\nuget.bat = Nuget\nuget.bat
-		Nuget\nuget.exe = Nuget\nuget.exe
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Main", "Main", "{856D08A7-0AE3-42C1-A811-75B59C0045BE}"
@@ -65,7 +64,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Reader", "src\Reade
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Cfg.Net.Reader.Shared", "src\Readers\Default\Cfg.Net.Reader.Shared\Cfg.Net.Reader.Shared.shproj", "{C76FC002-10FD-4A69-AF1A-1C9260EC6807}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Reader.Standard.20", "src\Readers\Default\Cfg.Net.Reader.Standard.20\Cfg.Net.Reader.Standard.20.csproj", "{44C47FC7-E690-4FCE-839A-95CA28CE51B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cfg.Net.Reader.Standard.20", "src\Readers\Default\Cfg.Net.Reader.Standard.20\Cfg.Net.Reader.Standard.20.csproj", "{44C47FC7-E690-4FCE-839A-95CA28CE51B6}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

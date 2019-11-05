@@ -1,8 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Cfg.Net.Reader.Standard._20</RootNamespace>
+    <RootNamespace>Cfg.Net.Reader</RootNamespace>
+    <AssemblyName>Cfg.Net.Reader</AssemblyName>
+    <Version>0.3.4</Version>
   </PropertyGroup>
 
   <Import Project="..\Cfg.Net.Reader.Shared\Cfg.Net.Reader.Shared.projitems" Label="Shared" />

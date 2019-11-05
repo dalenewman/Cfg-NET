@@ -1,23 +1,30 @@
 <?xml version="1.0"?>
 <package >
-  <metadata>
-    <id>Cfg-NET.Reader</id>
-    <version>0.3.3</version>
-    <title>Cfg-NET Reader</title>
-    <authors>Dale Newman</authors>
-    <owners>Dale Newman</owners>
-    <licenseUrl>https://github.com/dalenewman/Cfg-NET/blob/master/LICENSE.md</licenseUrl>
-    <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A reader implementation</description>
-    <releaseNotes>Updated to Cfg-Net's new interface.</releaseNotes>
-    <copyright>Copyright 2015-2018</copyright>
-    <tags>configuration, settings</tags>
-    <dependencies>
-      <dependency id="Cfg-NET" version="0.10.1" />
-    </dependencies>
-  </metadata>
-  <files>
-    <file src="..\Cfg.Net.Reader\bin\Release\Cfg.Net.Reader.dll" target="lib\net45\Cfg.Net.Reader.dll" />
-  </files>
+   <metadata>
+      <id>Cfg-NET.Reader</id>
+      <version>0.3.4</version>
+      <title>Cfg-NET Reader</title>
+      <authors>Dale Newman</authors>
+      <owners>Dale Newman</owners>
+      <licenseUrl>https://github.com/dalenewman/Cfg-NET/blob/master/LICENSE.md</licenseUrl>
+      <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
+      <requireLicenseAcceptance>false</requireLicenseAcceptance>
+      <description>A reader implementation</description>
+      <releaseNotes>Updated to Cfg-Net's new interface.</releaseNotes>
+      <copyright>Copyright 2015-2018</copyright>
+      <tags>configuration, settings</tags>
+      <dependencies>
+         <group targetFramework="net45">
+            <dependency id="Cfg-NET" version="0.10.5" />
+         </group>
+         <group targetFramework="netstandard2.0">
+            <dependency id="Cfg-NET" version="0.10.5" />
+         </group>
+      </dependencies>
+   </metadata>
+   <files>
+      <file src="..\src\Readers\Default\Cfg.Net.Reader\bin\Release\Cfg.Net.Reader.dll" target="lib\net45\Cfg.Net.Reader.dll" />
+      <file src="..\src\Readers\Default\Cfg.Net.Reader.Standard.20\bin\Release\netstandard2.0\Cfg.Net.Reader.deps.json" target="lib\netstandard2.0\Cfg.Net.Reader.deps.json" />
+      <file src="..\src\Readers\Default\Cfg.Net.Reader.Standard.20\bin\Release\netstandard2.0\Cfg.Net.Reader.dll" target="lib\netstandard2.0\Cfg.Net.Reader.dll" />
+   </files>
 </package>
