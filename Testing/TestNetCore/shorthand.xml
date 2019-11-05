@@ -1,0 +1,38 @@
+﻿<cfg>
+
+  <methods>
+    <add name="left" signature="length" />
+    <add name="right" signature="length" />
+    <add name="padleft" signature="padding" />
+    <add name="padright" signature="padding" />
+    <add name="javascript" signature="script" />
+    <add name="copy" signature="none" ignore="true" />
+    <add name="in" signature="domain" />
+  </methods>
+
+  <signatures>
+    <add name="padding">
+      <parameters>
+        <add name="total-width" />
+        <add name="padding-char" value="0" />
+      </parameters>
+    </add>
+    <add name="length">
+      <parameters>
+        <add name="length" />
+      </parameters>
+    </add>
+    <add name="script">
+      <parameters>
+        <add name="script" />
+      </parameters>
+    </add>
+    <add name="domain">
+      <parameters>
+        <add name="domain" />
+      </parameters>
+    </add>
+    <add name="none" />
+  </signatures>
+
+</cfg>

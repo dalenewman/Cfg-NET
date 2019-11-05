@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>abb72ffc-c11c-493c-865a-2f13009c1937</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>TestShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Case.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Clone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConfigureWithCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CustomProblems.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Domain.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ElementNameVariations.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EmptyLists.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnvironmentParameters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FixIssue2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FreeFormData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Length.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModifierTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parameters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PassInLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PreValidateTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PropertyManipulation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QueryStringTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ReadMe.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ReadMeJson.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Regex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShorthandTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestClasses\AttributeCfg.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestClasses\AttributeSite.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestClasses\Cfg.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestClasses\CfgDatabase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestClasses\CfgEnvironment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestClasses\CfgParameter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestClasses\CfgServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToJson.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToXml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TraceLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Trim.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UnitTest1.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValidatorTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Value.cs" />
+  </ItemGroup>
+</Project>
