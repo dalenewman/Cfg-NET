@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{8B
 	ProjectSection(SolutionItems) = preProject
 		Articles\Autofac.md = Articles\Autofac.md
 		Articles\EnvironmentsAndParameters.md = Articles\EnvironmentsAndParameters.md
-		Articles\Methods.md = Articles\Methods.md
 		Articles\Shorthand.md = Articles\Shorthand.md
 	EndProjectSection
 EndProject

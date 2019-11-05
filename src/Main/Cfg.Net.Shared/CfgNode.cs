@@ -161,11 +161,7 @@ namespace Cfg.Net {
             Process(node, string.Empty, Serializer, Events, parameters, Customizers, 0, Enabled);
         }
 
-        /// <summary>
-        /// Check programatically created objects / configurations.  
-        /// Note: The checked object is converted to "nodes" and re-processed so it will break references to the objects used to create it.
-        /// </summary>
-        public void Check() {
+        public void Load() {
             Events.Clear(_modelErrors);
             var name = CfgMetadataCache.NormalizeName(Type, Type.Name);
             var node = new ObjectNode(this, name);

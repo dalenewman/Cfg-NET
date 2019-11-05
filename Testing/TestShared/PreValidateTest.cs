@@ -85,7 +85,7 @@ namespace UnitTest {
 
             protected override void PreValidate() {
                 var thing = new Thing { Name = "three", Value = "error" };
-                thing.Check();
+                thing.Load();
                 if (thing.Errors().Any()) {
                     foreach (var error in thing.Errors()) {
                         Error(error);

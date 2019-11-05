@@ -10,7 +10,7 @@
       <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>allow manipulation from the outside via paramenters, environments, and place-holders</description>
-      <releaseNotes>add .netstandard 2.0 target</releaseNotes>
+      <releaseNotes>added .netstandard 2.0 target</releaseNotes>
       <copyright>Copyright 2015-2019</copyright>
       <tags>configuration, settings</tags>
       <dependencies>
@@ -18,10 +18,10 @@
          <group targetFramework="netstandard1.0">
             <dependency id="NETStandard.Library" version="1.6.0" />
             <dependency id="System.Runtime" version="4.1.0" />
-            <dependency id="Cfg-NET" version="0.10.5" />
+            <dependency id="Cfg-NET" version="0.11.0" />
          </group>
          <group targetFramework="netstandard2.0">
-            <dependency id="Cfg-NET" version="0.10.5" />
+            <dependency id="Cfg-NET" version="0.11.0" />
          </group>
       </dependencies>
    </metadata>

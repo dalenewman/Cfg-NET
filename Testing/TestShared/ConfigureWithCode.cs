@@ -30,20 +30,20 @@ namespace UnitTest {
             Assert.AreEqual(0, example.Errors().Length);
             Assert.IsNotNull(example.Items);
 
-            example.Check();
+            example.Load();
             Assert.AreNotEqual(0, example.Errors().Length);
             Assert.AreEqual(1, example.Warnings().Length);
             Assert.AreEqual(2, example.Errors().Length);
 
             example.Items.Add(new ExampleItem { Value = 5});
             example.Items.Add(new ExampleItem { Value = 6});
-            example.Check();
+            example.Load();
             Assert.AreNotEqual(0, example.Errors().Length);
             Assert.AreEqual(1, example.Warnings().Length);
             Assert.AreEqual(1, example.Errors().Length, "Only 1 error because we fixed the missing items.");
 
             example.Name = "I am required";
-            example.Check();
+            example.Load();
             Assert.AreEqual(0, example.Errors().Length, "0 errors because we added a name.");
         }
     }

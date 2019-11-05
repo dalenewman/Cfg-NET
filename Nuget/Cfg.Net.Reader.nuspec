@@ -10,15 +10,15 @@
       <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>A reader implementation</description>
-      <releaseNotes>Updated to Cfg-Net's new interface.</releaseNotes>
+      <releaseNotes>added .netstandard 2.0 target</releaseNotes>
       <copyright>Copyright 2015-2018</copyright>
       <tags>configuration, settings</tags>
       <dependencies>
          <group targetFramework="net45">
-            <dependency id="Cfg-NET" version="0.10.5" />
+            <dependency id="Cfg-NET" version="0.11.0" />
          </group>
          <group targetFramework="netstandard2.0">
-            <dependency id="Cfg-NET" version="0.10.5" />
+            <dependency id="Cfg-NET" version="0.11.0" />
          </group>
       </dependencies>
    </metadata>

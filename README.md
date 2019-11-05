@@ -4,34 +4,13 @@ Cfg-NET
 [![Build status](https://ci.appveyor.com/api/projects/status/qm4auhkcv6b23abr?svg=true)](https://ci.appveyor.com/project/dalenewman/cfg-net)
 [![NuGet](https://img.shields.io/nuget/v/Cfg-NET.svg?label=Nuget)](https://www.nuget.org/packages/Cfg-NET)
 
-An [open source](https://github.com/dalenewman/Cfg.Net) 
-configuration handler for .NET licensed under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0).
-
-#### Cfg-NET Configurations:
-
-* are editable by end-users
-* reduce the need to re-compile
-* co-exist with other configurations
-
-#### Cfg-NET:
-
-* is easy to use
-* supports collections
-* validates and reports errors and warnings
-* offers protection from `null`
-* allows you to store your configuration where you want (e.g. web, file, string)
-* is extensible 
-* is composable
-* is small (~68 KB)
-* has zero dependencies
-* is portable (.NETStandard1.0 with PCL compatibility)
-* is available on [Nuget](https://www.nuget.org/packages/Cfg-NET)
+Cfg-NET is a configuration library for .NET with 
+built-in validation and error reporting.
 
 ### Configuration
 
-Out of the box, Cfg-NET supports XML and JSON configurations.
-
-An XML example:
+Support for XML and/or JSON is built-in.  An example 
+configuration of fruits with their colors is provided below.
 
 ```xml
 <cfg>
@@ -52,7 +31,7 @@ An XML example:
 </cfg>
 ```
 
-Or, if you prefer JSON:
+Here's the same in JSON:
 
 ```json
 {
@@ -75,9 +54,16 @@ Or, if you prefer JSON:
 }
 ```
 
+**IMPORTANT**: A collection (like `<fruit/>`) 
+is restricted.  For XML, it is a named *element* 
+containing only nested `<add/>` *elements* 
+with *attributes*.  For JSON, it is a named 
+*array* of *objects* with *properties*.
+
 ### Code
 
-In code, you want to deal with a corresponding C# model like this:
+In code, a corresponding C# model for fruits 
+and their colors looks like this:
 
 ```csharp
 using System.Collections.Generic;
@@ -96,9 +82,9 @@ class Color {
 }
 ```
 
-To make the above model work with Cfg-NET, have each 
-class inherit `CfgNode` and decorate the properties 
-with the `Cfg` custom attribute: 
+To make the above model work with Cfg-NET, have 
+each class inherit `CfgNode` and decorate 
+the properties with the `Cfg` custom attribute: 
 
 ```csharp
 using System.Collections.Generic;
@@ -126,10 +112,8 @@ class Color : CfgNode {
 
 Inheriting from `CfgNode` provides:
 
-* a constructor allowing for dependency injection
 * a `Load()` method for processing an external configuration
 * a `Check()` method for processing an model you created in code
-* a `Sequence` property indicating the order your configuration was processed
 * an `Errors()` method to get errors in your configuration (after Load, or Check called)
 * an `Warnings()` method to get warnings in your configuration (after Load, or Check called)
 * a `Serialize()` method to get your model out as a string (xml, json, etc.) 

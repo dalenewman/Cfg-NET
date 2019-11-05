@@ -182,7 +182,7 @@ namespace UnitTest {
                 }
             };
 
-            cfg.Check();
+            cfg.Load();
 
             Assert.AreEqual(1, cfg.Errors().Length);
             Assert.AreEqual("An invalid value of aqua is in name.  The valid domain is: red, yellow, green, purple, blue, orange.", cfg.Errors().First());
