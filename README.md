@@ -54,9 +54,9 @@ Here's the same in JSON:
 }
 ```
 
-**IMPORTANT**: A collection (like `<fruit/>`) 
-is restricted.  For XML, it is a named *element* 
-containing only nested `<add/>` *elements* 
+**IMPORTANT**: A collection like `<fruit/>` 
+is somewhat restricted.  For XML, it is a named *element* 
+containing nested `<add/>` *elements* 
 with *attributes*.  For JSON, it is a named 
 *array* of *objects* with *properties*.
 
@@ -113,8 +113,7 @@ class Color : CfgNode {
 Inheriting from `CfgNode` provides:
 
 * a `Load()` method for processing a configuration
-* an `Errors()` method to get errors in your configuration (after Load, or Check called)
-* an `Warnings()` method to get warnings in your configuration (after Load, or Check called)
+* `Errors()` and `Warnings()` methods to check after `Load` is called
 * a `Serialize()` method to get your model out as a string (xml, json, etc.) 
 
 The `Cfg` attributes add validation and modification 
