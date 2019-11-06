@@ -1,17 +1,28 @@
 ﻿{
-    "servers": [
-        {
-            "name": "Gandalf",
-            "databases": [
-                { "name": "master", "backupsToKeep": 6 }
-            ]
-        },
-        {
-            "name": "Saruman",
-            "databases": [
-                { "name": "master", "backupFolder": "\\\\san\\sql-backups\\saruman\\master", "backupsToKeep": 8 },
-                { "name": "model", "backupFolder": "\\\\san\\sql-backups\\saruman\\model" }
-            ]
-        }
-    ]
+   "id": 1,
+   "servers": [
+      {
+         "name": "Gandalf",
+         "databases": [
+            {
+               "name": "master",
+               "backupsToKeep": 6
+            }
+         ]
+      },
+      {
+         "name": "Saruman",
+         "databases": [
+            {
+               "name": "master",
+               "backupFolder": "\\\\san\\sql-backups\\saruman\\master",
+               "backupsToKeep": 8
+            },
+            {
+               "name": "model",
+               "backupFolder": "\\\\san\\sql-backups\\saruman\\model"
+            }
+         ]
+      }
+   ]
 }

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<cfg>
+<cfg id="1">
   <servers>
     <add name="Gandalf">
       <databases>

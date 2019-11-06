@@ -9,11 +9,11 @@ built-in validation and error reporting.
 
 ### Configuration
 
-Support for XML and/or JSON is built-in.  An example 
-configuration of fruits with their colors is provided below.
+Support for XML and JSON configurations are 
+built-in.  An example of fruits with their colors is provided below.
 
 ```xml
-<cfg>
+<cfg id="1">
     <fruit>
         <add name="apple">
             <colors>
@@ -30,35 +30,36 @@ configuration of fruits with their colors is provided below.
     </fruit>
 </cfg>
 ```
+In XML, collections are named *elements* containing 
+nested `<add/>` *elements*.  Only `<add/>` elements 
+may have *attributes*.
 
 Here's the same in JSON:
 
 ```json
-{
-    "fruit": [
-        { 
-            "name":"apple",
-            "colors": [
-                {"name":"red"},
-                {"name":"yellow"},
-                {"name":"green"}
-            ]
-        },
-        {
-            "name":"banana",
-            "colors": [
-                {"name":"yellow"}
-            ]
-        }
-    ]
+{   
+   "id" : 1,
+   "fruit": [
+      { 
+         "name":"apple",
+         "colors": [
+            {"name":"red"},
+            {"name":"yellow"},
+            {"name":"green"}
+         ]
+      },
+      {
+         "name":"banana",
+         "colors": [
+            {"name":"yellow"}
+         ]
+      }
+   ]
 }
 ```
 
-**IMPORTANT**: A collection like `<fruit/>` 
-is somewhat restricted.  For XML, it is a named *element* 
-containing nested `<add/>` *elements* 
-with *attributes*.  For JSON, it is a named 
-*array* of *objects* with *properties*.
+In JSON, collections are named *arrays* of *objects*.  Only the 
+`objects` may have `properties`.
 
 ### Code
 
@@ -69,7 +70,8 @@ and their colors looks like this:
 using System.Collections.Generic;
 
 class Cfg {
-    public List<Fruit> Fruit { get; set; }
+   public int Id {get; set;}
+   public List<Fruit> Fruit { get; set; }
 }
 
 class Fruit {
@@ -91,8 +93,10 @@ using System.Collections.Generic;
 using Cfg.Net;
 
 class Cfg : CfgNode {
-    [Cfg]
-    public List<Fruit> Fruit { get; set; }
+   [Cfg]
+   public int Id { get; set;}      
+   [Cfg]
+   public List<Fruit> Fruit { get; set; }
 }
 
 class Fruit : CfgNode {
@@ -110,29 +114,30 @@ class Color : CfgNode {
  
 ### Design the Configuration
 
-Inheriting from `CfgNode` provides:
+Inheriting from `CfgNode` provides base methods:
 
-* a `Load()` method for processing a configuration
-* `Errors()` and `Warnings()` methods to check after `Load` is called
-* a `Serialize()` method to get your model out as a string (xml, json, etc.) 
+* `Load()` for loading or checking a configuration
+* `Errors()` and `Warnings()` to check after `Load` is called
+* `Serialize()` to get a text representation 
 
-The `Cfg` attributes add validation and modification 
-instructions.  An attribute has these 
-built-in options:
+The `Cfg` attribute adds validation and modification 
+instructions.  It has these options:
 
-* `value`, as in _default_ value
-* `toLower` or `toUpper`
-* `trim`, `trimStart`, or `trimEnd`
-* `required`
-* `unique`
-* `domain` with `delimiter` and `ignoreCase` options
-* `minLength` and/or `maxLength`
-* `minValue` and/or `maxValue`
-* `regex` with `ignoreCase` option
+* validation
+  * `required`
+  * `unique`
+  * `domain` with `delimiter` and `ignoreCase` options
+  * `minLength` and/or `maxLength`
+  * `minValue` and/or `maxValue`
+  * `regex` with `ignoreCase` option
+* transformation
+  * `value`, as in _default_ value
+  * `toLower` or `toUpper`
+  * `trim`, `trimStart`, or `trimEnd`
 
 ---
 
-If we want to make sure some fruit is defined in our configuration, we
+To make sure some fruit is defined in our configuration, we
 would add `required=true` to the fruit list like this:
 
 ```csharp

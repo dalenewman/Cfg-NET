@@ -20,14 +20,17 @@ using Cfg.Net.Contracts;
 
 namespace UnitTest.TestClasses {
 
-    public sealed class Cfg : CfgNode {
+   public sealed class Cfg : CfgNode {
 
-        [Cfg(required = true)]
-        public List<CfgServer> Servers { get; set; }
+      [Cfg]
+      public int Id { get; set; }
 
-        public Cfg(string cfg, IParser parser):base(parser) {
-            Load(cfg);
-        }
+      [Cfg(required = true)]
+      public List<CfgServer> Servers { get; set; }
 
-    } 
+      public Cfg(string cfg, IParser parser) : base(parser) {
+         Load(cfg);
+      }
+
+   }
 }

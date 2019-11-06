@@ -25,70 +25,71 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTest {
 
-    [TestClass]
-    public class ReadMe {
+   [TestClass]
+   public class ReadMe {
 
-        [TestMethod]
-        public void TestReadMe() {
+      [TestMethod]
+      public void TestReadMe() {
 
-            var xml = File.ReadAllText(@"ReadMe.xml");
-            var cfg = new TestClasses.Cfg(xml, new NanoXmlParser());
+         var xml = File.ReadAllText(@"ReadMe.xml");
+         var cfg = new TestClasses.Cfg(xml, new NanoXmlParser());
 
-            //TEST FOR PROBLEMS
-            Assert.AreEqual(0, cfg.Errors().Length);
+         //TEST FOR PROBLEMS
+         Assert.AreEqual(0, cfg.Errors().Length);
+
+         Assert.AreEqual(1, cfg.Id);
+
+         //TEST GANDALF
+         Assert.AreEqual("Gandalf", cfg.Servers[0].Name);
+         Assert.AreEqual(1, cfg.Servers[0].Databases.Count);
+         Assert.AreEqual("master", cfg.Servers[0].Databases[0].Name);
+         Assert.AreEqual(@"\\san\sql-backups", cfg.Servers[0].Databases[0].BackupFolder);
+         Assert.AreEqual(6, cfg.Servers[0].Databases[0].BackupsToKeep);
+
+         //TEST SARUMAN
+         Assert.AreEqual("Saruman", cfg.Servers[1].Name);
+         Assert.AreEqual(2, cfg.Servers[1].Databases.Count);
+         Assert.AreEqual("master", cfg.Servers[1].Databases[0].Name);
+         Assert.AreEqual(@"\\san\sql-backups\saruman\master", cfg.Servers[1].Databases[0].BackupFolder);
+         Assert.AreEqual(8, cfg.Servers[1].Databases[0].BackupsToKeep);
+         Assert.AreEqual("model", cfg.Servers[1].Databases[1].Name);
+         Assert.AreEqual(@"\\san\sql-backups\saruman\model", cfg.Servers[1].Databases[1].BackupFolder);
+         Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
+      }
 
 
-            //TEST GANDALF
-            Assert.AreEqual("Gandalf", cfg.Servers[0].Name);
-            Assert.AreEqual(1, cfg.Servers[0].Databases.Count);
-            Assert.AreEqual("master", cfg.Servers[0].Databases[0].Name);
-            Assert.AreEqual(@"\\san\sql-backups", cfg.Servers[0].Databases[0].BackupFolder);
-            Assert.AreEqual(6, cfg.Servers[0].Databases[0].BackupsToKeep);
 
-            //TEST SARUMAN
-            Assert.AreEqual("Saruman", cfg.Servers[1].Name);
-            Assert.AreEqual(2, cfg.Servers[1].Databases.Count);
-            Assert.AreEqual("master", cfg.Servers[1].Databases[0].Name);
-            Assert.AreEqual(@"\\san\sql-backups\saruman\master", cfg.Servers[1].Databases[0].BackupFolder);
-            Assert.AreEqual(8, cfg.Servers[1].Databases[0].BackupsToKeep);
-            Assert.AreEqual("model", cfg.Servers[1].Databases[1].Name);
-            Assert.AreEqual(@"\\san\sql-backups\saruman\model", cfg.Servers[1].Databases[1].BackupFolder);
-            Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
-        }
+      [TestMethod]
+      public void TestReadMe2() {
+         var xml = File.ReadAllText(@"ReadMe2.xml");
+         var cfg = new TestClasses.Cfg(xml, null);
 
+         foreach (var problem in cfg.Errors()) {
+            Console.WriteLine(problem);
+         }
 
+         //TEST FOR PROBLEMS
+         Assert.AreEqual(0, cfg.Errors().Length);
 
-        [TestMethod]
-        public void TestReadMe2() {
-            var xml = File.ReadAllText(@"ReadMe2.xml");
-            var cfg = new TestClasses.Cfg(xml, null);
+         //TEST SAM
+         Assert.AreEqual("Sam", cfg.Servers[0].Name);
+         Assert.AreEqual(2, cfg.Servers[0].Databases.Count);
+         Assert.AreEqual("master", cfg.Servers[0].Databases[0].Name);
+         Assert.AreEqual("msdb", cfg.Servers[0].Databases[1].Name);
+         Assert.AreEqual(@"\\san\sql-backups", cfg.Servers[0].Databases[0].BackupFolder);
+         Assert.AreEqual(5, cfg.Servers[0].Databases[0].BackupsToKeep);
 
-            foreach (var problem in cfg.Errors()) {
-                Console.WriteLine(problem);
-            }
+         //TEST VINNY
+         Assert.AreEqual("Vinny", cfg.Servers[1].Name);
+         Assert.AreEqual(2, cfg.Servers[1].Databases.Count);
+         Assert.AreEqual("master", cfg.Servers[1].Databases[0].Name);
+         Assert.AreEqual(@"\\san\sql-backups\vinny\master", cfg.Servers[1].Databases[0].BackupFolder);
+         Assert.AreEqual(3, cfg.Servers[1].Databases[0].BackupsToKeep);
+         Assert.AreEqual("model", cfg.Servers[1].Databases[1].Name);
+         Assert.AreEqual(@"\\san\sql-backups\vinny\model", cfg.Servers[1].Databases[1].BackupFolder);
+         Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
 
-            //TEST FOR PROBLEMS
-            Assert.AreEqual(0, cfg.Errors().Length);
-
-            //TEST SAM
-            Assert.AreEqual("Sam", cfg.Servers[0].Name);
-            Assert.AreEqual(2, cfg.Servers[0].Databases.Count);
-            Assert.AreEqual("master", cfg.Servers[0].Databases[0].Name);
-            Assert.AreEqual("msdb", cfg.Servers[0].Databases[1].Name);
-            Assert.AreEqual(@"\\san\sql-backups", cfg.Servers[0].Databases[0].BackupFolder);
-            Assert.AreEqual(5, cfg.Servers[0].Databases[0].BackupsToKeep);
-
-            //TEST VINNY
-            Assert.AreEqual("Vinny", cfg.Servers[1].Name);
-            Assert.AreEqual(2, cfg.Servers[1].Databases.Count);
-            Assert.AreEqual("master", cfg.Servers[1].Databases[0].Name);
-            Assert.AreEqual(@"\\san\sql-backups\vinny\master", cfg.Servers[1].Databases[0].BackupFolder);
-            Assert.AreEqual(3, cfg.Servers[1].Databases[0].BackupsToKeep);
-            Assert.AreEqual("model", cfg.Servers[1].Databases[1].Name);
-            Assert.AreEqual(@"\\san\sql-backups\vinny\model", cfg.Servers[1].Databases[1].BackupFolder);
-            Assert.AreEqual(4, cfg.Servers[1].Databases[1].BackupsToKeep);
-
-            const string expected = @"<Cfg>
+         const string expected = @"<Cfg>
     <servers>
         <add name=""Sam"">
             <databases>
@@ -104,32 +105,32 @@ namespace UnitTest {
         </add>
     </servers>
 </Cfg>";
-            var actual = cfg.Serialize();
-            Assert.AreEqual(expected.Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"));
+         var actual = cfg.Serialize();
+         Assert.AreEqual(expected.Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"));
 
-        }
+      }
 
-        [TestMethod]
-        public void TestReadMeThreads1() {
-            var thread1 = new Thread(TestReadMe);
-            var thread2 = new Thread(TestReadMe2);
-            var thread3 = new Thread(TestReadMe);
-            var thread4 = new Thread(TestReadMe2);
-            var thread5 = new Thread(TestReadMe);
-            var thread6 = new Thread(TestReadMe2);
-            thread1.Start();
-            thread2.Start();
-            thread3.Start();
-            thread4.Start();
-            thread5.Start();
-            thread6.Start();
-            TestReadMe();
-            TestReadMe2();
-        }
+      [TestMethod]
+      public void TestReadMeThreads1() {
+         var thread1 = new Thread(TestReadMe);
+         var thread2 = new Thread(TestReadMe2);
+         var thread3 = new Thread(TestReadMe);
+         var thread4 = new Thread(TestReadMe2);
+         var thread5 = new Thread(TestReadMe);
+         var thread6 = new Thread(TestReadMe2);
+         thread1.Start();
+         thread2.Start();
+         thread3.Start();
+         thread4.Start();
+         thread5.Start();
+         thread6.Start();
+         TestReadMe();
+         TestReadMe2();
+      }
 
-        [TestMethod]
-        public void NewTest() {
-            const string xml = @"
+      [TestMethod]
+      public void NewTest() {
+         const string xml = @"
 <cfg>
     <fruit>
         <add name='apple'>
@@ -149,29 +150,29 @@ namespace UnitTest {
 </cfg>
 ";
 
-            var cfg = new Cfg();
-            cfg.Load(xml);
-            cfg.Fruit.RemoveAll(f => f.Name == "apple");
-            cfg.Fruit.Add(new Fruit {
-                Name = "plum",
-                Colors = new List<Color> {
+         var cfg = new Cfg();
+         cfg.Load(xml);
+         cfg.Fruit.RemoveAll(f => f.Name == "apple");
+         cfg.Fruit.Add(new Fruit {
+            Name = "plum",
+            Colors = new List<Color> {
                     new Color { Name = "purple" }
                 }
-            });
+         });
 
-            foreach (var error in cfg.Errors()) {
-                Console.WriteLine(error);
-            }
+         foreach (var error in cfg.Errors()) {
+            Console.WriteLine(error);
+         }
 
-            Console.WriteLine(cfg.Serialize());
+         Console.WriteLine(cfg.Serialize());
 
-        }
+      }
 
-        [TestMethod]
-        public void TestCode() {
+      [TestMethod]
+      public void TestCode() {
 
-            var cfg = new Cfg {
-                Fruit = new List<Fruit> {
+         var cfg = new Cfg {
+            Fruit = new List<Fruit> {
                     new Fruit {
                         Name = "Apple",
                         Colors = new List<Color> {
@@ -180,33 +181,33 @@ namespace UnitTest {
                         }
                     }
                 }
-            };
+         };
 
-            cfg.Load();
+         cfg.Load();
 
-            Assert.AreEqual(1, cfg.Errors().Length);
-            Assert.AreEqual("An invalid value of aqua is in name.  The valid domain is: red, yellow, green, purple, blue, orange.", cfg.Errors().First());
-        }
-    }
+         Assert.AreEqual(1, cfg.Errors().Length);
+         Assert.AreEqual("An invalid value of aqua is in name.  The valid domain is: red, yellow, green, purple, blue, orange.", cfg.Errors().First());
+      }
+   }
 
 
 
-    class Cfg : CfgNode {
-        [Cfg(required = true)] // THERE MUST BE SOME FRUIT!
-        public List<Fruit> Fruit { get; set; }
-    }
+   class Cfg : CfgNode {
+      [Cfg(required = true)] // THERE MUST BE SOME FRUIT!
+      public List<Fruit> Fruit { get; set; }
+   }
 
-    class Fruit : CfgNode {
-        [Cfg(unique = true)] // THE FRUIT MUST BE UNIQUE!
-        public string Name { get; set; }
-        [Cfg]
-        public List<Color> Colors { get; set; }
-    }
+   class Fruit : CfgNode {
+      [Cfg(unique = true)] // THE FRUIT MUST BE UNIQUE!
+      public string Name { get; set; }
+      [Cfg]
+      public List<Color> Colors { get; set; }
+   }
 
-    class Color : CfgNode {
-        [Cfg(domain = "red,yellow,green,purple,blue,orange")]
-        public string Name { get; set; }
-    }
+   class Color : CfgNode {
+      [Cfg(domain = "red,yellow,green,purple,blue,orange")]
+      public string Name { get; set; }
+   }
 
 
 }
