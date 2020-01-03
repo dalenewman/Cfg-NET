@@ -30,9 +30,7 @@ built-in.  An example of fruits with their colors is provided below.
     </fruit>
 </cfg>
 ```
-In XML, collections are named *elements* containing 
-nested `<add/>` *elements*.  Only `<add/>` elements 
-may have *attributes*.
+In XML, collections are named elements containing nested `<add/>` elements. The collection elements may not contain attributes. Only the root (e.g. `<cfg/>`) and the `<add/>` elements may have attributes.
 
 Here's the same in JSON:
 
@@ -58,8 +56,7 @@ Here's the same in JSON:
 }
 ```
 
-In JSON, collections are named *arrays* of *objects*.  Only the 
-`objects` may have `properties`.
+In JSON, collections are named *arrays* of *objects*.  The collections may not have properties. Only the root object or objects within a collection array may have properties.
 
 ### Code
 
