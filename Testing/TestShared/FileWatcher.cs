@@ -23,7 +23,7 @@ namespace UnitTest {
     public class FileWatcher {
 
         [TestMethod]
-        //[Ignore("integration test that affects other tests")]
+        [Ignore("integration test that affects other tests")]
         public void TestFileWatcher() {
 
          using(var watcher = new FileSystemWatcherReader()) {
