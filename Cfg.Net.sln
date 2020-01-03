@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{5FE37D04
 		Nuget\Cfg.Net.Environment.nuspec = Nuget\Cfg.Net.Environment.nuspec
 		Nuget\Cfg.Net.nuspec = Nuget\Cfg.Net.nuspec
 		Nuget\Cfg.Net.Reader.nuspec = Nuget\Cfg.Net.Reader.nuspec
+		Nuget\Cfg.Net.Readers.FileSystemWatcherReader.nuspec = Nuget\Cfg.Net.Readers.FileSystemWatcherReader.nuspec
 		Nuget\Cfg.Net.Shorthand.nuspec = Nuget\Cfg.Net.Shorthand.nuspec
 		Nuget\nuget.bat = Nuget\nuget.bat
 	EndProjectSection
@@ -73,19 +74,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Shorthand", "src\Cu
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Cfg.Net.Environment.Shared", "src\Customizers\Environment\Cfg.Net.Environment.Shared\Cfg.Net.Environment.Shared.shproj", "{D17D76EA-69C0-4EC1-8E35-D15C4EB3F4B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Environment.Standard.20", "src\Customizers\Environment\Cfg.Net.Environment.Standard.20\Cfg.Net.Environment.Standard.20.csproj", "{EC2F5376-3078-412C-9EF6-3F4167B08F2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cfg.Net.Environment.Standard.20", "src\Customizers\Environment\Cfg.Net.Environment.Standard.20\Cfg.Net.Environment.Standard.20.csproj", "{EC2F5376-3078-412C-9EF6-3F4167B08F2B}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Cfg.Net.Shorthand.Shared", "src\Customizers\Shorthand\Cfg.Net.Shorthand.Shared\Cfg.Net.Shorthand.Shared.shproj", "{28DA6C7F-A14D-4787-9D61-457997288D99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cfg.Net.Shorthand.Standard.20", "src\Customizers\Shorthand\Cfg.Net.Shorthand.Standard.20\Cfg.Net.Shorthand.Standard.20.csproj", "{43FA3F95-0516-4D66-938E-266C0F961C79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cfg.Net.Shorthand.Standard.20", "src\Customizers\Shorthand\Cfg.Net.Shorthand.Standard.20\Cfg.Net.Shorthand.Standard.20.csproj", "{43FA3F95-0516-4D66-938E-266C0F961C79}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{22D31767-F452-4B97-891A-2B5FDBBC0513}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestNetCore", "Testing\TestNetCore\TestNetCore.csproj", "{F2A6877B-7452-432A-8E6C-0B809FCCE860}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestNetCore", "Testing\TestNetCore\TestNetCore.csproj", "{F2A6877B-7452-432A-8E6C-0B809FCCE860}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "TestShared", "Testing\TestShared\TestShared.shproj", "{ABB72FFC-C11C-493C-865A-2F13009C1937}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestFramework", "Testing\TestFramework\TestFramework.csproj", "{B311157F-6ED1-4260-B236-422F50D93048}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FileSystemWatcherReader", "FileSystemWatcherReader", "{E0C19E77-50A6-4FC9-96F2-B6FBA588A9B3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileSystemWatcherReader.Standard.20", "src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\FileSystemWatcherReader.Standard.20.csproj", "{C9FD840A-D479-41AF-A271-5023AF4A03ED}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -388,6 +393,22 @@ Global
 		{B311157F-6ED1-4260-B236-422F50D93048}.Release|x64.Build.0 = Release|Any CPU
 		{B311157F-6ED1-4260-B236-422F50D93048}.Release|x86.ActiveCfg = Release|Any CPU
 		{B311157F-6ED1-4260-B236-422F50D93048}.Release|x86.Build.0 = Release|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Debug|ARM.Build.0 = Debug|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Debug|x64.Build.0 = Debug|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Debug|x86.Build.0 = Debug|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Release|ARM.ActiveCfg = Release|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Release|ARM.Build.0 = Release|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Release|x64.ActiveCfg = Release|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Release|x64.Build.0 = Release|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Release|x86.ActiveCfg = Release|Any CPU
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -420,6 +441,8 @@ Global
 		{F2A6877B-7452-432A-8E6C-0B809FCCE860} = {22D31767-F452-4B97-891A-2B5FDBBC0513}
 		{ABB72FFC-C11C-493C-865A-2F13009C1937} = {22D31767-F452-4B97-891A-2B5FDBBC0513}
 		{B311157F-6ED1-4260-B236-422F50D93048} = {22D31767-F452-4B97-891A-2B5FDBBC0513}
+		{E0C19E77-50A6-4FC9-96F2-B6FBA588A9B3} = {C3F93254-98AD-40BD-89C4-AFF840BF2C37}
+		{C9FD840A-D479-41AF-A271-5023AF4A03ED} = {E0C19E77-50A6-4FC9-96F2-B6FBA588A9B3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A8810D42-17AC-46D1-92C9-2E1BDA3FF99D}

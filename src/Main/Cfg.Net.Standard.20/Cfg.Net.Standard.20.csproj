@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Cfg.Net</RootNamespace>
     <AssemblyName>CfgNet</AssemblyName>
-    <Version>0.11.0</Version>
+    <Version>0.12.0</Version>
     <Copyright>Copyright © 2015-2019</Copyright>
     <Description>an alternative configuration library</Description>
     <PackageId>Cfg-NET</PackageId>

@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CfgAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CfgEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\ICustomizer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IProperties.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CfgEvents.cs" />
@@ -23,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\ILogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\INode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contracts\IActiveReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\IReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Contracts\ISerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ext\Extensions.cs" />

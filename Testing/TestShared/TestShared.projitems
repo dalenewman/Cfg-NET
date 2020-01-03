@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Main.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModifierTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parameters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileWatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PassInLogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PreValidateTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PropertyManipulation.cs" />

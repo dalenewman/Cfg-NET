@@ -2,7 +2,7 @@
 <package>
    <metadata>
       <id>Cfg-NET</id>
-      <version>0.11.0</version>
+      <version>0.12.0</version>
       <title>Cfg-NET</title>
       <authors>Dale Newman</authors>
       <owners>Dale Newman</owners>
@@ -10,7 +10,7 @@
       <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>alternative configuration handler</description>
-      <releaseNotes>added .netstandard 2.0 target</releaseNotes>
+      <releaseNotes>added support for IActiveReader</releaseNotes>
       <copyright>Copyright 2015-2019</copyright>
       <tags>configuration, settings, xml, json</tags>
       <dependencies>

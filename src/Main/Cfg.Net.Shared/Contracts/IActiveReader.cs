@@ -13,37 +13,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+using System;
 using System.Collections.Generic;
-using Cfg.Net;
-using Cfg.Net.Contracts;
 
-namespace UnitTest.TestClasses {
+namespace Cfg.Net.Contracts {
 
-   public sealed class Cfg : CfgNode {
-
-      [Cfg]
-      public int Id { get; set; }
-
-      [Cfg(required = true)]
-      public List<CfgServer> Servers { get; set; }
-
-      public Cfg(string cfg) {
-         Load(cfg);
-      }
-
-      public Cfg(string cfg, IParser parser) : base(parser) {
-         Load(cfg);
-      }
-
-      public Cfg(string fileName, IActiveReader activeReader) : base(activeReader) {
-         Load(fileName);
-      }
-
-      protected override void OnChange(object sender, CfgEventArgs e) {
-         System.Console.WriteLine($"I am reloading {e.Source}");
-         base.OnChange(sender, e);
-      }
-
+   public interface IActiveReader : IDependency {
+      string Read(string resource, IDictionary<string, string> parameters, ILogger logger);
+      event EventHandler<CfgEventArgs> Changed;
    }
 }

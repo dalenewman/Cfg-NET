@@ -26,7 +26,7 @@ namespace UnitTest {
       public void TestReadMe() {
          var json = File.ReadAllText(@"ReadMe.json");
 
-         var cfg = new TestClasses.Cfg(json, null);
+         var cfg = new TestClasses.Cfg(json);
 
          foreach (var problem in cfg.Errors()) {
             Console.WriteLine(problem);

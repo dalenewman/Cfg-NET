@@ -62,7 +62,7 @@ namespace UnitTest {
       [TestMethod]
       public void TestReadMe2() {
          var xml = File.ReadAllText(@"ReadMe2.xml");
-         var cfg = new TestClasses.Cfg(xml, null);
+         var cfg = new TestClasses.Cfg(xml);
 
          foreach (var problem in cfg.Errors()) {
             Console.WriteLine(problem);

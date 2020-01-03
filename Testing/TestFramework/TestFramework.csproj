@@ -94,6 +94,10 @@
       <Project>{93afd9a7-5dc8-4392-8632-a553723bd3ac}</Project>
       <Name>Cfg.Net.Reader</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\FileSystemWatcherReader.Standard.20.csproj">
+      <Project>{c9fd840a-d479-41af-a271-5023af4a03ed}</Project>
+      <Name>FileSystemWatcherReader.Standard.20</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="ReadMe.xml">

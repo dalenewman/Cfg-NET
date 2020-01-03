@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FileReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ReTryingReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileFinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebReader.cs" />
   </ItemGroup>
 </Project>
