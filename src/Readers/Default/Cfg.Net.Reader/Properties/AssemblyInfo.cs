@@ -25,7 +25,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Dale Newman")]
 [assembly: AssemblyProduct("Cfg-Net")]
-[assembly: AssemblyCopyright("Copyright © 2015-2019")]
+[assembly: AssemblyCopyright("Copyright © 2015-2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

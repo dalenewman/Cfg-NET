@@ -2050,7 +2050,6 @@
       ],
       "sources": {
         "c:\\temp\\modules": {},
-        "http://ssitdev2.scope-services.local/Nuget/nuget": {},
         "https://api.nuget.org/v3/index.json": {}
       }
     },

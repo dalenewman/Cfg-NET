@@ -20,46 +20,51 @@ using System.Net;
 using Cfg.Net.Contracts;
 
 namespace Cfg.Net.Reader {
-    public class WebReader : IReader {
+   public class WebReader : IReader {
 
-        public string Read(string url, IDictionary<string,string> parameters, ILogger logger) {
+      public string Read(string url, IDictionary<string, string> parameters, ILogger logger) {
 
-            if (string.IsNullOrEmpty(url)) {
-                logger.Error("Your configuration url null or empty.");
-                return null;
-            }
+         //var original = ServicePointManager.ServerCertificateValidationCallback;
+         //ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, ssl) => true;
 
-            try {
-                var uri = new Uri(url);
-                if (!string.IsNullOrEmpty(uri.Query)) {
-                    var newParameters = HttpUtility.ParseQueryString(uri.Query.Substring(1));
-                    foreach (var pair in newParameters) {
-                        parameters[pair.Key] = pair.Value;
-                    }
-                }
-                var request = (HttpWebRequest)WebRequest.Create(uri);
-                request.Method = "GET";
-
-                using (var response = (HttpWebResponse)request.GetResponse()) {
-                    using (var responseStream = response.GetResponseStream()) {
-                        if (responseStream == null) {
-
-                        } else {
-                            if (response.StatusCode == HttpStatusCode.OK) {
-                                return new StreamReader(responseStream).ReadToEnd();
-                            }
-
-                            logger.Error("Response code was {0}. {1}", response.StatusCode, response.StatusDescription);
-                            return null;
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                logger.Error("Can not read url. {0}", ex.Message);
-                return null;
-            }
-
+         if (string.IsNullOrEmpty(url)) {
+            logger.Error("Your configuration url null or empty.");
             return null;
-        }
-    }
+         }
+
+         try {
+            var uri = new Uri(url);
+            if (!string.IsNullOrEmpty(uri.Query)) {
+               var newParameters = HttpUtility.ParseQueryString(uri.Query.Substring(1));
+               foreach (var pair in newParameters) {
+                  parameters[pair.Key] = pair.Value;
+               }
+            }
+            var request = (HttpWebRequest)WebRequest.Create(uri);
+            request.Method = "GET";
+
+            using (var response = (HttpWebResponse)request.GetResponse()) {
+               using (var responseStream = response.GetResponseStream()) {
+                  if (responseStream == null) {
+
+                  } else {
+                     if (response.StatusCode == HttpStatusCode.OK) {
+                        return new StreamReader(responseStream).ReadToEnd();
+                     }
+
+                     logger.Error("Response code was {0}. {1}", response.StatusCode, response.StatusDescription);
+                     return null;
+                  }
+               }
+            }
+         } catch (Exception ex) {
+            logger.Error("Can not read url. {0}", ex.Message);
+            return null;
+         } finally {
+            //ServicePointManager.ServerCertificateValidationCallback = original;
+         }
+
+         return null;
+      }
+   }
 }

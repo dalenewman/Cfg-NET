@@ -10,8 +10,8 @@
       <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>A reader implementation</description>
-      <releaseNotes>added .netstandard 2.0 target</releaseNotes>
-      <copyright>Copyright 2015-2018</copyright>
+      <releaseNotes>.net standard 2.0 target</releaseNotes>
+      <copyright>Copyright 2015-2020</copyright>
       <tags>configuration, settings</tags>
       <dependencies>
          <group targetFramework="net45">

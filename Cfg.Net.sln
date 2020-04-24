@@ -96,8 +96,11 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\Main\Cfg.Net.Shared\Cfg.Net.Shared.projitems*{20ecb16c-d7e6-41ca-a8ed-3c197057eccd}*SharedItemsImports = 13
 		src\Customizers\Shorthand\Cfg.Net.Shorthand.Shared\Cfg.Net.Shorthand.Shared.projitems*{28da6c7f-a14d-4787-9d61-457997288d99}*SharedItemsImports = 13
+		src\Customizers\Shorthand\Cfg.Net.Shorthand.Shared\Cfg.Net.Shorthand.Shared.projitems*{43fa3f95-0516-4d66-938e-266c0f961c79}*SharedItemsImports = 5
+		src\Readers\Default\Cfg.Net.Reader.Shared\Cfg.Net.Reader.Shared.projitems*{44c47fc7-e690-4fce-839a-95ca28ce51b6}*SharedItemsImports = 5
 		src\Main\Cfg.Net.Shared\Cfg.Net.Shared.projitems*{4cfd5636-2e70-4f75-af99-aef8bb725f6f}*SharedItemsImports = 4
 		src\Main\Cfg.Net.Shared\Cfg.Net.Shared.projitems*{4e2ae038-16a9-4845-bb1b-51c09db6f616}*SharedItemsImports = 4
+		src\Main\Cfg.Net.Shared\Cfg.Net.Shared.projitems*{50beb203-fea0-47fd-9bc1-4b2eccc91377}*SharedItemsImports = 5
 		src\Customizers\Environment\Cfg.Net.Environment.Shared\Cfg.Net.Environment.Shared.projitems*{629f7c32-54ad-400c-a0bf-9d0772a58e3a}*SharedItemsImports = 4
 		src\Main\Cfg.Net.Shared\Cfg.Net.Shared.projitems*{6ccfd0fd-c0b7-4b2b-ab17-2d8e3567b7e2}*SharedItemsImports = 4
 		src\Readers\Default\Cfg.Net.Reader.Shared\Cfg.Net.Reader.Shared.projitems*{93afd9a7-5dc8-4392-8632-a553723bd3ac}*SharedItemsImports = 4
@@ -108,6 +111,8 @@ Global
 		src\Customizers\Shorthand\Cfg.Net.Shorthand.Shared\Cfg.Net.Shorthand.Shared.projitems*{b74d8ffa-af9a-4b14-bc6d-3c43469d571d}*SharedItemsImports = 4
 		src\Readers\Default\Cfg.Net.Reader.Shared\Cfg.Net.Reader.Shared.projitems*{c76fc002-10fd-4a69-af1a-1c9260ec6807}*SharedItemsImports = 13
 		src\Customizers\Environment\Cfg.Net.Environment.Shared\Cfg.Net.Environment.Shared.projitems*{d17d76ea-69c0-4ec1-8e35-d15c4eb3f4b0}*SharedItemsImports = 13
+		src\Customizers\Environment\Cfg.Net.Environment.Shared\Cfg.Net.Environment.Shared.projitems*{ec2f5376-3078-412c-9ef6-3f4167b08f2b}*SharedItemsImports = 5
+		Testing\TestShared\TestShared.projitems*{f2a6877b-7452-432a-8e6c-0b809fcce860}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
