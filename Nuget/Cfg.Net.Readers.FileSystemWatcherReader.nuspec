@@ -2,7 +2,7 @@
 <package >
    <metadata>
       <id>Cfg-NET.Readers.FileSystemWatcherReader</id>
-      <version>0.12.1-beta</version>
+      <version>0.12.2-beta</version>
       <title>Cfg-NET File System Watcher Reader</title>
       <authors>Dale Newman</authors>
       <owners>Dale Newman</owners>
@@ -15,7 +15,7 @@
       <tags>configuration, settings</tags>
       <dependencies>
          <group targetFramework="netstandard2.0">
-            <dependency id="Cfg-NET" version="0.12.1" />
+            <dependency id="Cfg-NET" version="0.12.2" />
          </group>
       </dependencies>
    </metadata>

@@ -140,7 +140,7 @@ namespace Cfg.Net.Serializers {
                     sb.Append(" \"");
                     sb.Append(pair.Key);
                     sb.Append("\":");
-                    sb.Append(TypeToString[pair.Value.GetType()](pair.Value));
+                    sb.Append(pair.Value == null ? "null" : TypeToString[pair.Value.GetType()](pair.Value));
                     sb.Append(",");
                 }
             }

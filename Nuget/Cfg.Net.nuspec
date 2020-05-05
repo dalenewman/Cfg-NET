@@ -2,7 +2,7 @@
 <package>
    <metadata>
       <id>Cfg-NET</id>
-      <version>0.12.1</version>
+      <version>0.12.2</version>
       <title>Cfg-NET</title>
       <authors>Dale Newman</authors>
       <owners>Dale Newman</owners>
@@ -10,7 +10,7 @@
       <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>.net configuration handler</description>
-      <releaseNotes>added .net standard 2.1 target</releaseNotes>
+      <releaseNotes>handle null values in json serializer</releaseNotes>
       <copyright>Copyright 2015-2020</copyright>
       <tags>configuration, settings, xml, json, cfgnet</tags>
       <dependencies>
