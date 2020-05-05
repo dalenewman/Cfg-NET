@@ -2064,7 +2064,8 @@
       ],
       "sources": {
         "c:\\temp\\modules": {},
-        "https://api.nuget.org/v3/index.json": {}
+        "https://api.nuget.org/v3/index.json": {},
+        "https://www.myget.org/F/transformalize/api/v3/index.json": {}
       },
       "frameworks": {
         "netstandard1.0": {

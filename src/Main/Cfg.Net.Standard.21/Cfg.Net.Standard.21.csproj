@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Cfg.Net</RootNamespace>
+    <AssemblyName>CfgNet</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="..\Cfg.Net.Shared\Cfg.Net.Shared.projitems" Label="Shared" />
+
+</Project>

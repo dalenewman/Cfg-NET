@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+   <PropertyGroup>
+      <TargetFramework>netstandard2.1</TargetFramework>
+      <RootNamespace>Cfg.Net.Shorthand</RootNamespace>
+      <AssemblyName>Cfg.Net.Shorthand</AssemblyName>
+      <Version>0.12.1-beta</Version>
+   </PropertyGroup>
+
+   <Import Project="..\Cfg.Net.Shorthand.Shared\Cfg.Net.Shorthand.Shared.projitems" Label="Shared" />
+
+   <ItemGroup>
+     <ProjectReference Include="..\..\..\Main\Cfg.Net.Standard.21\Cfg.Net.Standard.21.csproj" />
+   </ItemGroup>
+
+</Project>
