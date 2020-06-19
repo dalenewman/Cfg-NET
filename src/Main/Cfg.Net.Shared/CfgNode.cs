@@ -85,8 +85,10 @@ namespace Cfg.Net {
       /// </summary>
       /// <param name="cfg">by default, cfg should be XML or JSON, but can be other things depending on what IParser is injected.</param>
       /// <param name="parameters">key, value pairs that may be used in ICustomizer implementations.</param>
-      public void Load(string cfg, IDictionary<string, string> parameters = null) {
+      /// <param name="enabled"></param>
+      public void Load(string cfg, IDictionary<string, string> parameters = null, bool enabled = true) {
 
+         Enabled = enabled;
          Events.Clear(_modelErrors);
 
          if (string.IsNullOrEmpty(cfg)) {
@@ -159,7 +161,8 @@ namespace Cfg.Net {
          Process(node, string.Empty, Serializer, Events, parameters, Customizers, 0, Enabled);
       }
 
-      public void Load() {
+      public void Load(bool enabled = true) {
+         Enabled = enabled;
          Events.Clear(_modelErrors);
          var name = CfgMetadataCache.NormalizeName(Type, Type.Name);
          var node = new ObjectNode(this, name);

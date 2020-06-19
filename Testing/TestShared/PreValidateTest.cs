@@ -22,78 +22,94 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTest {
 
-    [TestClass]
-    public class PreValidateTest {
+   [TestClass]
+   public class PreValidateTest {
 
-        [TestMethod]
-        public void TestPreValidateAProperty() {
-            const string resource = @"<cfg>
+      [TestMethod]
+      public void TestPreValidateAProperty() {
+         const string resource = @"<cfg>
                 <things>
                     <add name='one' value='something' />
                     <add name='two' value='Another' />
                 </things>
             </cfg>";
-            var actual = new TestProperty(resource, new TraceLogger());
-            Assert.AreEqual(0, actual.Errors().Length);
-            Assert.AreEqual(2, actual.Things.Count);
-        }
+         var actual = new TestProperty(resource, new TraceLogger());
+         Assert.AreEqual(0, actual.Errors().Length);
+         Assert.AreEqual(2, actual.Things.Count);
+      }
 
 
-        [TestMethod]
-        public void TestPreValidateACollection() {
-            const string resource = @"<cfg>
+      [TestMethod]
+      public void TestPreValidateACollection() {
+         const string resource = @"<cfg>
                 <things>
                     <add name='one' value='something' />
                     <add name='two' value='Another' />
                 </things>
             </cfg>";
-            var actual = new TestCollection(resource, new TraceLogger());
-            Assert.AreEqual(1, actual.Errors().Length);
-            Assert.AreEqual(3, actual.Things.Count);
-        }
+         var actual = new TestCollection(resource, new TraceLogger());
+         Assert.AreEqual(1, actual.Errors().Length);
+         Assert.AreEqual("An invalid value of Error is in value.  The valid domain is: Something, Another.", actual.Errors().First());
+         Assert.AreEqual(3, actual.Things.Count);
+      }
 
-        private class TestProperty : CfgNode {
-            public TestProperty(string cfg, IDependency logger)
-                : base(logger) {
-                Load(cfg);
+      [TestMethod]
+      public void TestPreValidateACollectionDisabled() {
+         const string resource = @"<cfg>
+                <things>
+                    <add name='one' value='something' />
+                    <add name='two' value='Another' />
+                </things>
+            </cfg>";
+         var actual = new TestCollection(resource, new TraceLogger(), enabled:false);
+         Assert.AreEqual(0, actual.Errors().Length);
+         Assert.AreEqual(2, actual.Things.Count);
+      }
+
+      private class TestProperty : CfgNode {
+         public TestProperty(string cfg, IDependency logger)
+             : base(logger) {
+            Load(cfg);
+         }
+         [Cfg]
+         public List<Thing> Things { get; set; }
+      }
+
+      private class Thing : CfgNode {
+         [Cfg]
+         public string Name { get; set; }
+
+         [Cfg(domain = "Something,Another", ignoreCase = false)]
+         public string Value { get; set; }
+
+         protected override void PreValidate() {
+            if (char.IsLower(Value[0])) {
+               Value = char.ToUpper(Value[0]) + Value.Substring(1);
             }
-            [Cfg]
-            public List<Thing> Things { get; set; }
-        }
+         }
+      }
 
-        private class Thing : CfgNode {
-            [Cfg]
-            public string Name { get; set; }
+      private class TestCollection : CfgNode {
+         
+         public TestCollection(string cfg, ILogger logger, bool enabled=true)
+             : base(logger) {
+            Load(cfg, enabled:enabled);
+         }
 
-            [Cfg(domain = "Something,Another", ignoreCase = false)]
-            public string Value { get; set; }
+         [Cfg]
+         public List<Thing> Things { get; set; }
 
-            protected override void PreValidate() {
-                if (char.IsLower(Value[0])) {
-                    Value = char.ToUpper(Value[0]) + Value.Substring(1);
-                }
+         protected override void PreValidate() {
+            var thing = new Thing { Name = "three", Value = "error" };
+            thing.Load();
+            if (thing.Errors().Any()) {
+               foreach (var error in thing.Errors()) {
+                  Error(error);
+               }
             }
-        }
+            Things.Add(thing);
+         }
+      }
 
-        private class TestCollection : CfgNode {
-            public TestCollection(string cfg, ILogger logger)
-                : base(logger) {
-                Load(cfg);
-            }
-            [Cfg]
-            public List<Thing> Things { get; set; }
-
-            protected override void PreValidate() {
-                var thing = new Thing { Name = "three", Value = "error" };
-                thing.Load();
-                if (thing.Errors().Any()) {
-                    foreach (var error in thing.Errors()) {
-                        Error(error);
-                    }
-                }
-                Things.Add(thing);
-            }
-        }
-
-    }
+   }
 }

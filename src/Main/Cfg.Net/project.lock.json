@@ -2033,22 +2033,23 @@
     ".NETStandard,Version=v1.0": []
   },
   "packageFolders": {
-    "C:\\Users\\dnewman\\.nuget\\packages\\": {}
+    "C:\\Users\\dalen\\.nuget\\packages\\": {}
   },
   "project": {
     "restore": {
-      "projectUniqueName": "D:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj",
+      "projectUniqueName": "E:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj",
       "projectName": "Cfg.Net",
-      "projectPath": "D:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj",
-      "projectJsonPath": "D:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\project.json",
-      "packagesPath": "C:\\Users\\dnewman\\.nuget\\packages\\",
-      "outputPath": "D:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\obj\\",
+      "projectPath": "E:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj",
+      "projectJsonPath": "E:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\project.json",
+      "packagesPath": "C:\\Users\\dalen\\.nuget\\packages\\",
+      "outputPath": "E:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\obj\\",
       "projectStyle": "ProjectJson",
       "configFilePaths": [
-        "C:\\Users\\dnewman\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\dalen\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "c:\\temp\\modules": {},
         "https://api.nuget.org/v3/index.json": {},
         "https://www.myget.org/F/transformalize/api/v3/index.json": {}

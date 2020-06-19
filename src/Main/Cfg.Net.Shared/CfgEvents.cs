@@ -57,7 +57,6 @@ namespace Cfg.Net {
         }
 
         public void SettingValue(string propertyName, object value, string parentName, string nodeName, string message) {
-
             Logger.Error("Could not set {0} to {1} inside {2}. {3}", propertyName, value, CombineName(parentName, nodeName), message);
         }
 

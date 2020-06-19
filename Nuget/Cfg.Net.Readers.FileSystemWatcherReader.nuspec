@@ -2,7 +2,7 @@
 <package >
    <metadata>
       <id>Cfg-NET.Readers.FileSystemWatcherReader</id>
-      <version>0.12.2-beta</version>
+      <version>0.13.0-beta</version>
       <title>Cfg-NET File System Watcher Reader</title>
       <authors>Dale Newman</authors>
       <owners>Dale Newman</owners>
@@ -15,13 +15,13 @@
       <tags>configuration, settings</tags>
       <dependencies>
          <group targetFramework="netstandard2.0">
-            <dependency id="Cfg-NET" version="0.12.2" />
+            <dependency id="Cfg-NET" version="0.13.0" />
          </group>
       </dependencies>
    </metadata>
    <files>
-      <file src="..\src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\bin\Release\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.dll" target="lib\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.dll" />
-      <file src="..\src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\bin\Release\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.pdb" target="lib\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.pdb" />
-      <file src="..\src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\bin\Release\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.deps.json" target="lib\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.deps.json" />
+      <file src="..\src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\bin\Debug\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.dll" target="lib\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.dll" />
+      <file src="..\src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\bin\Debug\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.pdb" target="lib\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.pdb" />
+      <file src="..\src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\bin\Debug\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.deps.json" target="lib\netstandard2.0\Cfg.Net.Readers.FileSystemWatcherReader.deps.json" />
    </files>
 </package>

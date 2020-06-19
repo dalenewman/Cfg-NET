@@ -2,7 +2,7 @@
 <package >
    <metadata>
       <id>Cfg-NET.Reader</id>
-      <version>0.12.2</version>
+      <version>0.13.0</version>
       <title>Cfg-NET Reader</title>
       <authors>Dale Newman</authors>
       <owners>Dale Newman</owners>
@@ -15,13 +15,13 @@
       <tags>configuration, settings, cfgnet</tags>
       <dependencies>
          <group targetFramework="net45">
-            <dependency id="Cfg-NET" version="0.12.2" />
+            <dependency id="Cfg-NET" version="0.13.0" />
          </group>
          <group targetFramework="netstandard2.0">
-            <dependency id="Cfg-NET" version="0.12.2" />
+            <dependency id="Cfg-NET" version="0.13.0" />
          </group>
          <group targetFramework="netstandard2.1">
-            <dependency id="Cfg-NET" version="0.12.2" />
+            <dependency id="Cfg-NET" version="0.13.0" />
          </group>         
       </dependencies>
    </metadata>

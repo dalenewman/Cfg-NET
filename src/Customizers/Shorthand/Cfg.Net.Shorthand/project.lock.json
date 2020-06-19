@@ -2046,22 +2046,23 @@
     ".NETStandard,Version=v1.0": []
   },
   "packageFolders": {
-    "C:\\Users\\dnewman\\.nuget\\packages\\": {}
+    "C:\\Users\\dalen\\.nuget\\packages\\": {}
   },
   "project": {
     "restore": {
-      "projectUniqueName": "D:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\Cfg.Net.Shorthand.csproj",
+      "projectUniqueName": "E:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\Cfg.Net.Shorthand.csproj",
       "projectName": "Cfg.Net.Shorthand",
-      "projectPath": "D:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\Cfg.Net.Shorthand.csproj",
-      "projectJsonPath": "D:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\project.json",
-      "packagesPath": "C:\\Users\\dnewman\\.nuget\\packages\\",
-      "outputPath": "D:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\obj\\",
+      "projectPath": "E:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\Cfg.Net.Shorthand.csproj",
+      "projectJsonPath": "E:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\project.json",
+      "packagesPath": "C:\\Users\\dalen\\.nuget\\packages\\",
+      "outputPath": "E:\\Code\\Cfg-NET\\src\\Customizers\\Shorthand\\Cfg.Net.Shorthand\\obj\\",
       "projectStyle": "ProjectJson",
       "configFilePaths": [
-        "C:\\Users\\dnewman\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\dalen\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "c:\\temp\\modules": {},
         "https://api.nuget.org/v3/index.json": {},
         "https://www.myget.org/F/transformalize/api/v3/index.json": {}
@@ -2069,8 +2070,8 @@
       "frameworks": {
         "netstandard1.0": {
           "projectReferences": {
-            "D:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj": {
-              "projectPath": "D:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj"
+            "E:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj": {
+              "projectPath": "E:\\Code\\Cfg-NET\\src\\Main\\Cfg.Net\\Cfg.Net.csproj"
             }
           }
         }
