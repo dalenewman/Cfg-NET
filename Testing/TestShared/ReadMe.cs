@@ -61,7 +61,7 @@ namespace UnitTest {
       public void TestReadMeDisabled() {
 
          var xml = File.ReadAllText(@"ReadMe.xml");
-         var cfg = new TestClasses.Cfg(xml, new NanoXmlParser(), enabled:false);
+         var cfg = new TestClasses.Cfg(xml, new NanoXmlParser());
 
          //TEST FOR PROBLEMS
          Assert.AreEqual(0, cfg.Errors().Length);
@@ -215,26 +215,6 @@ namespace UnitTest {
 
          Assert.AreEqual(1, cfg.Errors().Length);
          Assert.AreEqual("An invalid value of aqua is in name.  The valid domain is: red, yellow, green, purple, blue, orange.", cfg.Errors().First());
-      }
-
-      [TestMethod]
-      public void TestCodeDisabled() {
-
-         var cfg = new Cfg {
-            Fruit = new List<Fruit> {
-                    new Fruit {
-                        Name = "Apple",
-                        Colors = new List<Color> {
-                            new Color {Name = "red"},
-                            new Color {Name = "aqua"}
-                        }
-                    }
-                }
-         };
-
-         cfg.Load(enabled:false);
-
-         Assert.AreEqual(0, cfg.Errors().Length);
       }
 
    }

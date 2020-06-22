@@ -53,19 +53,6 @@ namespace UnitTest {
          Assert.AreEqual(3, actual.Things.Count);
       }
 
-      [TestMethod]
-      public void TestPreValidateACollectionDisabled() {
-         const string resource = @"<cfg>
-                <things>
-                    <add name='one' value='something' />
-                    <add name='two' value='Another' />
-                </things>
-            </cfg>";
-         var actual = new TestCollection(resource, new TraceLogger(), enabled:false);
-         Assert.AreEqual(0, actual.Errors().Length);
-         Assert.AreEqual(2, actual.Things.Count);
-      }
-
       private class TestProperty : CfgNode {
          public TestProperty(string cfg, IDependency logger)
              : base(logger) {
@@ -91,9 +78,9 @@ namespace UnitTest {
 
       private class TestCollection : CfgNode {
          
-         public TestCollection(string cfg, ILogger logger, bool enabled=true)
+         public TestCollection(string cfg, ILogger logger)
              : base(logger) {
-            Load(cfg, enabled:enabled);
+            Load(cfg);
          }
 
          [Cfg]

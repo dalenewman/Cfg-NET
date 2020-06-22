@@ -4,8 +4,8 @@
       <TargetFramework>netstandard2.1</TargetFramework>
       <RootNamespace>Cfg.Net</RootNamespace>
       <AssemblyName>CfgNet</AssemblyName>
-      <Version>0.13.0-beta</Version>
-      <Copyright>Copyright © 2015-2019</Copyright>
+      <Version>0.13.1-beta</Version>
+      <Copyright>Copyright © 2015-2020</Copyright>
       <Description>an alternative configuration library</Description>
       <PackageId>Cfg-NET</PackageId>
       <Authors>Dale Newman</Authors>

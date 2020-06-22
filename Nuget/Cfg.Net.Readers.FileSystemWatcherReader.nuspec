@@ -2,7 +2,7 @@
 <package >
    <metadata>
       <id>Cfg-NET.Readers.FileSystemWatcherReader</id>
-      <version>0.13.0-beta</version>
+      <version>1.13.2-beta</version>
       <title>Cfg-NET File System Watcher Reader</title>
       <authors>Dale Newman</authors>
       <owners>Dale Newman</owners>
@@ -10,12 +10,12 @@
       <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>A file reader implementation that re-loads when the file changes</description>
-      <releaseNotes>version bump</releaseNotes>
+      <releaseNotes>removed support for pcl in favor of .net standard 1.0</releaseNotes>
       <copyright>Copyright 2015-2020</copyright>
       <tags>configuration, settings</tags>
       <dependencies>
          <group targetFramework="netstandard2.0">
-            <dependency id="Cfg-NET" version="0.13.0" />
+            <dependency id="Cfg-NET" version="0.13.2-beta" />
          </group>
       </dependencies>
    </metadata>

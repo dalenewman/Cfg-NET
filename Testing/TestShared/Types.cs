@@ -55,43 +55,12 @@ namespace UnitTest {
 
       }
 
-      [TestMethod]
-      public void TestWrongTypesDisabled() {
-         var xml = @"
-    <test>
-        <things>
-            <add IntValue='3' ShortValue='3' />
-            <add IntValue='x' ShortValue='40000' />
-        </things>
-    </test>
-".Replace("'", "\"");
-
-         var cfg = new TestTypes(xml, enabled:false);
-
-         foreach (var problem in cfg.Errors()) {
-            Console.WriteLine(problem);
-         }
-
-         var problems = cfg.Errors();
-         Assert.AreEqual(2, problems.Length);
-         Assert.AreEqual("Could not set IntValue to x inside things item. Input string was not in a correct format.", problems[0]);
-         Assert.AreEqual("Could not set ShortValue to 40000 inside things item. Value was either too large or too small for an Int16.", problems[1]);
-
-         Assert.AreEqual(3, cfg.Things.First().IntValue);
-         Assert.AreEqual((short)3, cfg.Things.First().ShortValue);
-
-         Assert.AreEqual(default, cfg.Things.Last().IntValue);
-         Assert.AreEqual(default, cfg.Things.Last().ShortValue);
-
-      }
-
-
       public class TestTypes : CfgNode {
          [Cfg()]
          public List<TypeThing> Things { get; set; }
 
-         public TestTypes(string xml, bool enabled = true) {
-            Load(xml, enabled: true);
+         public TestTypes(string xml) {
+            Load(xml);
          }
       }
 

@@ -10,6 +10,10 @@
     <DefineConstants>TRACE;CORE</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;CORE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="ReadMe.xml" />
     <None Remove="ReadMe2.xml" />

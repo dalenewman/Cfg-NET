@@ -38,7 +38,6 @@ namespace Cfg.Net {
       private readonly HashSet<string> _modelErrors = new HashSet<string>();
 
       public uint Sequence { get; private set; }
-      private bool Enabled { get; set; } = true;
 
       protected CfgNode() {
          Events = new CfgEvents(new DefaultLogger(new MemoryLogger()));
@@ -85,10 +84,8 @@ namespace Cfg.Net {
       /// </summary>
       /// <param name="cfg">by default, cfg should be XML or JSON, but can be other things depending on what IParser is injected.</param>
       /// <param name="parameters">key, value pairs that may be used in ICustomizer implementations.</param>
-      /// <param name="enabled"></param>
-      public void Load(string cfg, IDictionary<string, string> parameters = null, bool enabled = true) {
+      public void Load(string cfg, IDictionary<string, string> parameters = null) {
 
-         Enabled = enabled;
          Events.Clear(_modelErrors);
 
          if (string.IsNullOrEmpty(cfg)) {
@@ -158,15 +155,14 @@ namespace Cfg.Net {
             }
          }
 
-         Process(node, string.Empty, Serializer, Events, parameters, Customizers, 0, Enabled);
+         Process(node, string.Empty, Serializer, Events, parameters, Customizers, 0);
       }
 
-      public void Load(bool enabled = true) {
-         Enabled = enabled;
+      public void Load() {
          Events.Clear(_modelErrors);
          var name = CfgMetadataCache.NormalizeName(Type, Type.Name);
          var node = new ObjectNode(this, name);
-         Process(node, name, Serializer, Events, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), Customizers, 0, Enabled);
+         Process(node, name, Serializer, Events, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), Customizers, 0);
       }
 
       private CfgNode Process(
@@ -176,8 +172,7 @@ namespace Cfg.Net {
           CfgEvents events,
           IDictionary<string, string> parameters,
           IList<ICustomizer> customizers,
-          uint sequence,
-          bool enabled
+          uint sequence
       ) {
          Sequence = sequence;
          Clear();
@@ -186,18 +181,15 @@ namespace Cfg.Net {
          Events = events;
          Customizers = customizers;
          Serializer = serializer;
-         Enabled = enabled;
 
          LoadProperties(node, parent, parameters, customizers);
          LoadCollections(node, parent, parameters, sequence);
 
-         if (Enabled) {
-            PreValidate();
-            ValidateBasedOnAttributes(node, parameters);
-            ValidateListsBasedOnAttributes(node.Name);
-            Validate();
-            PostValidate();
-         }
+         PreValidate();
+         ValidateBasedOnAttributes(node, parameters);
+         ValidateListsBasedOnAttributes(node.Name);
+         Validate();
+         PostValidate();
          return this;
       }
 
@@ -287,7 +279,7 @@ namespace Cfg.Net {
                            }
                         }
                      } else {
-                        elements[addKey].Add(item.Loader().Process(add, subNode.Name, Serializer, Events, parameters, Customizers, ++sequence, Enabled));
+                        elements[addKey].Add(item.Loader().Process(add, subNode.Name, Serializer, Events, parameters, Customizers, ++sequence));
                      }
                   } else {
                      Events.UnexpectedElement(add.Name, subNode.Name);
@@ -407,22 +399,20 @@ namespace Cfg.Net {
 
                   var stringValue = attribute.Value.ToString();
 
-                  if (Enabled) {
-                     if (item.Attribute.toLower) {
-                        stringValue = stringValue.ToLower();
-                     } else if (item.Attribute.toUpper) {
-                        stringValue = stringValue.ToUpper();
-                     }
+                  if (item.Attribute.toLower) {
+                     stringValue = stringValue.ToLower();
+                  } else if (item.Attribute.toUpper) {
+                     stringValue = stringValue.ToUpper();
+                  }
 
-                     if (item.Attribute.trim || item.Attribute.trimStart && item.Attribute.trimEnd) {
-                        stringValue = stringValue.Trim();
-                     } else {
-                        if (item.Attribute.trimStart) {
-                           stringValue = stringValue.TrimStart();
-                        }
-                        if (item.Attribute.trimEnd) {
-                           stringValue = stringValue.TrimEnd();
-                        }
+                  if (item.Attribute.trim || item.Attribute.trimStart && item.Attribute.trimEnd) {
+                     stringValue = stringValue.Trim();
+                  } else {
+                     if (item.Attribute.trimStart) {
+                        stringValue = stringValue.TrimStart();
+                     }
+                     if (item.Attribute.trimEnd) {
+                        stringValue = stringValue.TrimEnd();
                      }
                   }
 
@@ -441,12 +431,10 @@ namespace Cfg.Net {
          }
 
          // missing any required attributes?
-         if (Enabled) {
-            foreach (var key in keys.Except(keyHits)) {
-               var item = metadata[key];
-               if (item.Attribute.required) {
-                  Events.MissingAttribute(parentName, node.Name, key);
-               }
+         foreach (var key in keys.Except(keyHits)) {
+            var item = metadata[key];
+            if (item.Attribute.required) {
+               Events.MissingAttribute(parentName, node.Name, key);
             }
          }
 

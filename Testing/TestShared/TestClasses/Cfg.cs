@@ -28,12 +28,12 @@ namespace UnitTest.TestClasses {
       [Cfg(required = true)]
       public List<CfgServer> Servers { get; set; }
 
-      public Cfg(string cfg, bool enabled = true) {
-         Load(cfg, enabled:enabled);
+      public Cfg(string cfg) {
+         Load(cfg);
       }
 
-      public Cfg(string cfg, IParser parser, bool enabled = true) : base(parser) {
-         Load(cfg, enabled:enabled);
+      public Cfg(string cfg, IParser parser) : base(parser) {
+         Load(cfg);
       }
 
       public Cfg(string fileName, IActiveReader activeReader) : base(activeReader) {
