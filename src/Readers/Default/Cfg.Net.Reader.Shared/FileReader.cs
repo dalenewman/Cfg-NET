@@ -42,14 +42,6 @@ namespace Cfg.Net.Reader {
             fileName = fileName.Substring(0, queryStringIndex);
          }
 
-         var lastPart = fileName.Split('\\').Last();
-         var intersection = lastPart.Intersect(Path.GetInvalidFileNameChars()).ToArray();
-
-         if (intersection.Any()) {
-            logger.Error("Your configuration file name contains invalid characters: " + string.Join(", ", intersection) + ".");
-            return null;
-         }
-
          if (Path.HasExtension(fileName)) {
             FileInfo fileInfo;
             if (!Path.IsPathRooted(fileName)) {
@@ -57,6 +49,14 @@ namespace Cfg.Net.Reader {
             }
 
             fileInfo = new FileInfo(fileName);
+
+            var intersection = fileInfo.Name.Intersect(Path.GetInvalidFileNameChars()).ToArray();
+
+            if (intersection.Any()) {
+               logger.Error("Your configuration file name contains invalid characters: " + string.Join(", ", intersection) + ".");
+               return null;
+            }
+
 
             try {
                return File.ReadAllText(fileInfo.FullName);

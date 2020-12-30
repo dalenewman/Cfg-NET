@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Cfg.Net.Reader</RootNamespace>
     <AssemblyName>Cfg.Net.Reader</AssemblyName>
-    <Version>0.12.1-beta</Version>
+    <Version>0.13.3-beta</Version>
   </PropertyGroup>
 
   <Import Project="..\Cfg.Net.Reader.Shared\Cfg.Net.Reader.Shared.projitems" Label="Shared" />

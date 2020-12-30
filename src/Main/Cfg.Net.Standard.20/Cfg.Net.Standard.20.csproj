@@ -1,17 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Cfg.Net</RootNamespace>
     <AssemblyName>CfgNet</AssemblyName>
-    <Version>0.13.1-beta</Version>
+    <Version>0.13.3-beta</Version>
     <Copyright>Copyright © 2015-2020</Copyright>
     <Description>an alternative configuration library</Description>
     <PackageId>Cfg-NET</PackageId>
     <Authors>Dale Newman</Authors>
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
-
   <Import Project="..\Cfg.Net.Shared\Cfg.Net.Shared.projitems" Label="Shared" />
-
 </Project>

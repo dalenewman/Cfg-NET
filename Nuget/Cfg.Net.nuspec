@@ -2,7 +2,7 @@
 <package>
    <metadata>
       <id>Cfg-NET</id>
-      <version>0.13.2-beta</version>
+      <version>0.13.3-beta</version>
       <title>Cfg-NET</title>
       <authors>Dale Newman</authors>
       <owners>Dale Newman</owners>
@@ -10,7 +10,7 @@
       <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>.net configuration handler</description>
-      <releaseNotes>removed support for pcl in favor of .net standard 1.0</releaseNotes>
+      <releaseNotes>corrected file and assembly version</releaseNotes>
       <copyright>Copyright 2015-2020</copyright>
       <tags>configuration, settings, xml, json, cfgnet</tags>
       <dependencies>
