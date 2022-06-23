@@ -2,7 +2,7 @@
 <package>
    <metadata>
       <id>Cfg-NET</id>
-      <version>0.13.3-beta</version>
+      <version>0.14.0-beta</version>
       <title>Cfg-NET</title>
       <authors>Dale Newman</authors>
       <owners>Dale Newman</owners>
@@ -10,13 +10,10 @@
       <projectUrl>https://github.com/dalenewman/Cfg-NET</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>.net configuration handler</description>
-      <releaseNotes>corrected file and assembly version</releaseNotes>
-      <copyright>Copyright 2015-2020</copyright>
+      <releaseNotes>general maintenance</releaseNotes>
+      <copyright>Copyright 2015-2022</copyright>
       <tags>configuration, settings, xml, json, cfgnet</tags>
       <dependencies>
-         <group targetFramework="net40" />
-         <group targetFramework="net45" />
-         <group targetFramework="net452" />
          <group targetFramework="net462" />
          <group targetFramework="netstandard1.0">
             <dependency id="NETStandard.Library" version="1.6.1" />
@@ -26,29 +23,20 @@
       </dependencies>
    </metadata>
    <files>
-      <file src="..\src\Main\Cfg.Net.40\bin\Debug\CfgNet.dll" target="lib\net40\CfgNet.dll" />
-      <file src="..\src\Main\Cfg.Net.40\bin\Debug\CfgNet.pdb" target="lib\net40\CfgNet.pdb" />
-      
-      <file src="..\src\Main\Cfg.Net.45\bin\Debug\CfgNet.dll" target="lib\net45\CfgNet.dll" />
-      <file src="..\src\Main\Cfg.Net.45\bin\Debug\CfgNet.pdb" target="lib\net45\CfgNet.pdb" />
-      
-      <file src="..\src\Main\Cfg.Net.452\bin\Debug\CfgNet.dll" target="lib\net452\CfgNet.dll" />
-      <file src="..\src\Main\Cfg.Net.452\bin\Debug\CfgNet.pdb" target="lib\net452\CfgNet.pdb" />
-      
-      <file src="..\src\Main\Cfg.Net.462\bin\Debug\CfgNet.dll" target="lib\net462\CfgNet.dll" />
-      <file src="..\src\Main\Cfg.Net.462\bin\Debug\CfgNet.pdb" target="lib\net462\CfgNet.pdb" />
+      <file src="..\src\Main\Cfg.Net.462\bin\Release\CfgNet.dll" target="lib\net462\CfgNet.dll" />
+      <!--<file src="..\src\Main\Cfg.Net.462\bin\Release\CfgNet.pdb" target="lib\net462\CfgNet.pdb" />-->
 
-      <file src="..\src\Main\Cfg.Net.Standard.1.0\bin\Debug\netstandard1.0\CfgNet.dll" target="lib\netstandard1.0\CfgNet.dll" />
-      <file src="..\src\Main\Cfg.Net.Standard.1.0\bin\Debug\netstandard1.0\CfgNet.pdb" target="lib\netstandard1.0\CfgNet.pdb" />
-      <file src="..\src\Main\Cfg.Net.Standard.1.0\bin\Debug\netstandard1.0\CfgNet.deps.json" target="lib\netstandard1.0\CfgNet.deps.json" />
+      <file src="..\src\Main\Cfg.Net.Standard.1.0\bin\Release\netstandard1.0\CfgNet.dll" target="lib\netstandard1.0\CfgNet.dll" />
+      <!--<file src="..\src\Main\Cfg.Net.Standard.1.0\bin\Release\netstandard1.0\CfgNet.pdb" target="lib\netstandard1.0\CfgNet.pdb" />-->
+      <file src="..\src\Main\Cfg.Net.Standard.1.0\bin\Release\netstandard1.0\CfgNet.deps.json" target="lib\netstandard1.0\CfgNet.deps.json" />
 
-      <file src="..\src\Main\Cfg.Net.Standard.20\bin\Debug\netstandard2.0\CfgNet.dll" target="lib\netstandard2.0\CfgNet.dll" />
-      <file src="..\src\Main\Cfg.Net.Standard.20\bin\Debug\netstandard2.0\CfgNet.pdb" target="lib\netstandard2.0\CfgNet.pdb" />
-      <file src="..\src\Main\Cfg.Net.Standard.20\bin\Debug\netstandard2.0\CfgNet.deps.json" target="lib\netstandard2.0\CfgNet.deps.json" />
+      <file src="..\src\Main\Cfg.Net.Standard.20\bin\Release\netstandard2.0\CfgNet.dll" target="lib\netstandard2.0\CfgNet.dll" />
+      <!--<file src="..\src\Main\Cfg.Net.Standard.20\bin\Release\netstandard2.0\CfgNet.pdb" target="lib\netstandard2.0\CfgNet.pdb" />-->
+      <file src="..\src\Main\Cfg.Net.Standard.20\bin\Release\netstandard2.0\CfgNet.deps.json" target="lib\netstandard2.0\CfgNet.deps.json" />
 
-      <file src="..\src\Main\Cfg.Net.Standard.21\bin\Debug\netstandard2.1\CfgNet.dll" target="lib\netstandard2.1\CfgNet.dll" />
-      <file src="..\src\Main\Cfg.Net.Standard.21\bin\Debug\netstandard2.1\CfgNet.pdb" target="lib\netstandard2.1\CfgNet.pdb" />
-      <file src="..\src\Main\Cfg.Net.Standard.21\bin\Debug\netstandard2.1\CfgNet.deps.json" target="lib\netstandard2.1\CfgNet.deps.json" />
+      <file src="..\src\Main\Cfg.Net.Standard.21\bin\Release\netstandard2.1\CfgNet.dll" target="lib\netstandard2.1\CfgNet.dll" />
+      <!--<file src="..\src\Main\Cfg.Net.Standard.21\bin\Release\netstandard2.1\CfgNet.pdb" target="lib\netstandard2.1\CfgNet.pdb" />-->
+      <file src="..\src\Main\Cfg.Net.Standard.21\bin\Release\netstandard2.1\CfgNet.deps.json" target="lib\netstandard2.1\CfgNet.deps.json" />
       
    </files>
 </package>

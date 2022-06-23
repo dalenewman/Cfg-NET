@@ -3,12 +3,14 @@
     <TargetFramework>netstandard1.0</TargetFramework>
     <RootNamespace>Cfg.Net</RootNamespace>
     <AssemblyName>CfgNet</AssemblyName>
-    <Version>0.13.3-beta</Version>
+    <Version>0.14.0-beta</Version>
     <Copyright>Copyright © 2015-2020</Copyright>
     <Description>an alternative configuration library</Description>
     <PackageId>Cfg-NET</PackageId>
     <Authors>Dale Newman</Authors>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <FileVersion>0.14.0</FileVersion>
+    <AssemblyVersion>0.14.0</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;NETS</DefineConstants>

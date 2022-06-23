@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Cfg.Net.Parsers.Xml.Linq</RootNamespace>
     <AssemblyName>Cfg.Net.Parsers.Xml.Linq</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -46,9 +46,9 @@
     <Compile Include="XDocumentParser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Main\Cfg.Net.45\Cfg.Net.45.csproj">
-      <Project>{4cfd5636-2e70-4f75-af99-aef8bb725f6f}</Project>
-      <Name>Cfg.Net.45</Name>
+    <ProjectReference Include="..\..\Main\Cfg.Net.462\Cfg.Net.462.csproj">
+      <Project>{b65fc5ae-d51a-408d-b324-ab4729ade4d7}</Project>
+      <Name>Cfg.Net.462</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

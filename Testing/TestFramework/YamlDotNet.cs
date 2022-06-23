@@ -38,11 +38,12 @@ namespace UnitTest {
       value: false
 ";
             var builder = new SerializerBuilder();
-            builder.EmitDefaults();
+            // builder.EmitDefaults();
+            builder.ConfigureDefaultValuesHandling(DefaultValuesHandling.Preserve);
             builder.WithNamingConvention(new HyphenatedNamingConvention());
 
             var cfg = new TestYamlParser(yaml, new YamlDotNetParser(), new YamlDotNetSerializer(builder.Build()));
-
+            
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);
             }
