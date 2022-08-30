@@ -49,8 +49,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\YamlDotNet.11.2.1\lib\net45\YamlDotNet.dll</HintPath>
+    <Reference Include="YamlDotNet, Version=12.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\YamlDotNet.12.0.0\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -74,9 +74,9 @@
       <Project>{43fa3f95-0516-4d66-938e-266c0f961c79}</Project>
       <Name>Cfg.Net.Shorthand.Standard.20</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Main\Cfg.Net.462\Cfg.Net.462.csproj">
-      <Project>{b65fc5ae-d51a-408d-b324-ab4729ade4d7}</Project>
-      <Name>Cfg.Net.462</Name>
+    <ProjectReference Include="..\..\src\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj">
+      <Project>{50beb203-fea0-47fd-9bc1-4b2eccc91377}</Project>
+      <Name>Cfg.Net.Standard.20</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Parsers\Cfg.Net.Parsers.Json.Net\Cfg.Net.Parsers.Json.Net.csproj">
       <Project>{d64515c8-95b0-459b-bf6c-9f54e170211f}</Project>

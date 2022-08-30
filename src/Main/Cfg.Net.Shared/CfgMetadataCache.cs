@@ -41,11 +41,7 @@ namespace Cfg.Net {
                 var keyCache = new List<string>();
                 var listCache = new List<string>();
 
-#if NETS
                 var propertyInfos = type.GetRuntimeProperties().ToArray();
-#else
-                var propertyInfos = type.GetProperties();
-#endif
 
                 metadata = new Dictionary<string, CfgMetadata>(StringComparer.Ordinal);
                 foreach (var propertyInfo in propertyInfos) {
@@ -54,11 +50,7 @@ namespace Cfg.Net {
                     if (!propertyInfo.CanWrite)
                         continue;
 
-#if NETS
                     var attribute = (CfgAttribute)propertyInfo.GetCustomAttribute(typeof(CfgAttribute), true);
-#else
-                    var attribute = (CfgAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(CfgAttribute), true);
-#endif
 
                     if (attribute == null)
                         continue;
@@ -71,11 +63,7 @@ namespace Cfg.Net {
                     // regex
                     try {
                         if (attribute.RegexIsSet) {
-#if NETS
-                            item.Regex = attribute.ignoreCase ? new Regex(attribute.regex, RegexOptions.IgnoreCase) : new Regex(attribute.regex);
-#else
                             item.Regex = attribute.ignoreCase ? new Regex(attribute.regex, RegexOptions.Compiled | RegexOptions.IgnoreCase) : new Regex(attribute.regex, RegexOptions.Compiled);
-#endif
                         }
                     } catch (ArgumentException ex) {
                         item.Errors.Add(CfgEvents.InvalidRegex(key, attribute.regex, ex));
@@ -110,7 +98,6 @@ namespace Cfg.Net {
                         attribute.maxValue = maxValue;
                     }
 
-
                     //foreach (var cp in constructors) {
                     //    if (!cp.Any()) {
                     //        obj = item.ListActivator();
@@ -131,22 +118,6 @@ namespace Cfg.Net {
                     //    }
                     //}
 
-#if NETS
-                    var propertyTypeInfo = propertyInfo.PropertyType.GetTypeInfo();
-                    if (propertyTypeInfo.IsGenericType) {
-                        listCache.Add(key);
-                        item.ListType = propertyTypeInfo.GenericTypeArguments[0];
-                        var listTypeInfo = item.ListType.GetTypeInfo();
-                        item.ImplementsProperties = typeof(IProperties).GetTypeInfo().IsAssignableFrom(listTypeInfo);
-                        item.Constructors = propertyTypeInfo.DeclaredConstructors.Select(c => c.GetParameters());
-                        item.ListActivator = () => Activator.CreateInstance(propertyInfo.PropertyType);
-                        if (listTypeInfo.IsSubclassOf(typeof(CfgNode))) {
-                            item.Loader = () => (CfgNode)Activator.CreateInstance(item.ListType);
-                        }
-                    } else {
-                        keyCache.Add(key);
-                    }
-#else
                     if (propertyInfo.PropertyType.IsGenericType) {
                         listCache.Add(key);
                         item.ListType = propertyInfo.PropertyType.GetGenericArguments()[0];
@@ -160,7 +131,6 @@ namespace Cfg.Net {
                     } else {
                         keyCache.Add(key);
                     }
-#endif
 
                     if (string.IsNullOrEmpty(attribute.name)) {
                         attribute.name = key;
@@ -233,7 +203,6 @@ namespace Cfg.Net {
                 return result;
             }
         }
-
 
         public static IEnumerable<string> PropertyNames(Type type) {
             return PropertyCache.TryGetValue(type, out var names) ? names : new List<string>();

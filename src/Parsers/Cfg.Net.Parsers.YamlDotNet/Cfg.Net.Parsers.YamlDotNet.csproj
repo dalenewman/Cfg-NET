@@ -40,8 +40,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\YamlDotNet.11.2.1\lib\net45\YamlDotNet.dll</HintPath>
+    <Reference Include="YamlDotNet, Version=12.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\YamlDotNet.12.0.0\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -51,9 +51,9 @@
     <Compile Include="YamlDotNetSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Main\Cfg.Net.462\Cfg.Net.462.csproj">
-      <Project>{b65fc5ae-d51a-408d-b324-ab4729ade4d7}</Project>
-      <Name>Cfg.Net.462</Name>
+    <ProjectReference Include="..\..\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj">
+      <Project>{50beb203-fea0-47fd-9bc1-4b2eccc91377}</Project>
+      <Name>Cfg.Net.Standard.20</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

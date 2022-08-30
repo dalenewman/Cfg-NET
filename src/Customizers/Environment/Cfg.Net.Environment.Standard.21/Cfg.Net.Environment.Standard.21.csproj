@@ -4,9 +4,9 @@
     <TargetFramework>netstandard2.1</TargetFramework>
      <RootNamespace>Cfg.Net.Environment</RootNamespace>
      <AssemblyName>Cfg.Net.Environment</AssemblyName>
-     <Version>0.14.0-beta</Version>
-     <FileVersion>0.14.0</FileVersion>
-     <AssemblyVersion>0.14.0</AssemblyVersion>
+     <Version>0.15.0-beta</Version>
+     <FileVersion>0.15.0</FileVersion>
+     <AssemblyVersion>0.15.0</AssemblyVersion>
   </PropertyGroup>
 
   <Import Project="..\Cfg.Net.Environment.Shared\Cfg.Net.Environment.Shared.projitems" Label="Shared" />

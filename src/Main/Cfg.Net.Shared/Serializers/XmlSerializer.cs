@@ -31,11 +31,7 @@ namespace Cfg.Net.Serializers {
         string InnerSerialize(CfgNode node) {
 
             var type = node.GetType();
-#if NETS
-            var attribute = type.GetTypeInfo().GetCustomAttributes(typeof(CfgAttribute), true).FirstOrDefault() as CfgAttribute;
-#else
             var attribute = type.GetCustomAttributes(typeof(CfgAttribute), true).FirstOrDefault() as CfgAttribute;
-#endif
             if (attribute != null && !attribute.serialize)
                 return string.Empty;
 

@@ -53,13 +53,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Main\Cfg.Net.462\Cfg.Net.462.csproj">
-      <Project>{b65fc5ae-d51a-408d-b324-ab4729ade4d7}</Project>
-      <Name>Cfg.Net.462</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\..\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj">
+      <Project>{50beb203-fea0-47fd-9bc1-4b2eccc91377}</Project>
+      <Name>Cfg.Net.Standard.20</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
