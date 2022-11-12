@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+   <PropertyGroup>
+      <TargetFramework>netstandard2.0</TargetFramework>
+      <RootNamespace>Cfg.Net.Parsers.Json.Net</RootNamespace>
+      <AssemblyName>Cfg.Net.Parser.Json.Net</AssemblyName>
+      <Version>0.15.0-beta</Version>
+      <FileVersion>0.15.0</FileVersion>
+      <AssemblyVersion>0.15.0</AssemblyVersion>
+   </PropertyGroup>
+
+   <ItemGroup>
+     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <ProjectReference Include="..\..\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj" />
+   </ItemGroup>
+
+</Project>

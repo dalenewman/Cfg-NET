@@ -52,6 +52,9 @@
     <ProjectReference Include="..\..\src\Customizers\Environment\Cfg.Net.Environment.Standard.20\Cfg.Net.Environment.Standard.20.csproj" />
     <ProjectReference Include="..\..\src\Customizers\Shorthand\Cfg.Net.Shorthand.Standard.20\Cfg.Net.Shorthand.Standard.20.csproj" />
     <ProjectReference Include="..\..\src\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj" />
+    <ProjectReference Include="..\..\src\Parsers\Json.Net\Json.Net.csproj" />
+    <ProjectReference Include="..\..\src\Parsers\Xml.Linq\Xml.Linq.csproj" />
+    <ProjectReference Include="..\..\src\Parsers\YamlDotNet\YamlDotNet.csproj" />
     <ProjectReference Include="..\..\src\Readers\Default\Cfg.Net.Reader.Standard.20\Cfg.Net.Reader.Standard.20.csproj" />
     <ProjectReference Include="..\..\src\Readers\FileSystemWatcherReader\FileSystemWatcherReader.Standard.20\FileSystemWatcherReader.Standard.20.csproj" />
   </ItemGroup>

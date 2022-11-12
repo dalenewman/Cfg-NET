@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+   <PropertyGroup>
+      <TargetFramework>netstandard2.0</TargetFramework>
+      <RootNamespace>Cfg.Net.Parsers.Xml.Linq</RootNamespace>
+      <AssemblyName>Cfg.Net.Parser.Xml.Linq</AssemblyName>
+      <Version>0.15.0-beta</Version>
+      <FileVersion>0.15.0</FileVersion>
+      <AssemblyVersion>0.15.0</AssemblyVersion>
+   </PropertyGroup>
+
+   <ItemGroup>
+      <ProjectReference Include="..\..\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj" />
+   </ItemGroup>
+
+</Project>

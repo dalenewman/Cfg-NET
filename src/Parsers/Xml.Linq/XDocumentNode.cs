@@ -1,6 +1,6 @@
 ﻿// Cfg.Net
 // An Alternative .NET Configuration Handler
-// Copyright 2015-2018 Dale Newman
+// Copyright 2015-2022 Dale Newman
 //  
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
