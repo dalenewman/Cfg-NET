@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Cfg.Net.Readers.FileSystemWatcherReader</RootNamespace>
+    <AssemblyName>Cfg.Net.Readers.FileSystemWatcherReader</AssemblyName>
+    <Version>0.16.0-beta</Version>
+    <FileVersion>0.16.0</FileVersion>
+    <AssemblyVersion>0.16.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
+    <PackageId>Cfg-NET.Readers.FileSystemWatcherReader</PackageId>
+    <Authors>Dale Newman</Authors>
+    <Description>file system watcher reader for Cfg-NET configuration reloading</Description>
+    <Copyright>Copyright 2015-2026 Dale Newman</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>configuration;cfgnet;reader;filesystemwatcher</PackageTags>
+    <PackageProjectUrl>https://github.com/dalenewman/Cfg-NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dalenewman/Cfg-NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Main\Cfg.Net\Cfg.Net.csproj" />
+  </ItemGroup>
+</Project>

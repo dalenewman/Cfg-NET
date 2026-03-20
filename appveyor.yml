@@ -1,6 +1,0 @@
-version: 0.11.0.{build}
-image: Visual Studio 2019
-before_build:
-- cmd: nuget restore
-build:
-  verbosity: minimal

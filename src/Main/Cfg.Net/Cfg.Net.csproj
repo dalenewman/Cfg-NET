@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <RootNamespace>Cfg.Net</RootNamespace>
+    <AssemblyName>CfgNet</AssemblyName>
+    <Version>0.16.0-beta</Version>
+    <FileVersion>0.16.0</FileVersion>
+    <AssemblyVersion>0.16.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
+    <PackageId>Cfg-NET</PackageId>
+    <Authors>Dale Newman</Authors>
+    <Description>an alternative .net configuration handler with validation</Description>
+    <Copyright>Copyright 2015-2026 Dale Newman</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>configuration;settings;xml;json;cfgnet</PackageTags>
+    <PackageProjectUrl>https://github.com/dalenewman/Cfg-NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dalenewman/Cfg-NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+</Project>

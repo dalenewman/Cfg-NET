@@ -1,16 +1,24 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-   <PropertyGroup>
-      <TargetFramework>netstandard2.0</TargetFramework>
-      <RootNamespace>Cfg.Net.Parsers.Xml.Linq</RootNamespace>
-      <AssemblyName>Cfg.Net.Parser.Xml.Linq</AssemblyName>
-      <Version>0.15.0-beta</Version>
-      <FileVersion>0.15.0</FileVersion>
-      <AssemblyVersion>0.15.0</AssemblyVersion>
-   </PropertyGroup>
-
-   <ItemGroup>
-      <ProjectReference Include="..\..\Main\Cfg.Net.Standard.20\Cfg.Net.Standard.20.csproj" />
-   </ItemGroup>
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Cfg.Net.Parsers.Xml.Linq</RootNamespace>
+    <AssemblyName>Cfg.Net.Parser.Xml.Linq</AssemblyName>
+    <Version>0.16.0-beta</Version>
+    <FileVersion>0.16.0</FileVersion>
+    <AssemblyVersion>0.16.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
+    <PackageId>Cfg-NET.Parser.Xml.Linq</PackageId>
+    <Authors>Dale Newman</Authors>
+    <Description>Xml.Linq parser for Cfg-NET</Description>
+    <Copyright>Copyright 2015-2026 Dale Newman</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>configuration;cfgnet;xml;parser</PackageTags>
+    <PackageProjectUrl>https://github.com/dalenewman/Cfg-NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dalenewman/Cfg-NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Main\Cfg.Net\Cfg.Net.csproj" />
+  </ItemGroup>
 </Project>

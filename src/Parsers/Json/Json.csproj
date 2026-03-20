@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Cfg.Net.Parsers.Json</RootNamespace>
+    <AssemblyName>Cfg.Net.Parser.Json</AssemblyName>
+    <Version>0.16.0-beta</Version>
+    <FileVersion>0.16.0</FileVersion>
+    <AssemblyVersion>0.16.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
+    <PackageId>Cfg-NET.Parser.Json</PackageId>
+    <Authors>Dale Newman</Authors>
+    <Description>System.Text.Json parser for Cfg-NET</Description>
+    <Copyright>Copyright 2015-2026 Dale Newman</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>configuration;cfgnet;json;parser</PackageTags>
+    <PackageProjectUrl>https://github.com/dalenewman/Cfg-NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dalenewman/Cfg-NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="10.0.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Main\Cfg.Net\Cfg.Net.csproj" />
+  </ItemGroup>
+</Project>
