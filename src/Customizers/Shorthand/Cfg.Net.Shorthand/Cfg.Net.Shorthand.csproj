@@ -6,6 +6,7 @@
     <Version>0.16.0-beta</Version>
     <FileVersion>0.16.0</FileVersion>
     <AssemblyVersion>0.16.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
     <PackageId>Cfg-NET.Shorthand</PackageId>
     <Authors>Dale Newman</Authors>
     <Description>shorthand expression customizer for Cfg-NET</Description>

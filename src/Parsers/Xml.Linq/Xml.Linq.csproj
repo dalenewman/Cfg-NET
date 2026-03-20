@@ -6,6 +6,7 @@
     <Version>0.16.0-beta</Version>
     <FileVersion>0.16.0</FileVersion>
     <AssemblyVersion>0.16.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
     <PackageId>Cfg-NET.Parser.Xml.Linq</PackageId>
     <Authors>Dale Newman</Authors>
     <Description>Xml.Linq parser for Cfg-NET</Description>

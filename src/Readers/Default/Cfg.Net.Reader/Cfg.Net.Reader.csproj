@@ -6,6 +6,7 @@
     <Version>0.16.0-beta</Version>
     <FileVersion>0.16.0</FileVersion>
     <AssemblyVersion>0.16.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
     <PackageId>Cfg-NET.Reader</PackageId>
     <Authors>Dale Newman</Authors>
     <Description>default file and web reader for Cfg-NET</Description>

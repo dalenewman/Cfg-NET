@@ -2,16 +2,14 @@
 set -euo pipefail
 
 # Pack all packable SDK-style projects under src/
-# Usage: ./scripts/nuget-pack.sh [--id-prefix PREFIX] [--configuration CONFIG] [--output DIR] [--dry-run]
+# Usage: ./scripts/nuget-pack.sh [--configuration CONFIG] [--output DIR] [--dry-run]
 
-ID_PREFIX="Cfg"
 CONFIGURATION="Release"
 OUTPUT="artifacts"
 DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --id-prefix)      ID_PREFIX="$2"; shift 2 ;;
     --configuration)  CONFIGURATION="$2"; shift 2 ;;
     --output)         OUTPUT="$2"; shift 2 ;;
     --dry-run)        DRY_RUN=true; shift ;;
@@ -24,22 +22,18 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 mkdir -p "$ROOT_DIR/$OUTPUT"
 
-echo "Discovering packable projects (prefix: $ID_PREFIX)..."
+echo "Discovering packable projects..."
 
 FOUND=0
 while IFS= read -r csproj; do
-  # Skip test projects
-  if grep -q '<IsPackable>false</IsPackable>' "$csproj" 2>/dev/null; then
+  # Only pack projects with IsPackable=true
+  if ! grep -q '<IsPackable>true</IsPackable>' "$csproj" 2>/dev/null; then
     continue
   fi
 
-  # Check if it matches the prefix
   PACKAGE_ID=$(sed -n 's/.*<PackageId>\([^<]*\)<\/PackageId>.*/\1/p' "$csproj" 2>/dev/null | head -1)
   if [[ -z "$PACKAGE_ID" ]]; then
-    continue
-  fi
-  if [[ -n "$ID_PREFIX" && "$PACKAGE_ID" != "$ID_PREFIX"* ]]; then
-    continue
+    PACKAGE_ID="$(basename "$csproj" .csproj)"
   fi
 
   FOUND=$((FOUND + 1))
