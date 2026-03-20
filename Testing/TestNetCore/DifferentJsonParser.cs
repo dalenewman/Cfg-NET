@@ -19,8 +19,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Cfg.Net;
 using Cfg.Net.Contracts;
-using Cfg.Net.Parsers.Json.Net;
+using Cfg.Net.Parsers.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using JsonSerializer = Cfg.Net.Parsers.Json.JsonSerializer;
 
 namespace UnitTest {
 
@@ -37,7 +38,7 @@ namespace UnitTest {
     ]
 }".Replace("'", "\"");
 
-            var cfg = new TestDifferentJsonParser(json, new JsonNetParser(), new JsonNetSerializer());
+            var cfg = new TestDifferentJsonParser(json, new JsonParser(), new JsonSerializer());
 
             foreach (var problem in cfg.Errors()) {
                 Console.WriteLine(problem);

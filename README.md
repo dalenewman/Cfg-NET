@@ -396,6 +396,6 @@ I appreciate the stars and feedback.
 
 #### Further Reading (optional)
 
-* [Using Dependency Injection & Autofac with Cfg-NET](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Autofac.md)
-* [Using Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/EnvironmentsAndParameters.md)
-* [Using Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/Articles/Shorthand.md)
+* [Using Dependency Injection & Autofac with Cfg-NET](https://github.com/dalenewman/Cfg-NET/blob/master/docs/autofac.md)
+* [Using Environments, Parameters, and @(Place-Holders)](https://github.com/dalenewman/Cfg-NET/blob/master/docs/environments-and-parameters.md)
+* [Using Shorthand](https://github.com/dalenewman/Cfg-NET/blob/master/docs/shorthand.md)

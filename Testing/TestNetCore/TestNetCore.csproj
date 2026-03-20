@@ -27,10 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.7.3" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.7.3" />
-    <PackageReference Include="coverlet.collector" Version="6.0.4">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.1.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.1.0" />
+    <PackageReference Include="coverlet.collector" Version="8.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -40,7 +40,7 @@
     <ProjectReference Include="..\..\src\Customizers\Environment\Cfg.Net.Environment\Cfg.Net.Environment.csproj" />
     <ProjectReference Include="..\..\src\Customizers\Shorthand\Cfg.Net.Shorthand\Cfg.Net.Shorthand.csproj" />
     <ProjectReference Include="..\..\src\Main\Cfg.Net\Cfg.Net.csproj" />
-    <ProjectReference Include="..\..\src\Parsers\Json.Net\Json.Net.csproj" />
+    <ProjectReference Include="..\..\src\Parsers\Json\Json.csproj" />
     <ProjectReference Include="..\..\src\Parsers\Xml.Linq\Xml.Linq.csproj" />
     <ProjectReference Include="..\..\src\Parsers\YamlDotNet\YamlDotNet.csproj" />
     <ProjectReference Include="..\..\src\Readers\Default\Cfg.Net.Reader\Cfg.Net.Reader.csproj" />
