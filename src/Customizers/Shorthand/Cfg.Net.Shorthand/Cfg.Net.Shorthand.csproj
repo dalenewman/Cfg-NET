@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <RootNamespace>Cfg.Net.Shorthand</RootNamespace>
+    <AssemblyName>Cfg.Net.Shorthand</AssemblyName>
+    <Version>0.16.0-beta</Version>
+    <FileVersion>0.16.0</FileVersion>
+    <AssemblyVersion>0.16.0</AssemblyVersion>
+    <PackageId>Cfg-NET.Shorthand</PackageId>
+    <Authors>Dale Newman</Authors>
+    <Description>shorthand expression customizer for Cfg-NET</Description>
+    <Copyright>Copyright 2015-2026 Dale Newman</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>configuration;cfgnet;shorthand</PackageTags>
+    <PackageProjectUrl>https://github.com/dalenewman/Cfg-NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dalenewman/Cfg-NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Main\Cfg.Net\Cfg.Net.csproj" />
+  </ItemGroup>
+</Project>

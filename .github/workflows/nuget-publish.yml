@@ -1,0 +1,35 @@
+name: NuGet Publish
+on:
+  workflow_dispatch:
+    inputs:
+      publish_nuget:
+        description: 'Publish to NuGet.org'
+        required: false
+        type: boolean
+        default: false
+      publish_myget:
+        description: 'Publish to MyGet'
+        required: false
+        type: boolean
+        default: false
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+    - name: Pack
+      run: bash scripts/nuget-pack.sh
+    - name: Push to NuGet.org
+      if: ${{ inputs.publish_nuget }}
+      run: bash scripts/nuget-push.sh --source nuget --api-key-env NUGET_API_KEY
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    - name: Push to MyGet
+      if: ${{ inputs.publish_myget }}
+      run: bash scripts/nuget-push.sh --source myget --api-key-env MYGET_API_KEY
+      env:
+        MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}

@@ -1,7 +1,6 @@
 Cfg-NET
 =======
 
-[![Build status](https://ci.appveyor.com/api/projects/status/qm4auhkcv6b23abr?svg=true)](https://ci.appveyor.com/project/dalenewman/cfg-net)
 [![NuGet](https://img.shields.io/nuget/v/Cfg-NET.svg?label=Nuget)](https://www.nuget.org/packages/Cfg-NET)
 
 Cfg-NET is a configuration library for .NET with 
