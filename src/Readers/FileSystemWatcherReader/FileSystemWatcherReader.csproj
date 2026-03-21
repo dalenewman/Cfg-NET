@@ -3,9 +3,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Cfg.Net.Readers.FileSystemWatcherReader</RootNamespace>
     <AssemblyName>Cfg.Net.Readers.FileSystemWatcherReader</AssemblyName>
-    <Version>0.16.0-beta</Version>
-    <FileVersion>0.16.0</FileVersion>
-    <AssemblyVersion>0.16.0</AssemblyVersion>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0</FileVersion>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
     <IsPackable>false</IsPackable>
     <PackageId>Cfg-NET.Readers.FileSystemWatcherReader</PackageId>
     <Authors>Dale Newman</Authors>
