@@ -10,7 +10,7 @@ OUTPUT="artifacts"
 DRY_RUN=false
 
 NUGET_URL="https://api.nuget.org/v3/index.json"
-MYGET_URL="https://www.myget.org/F/cfg-net/api/v3/index.json"
+MYGET_URL="https://www.myget.org/F/transformalize/api/v3/index.json"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
